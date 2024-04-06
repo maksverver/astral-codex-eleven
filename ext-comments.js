@@ -82,6 +82,38 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     }
   }
 
+  // Constructs a Substack profile link from a user id and name.
+  //
+  // I don't know the exact algorithm, but based on observation, I determined
+  // that the username is transformed into a suffix as follows:
+  //
+  //  - characters other than ASCII letters, digits, underscores, and hyphens
+  //    are deleted (notably, letters in foreign scripts are stripped, as are
+  //    periods, which are technically URL-safe).
+  //  - spaces are converted to hyphens, except leading/trailing spaces, which
+  //    are trimmed.
+  //  - letters are converted to lower case
+  //
+  // For example:
+  //
+  // "TimW"            -> https://substack.com/profile/1234567-timw
+  // "A.M. Charlebois" -> https://substack.com/profile/1234567-am-charlebois
+  // "Анна Musk"       -> https://substack.com/profile/1234567-musk
+  //
+  // There are some details I don't know:
+  //
+  //  - are consecutive spaces mapped to a single hyphen, or multiple?
+  //  - if the suffix is empty, is the trailing hyphen omitted?
+  //
+  // Nevertheless, the algorithm implemented here seems to work for most users.
+  function makeProfileLink(id, name) {
+    if (!Number.isInteger(id)) return undefined;
+    if (typeof(name) !== 'string') return undefined;
+    const suffix = name.replaceAll(/[^0-9a-zA-Z _-]/g, '')
+        .trim().replaceAll(/ +/g, '-').toLowerCase();
+    return `https://substack.com/profile/${id}-${suffix}`;
+  }
+
   function createCommentDiv(parentElem, comment, depth) {
     const commentDiv = createElement(parentElem, 'div', 'comment');
     const borderDiv = createElement(commentDiv, 'div', 'border');
@@ -89,12 +121,13 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     const contentDiv = createElement(commentDiv, 'div', 'content');
     const commentHeader = createElement(contentDiv, 'header', 'comment-meta');
     const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
-    authorSpan.appendChild(document.createTextNode(
+    const authorLink = createElement(authorSpan, 'a');
+    authorLink.href = makeProfileLink(comment.user_id, comment.name);
+    authorLink.appendChild(document.createTextNode(
         comment.name ?? (comment.deleted ? "<user deleted>" : "<user unavailable>")));
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
-    postDateLink.target = '_blank';
 
     postDateLink.appendChild(document.createTextNode(
       new Date(comment.date).toLocaleString('en-US', options.dateFormat)));
