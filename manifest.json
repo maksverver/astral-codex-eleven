@@ -11,19 +11,19 @@
   ],
   "content_scripts": [
     {
-      "css": [
-        "ext-comments.css"
+      "matches": [
+        "*://www.astralcodexten.com/p/*"
       ],
       "exclude_matches": [
         "*://www.astralcodexten.com/p/*/comment/*",
         "*://www.astralcodexten.com/p/*/comments"
       ],
+      "css": [
+        "ext-comments.css"
+      ],
       "js": [
         "ext-comments.js",
         "acx-comment-viewer.js"
-      ],
-      "matches": [
-        "*://www.astralcodexten.com/p/*"
       ],
       "world": "MAIN"
     }
