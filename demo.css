@@ -1,3 +1,11 @@
+.ext-comments .comment {
+  margin-top: 12px;
+}
+
+.comment .comment-body p {
+  margin: 0 0 8px 0;
+}
+
 .ext-comments .comment .comment-meta .commenter-name {
   font-weight: bold;
 }
