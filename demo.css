@@ -1,0 +1,8 @@
+.ext-comments .comment .comment-meta .commenter-name {
+  font-weight: bold;
+}
+
+.ext-comments .comment header .comment-timestamp {
+  opacity: 50%;
+  margin-left: 1em;
+}

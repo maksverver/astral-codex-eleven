@@ -1,0 +1,53 @@
+.ext-comments .comment {
+  --comment-padding: 8px;
+
+  padding: var(--comment-padding);
+}
+
+.ext-comments .comment.collapsed > .content > .main {
+  display: none;
+}
+
+.ext-comments .comment {
+  display: flex;
+  flex-direction: row;
+}
+
+.ext-comments .comment .border {
+  cursor: pointer;
+  align-items: center;
+  padding-left: 7px;
+  padding-right: 7px;
+}
+
+.ext-comments .comment .border .line {
+  background: rgba(0, 0, 0, 25%);
+  width: 2px;
+  height: 100%;
+  margin: auto;
+}
+
+.ext-comments .comment .border:hover {
+  padding-left:  5px;
+  padding-right: 5px;
+  transition: all 0.25s;
+}
+
+.ext-comments .comment .border:hover .line {
+  background: rgba(0, 0, 0, 50%);
+  width: 6px;
+  transition: all 0.25s;
+}
+
+.ext-comments .comment .content .text {
+  white-space: preserve pretty;
+  overflow-wrap: anywhere;
+  max-width: 40em;
+  min-width: 20em;
+  padding: var(--comment-padding);
+  margin: 0;
+  /* remove the max-height: 600px, overflow-y: hidden that Substack CSS
+     applies to .comment-body */
+  max-height: initial !important;
+  overflow-y: initial !important;
+}

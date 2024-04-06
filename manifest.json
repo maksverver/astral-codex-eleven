@@ -1,0 +1,50 @@
+{
+  "manifest_version": 3,
+  "name": "Astral Codex Ten Comment Viewer",
+  "version": "0.1",
+  "description": "Speeds up loading of comments on https://www.astralcodexten.com/.",
+  "permissions": [
+    "declarativeNetRequestWithHostAccess"
+  ],
+  "host_permissions": [
+    "*://www.astralcodexten.com/p/*"
+  ],
+  "content_scripts": [
+    {
+      "css": [
+        "ext-comments.css"
+      ],
+      "exclude_matches": [
+        "*://www.astralcodexten.com/p/*/comment/*",
+        "*://www.astralcodexten.com/p/*/comments"
+      ],
+      "js": [
+        "ext-comments.js",
+        "acx-comment-viewer.js"
+      ],
+      "matches": [
+        "*://www.astralcodexten.com/p/*"
+      ],
+      "world": "MAIN"
+    }
+  ],
+  "declarative_net_request": {
+    "rule_resources": [
+      {
+        "id": "ruleset-1",
+        "enabled": true,
+        "path": "filter-rules.json"
+      }
+    ]
+  },
+  "web_accessible_resources": [
+    {
+      "matches": [
+        "*://www.astralcodexten.com/*"
+      ],
+      "resources": [
+        "no-comments.json"
+      ]
+    }
+  ]
+}

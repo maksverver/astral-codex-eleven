@@ -1,0 +1,22 @@
+Description of the filter rules defined in filter-rules.json:
+
+1. redirect *://www.astralcodexten.com/api/v1/post/*/comments?*
+
+This redirects the regular script that fetches comments to an empty JSON
+file, which prevents it from populating the comment section (which is too slow).
+It's a redirect because blocking the request would cause the page to retry
+indefinitely!
+
+
+2. allow *://www.astralcodexten.com/api/v1/post/*/comments?*&comment_id=*
+
+This allows comment deeplinks to work as normally. The idea is that you should
+be able to use these to reply to threads, which the extension currently doesn't
+support on the main post page.
+
+
+3. allow *://www.astralcodexten.com/api/v1/post/*/comments?no-filter&*
+
+The no-filter query component is used by the extension to fetch comments while
+bypassing the redirect; without this, the extension wouldn't be able to fetch
+comments either!

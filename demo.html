@@ -1,0 +1,21 @@
+<!DOCTYPE html>
+<html>
+  <head>
+    <title>ACX Comment Viewer (demo)</title>
+    <script src="ext-comments.js" async defer></script>
+    <link rel="stylesheet" href="ext-comments.css">
+    <link rel="stylesheet" href="demo.css">
+  </head>
+  <body>
+    <div id="ext-comments" class="ext-comments"></div>
+    <script>
+      window.addEventListener('load', async () => {
+        const rootDiv = document.getElementById('ext-comments');
+        //const jsonPath = 'data/smaller-comments.json';
+        const jsonPath = 'data/ivermectin-comments.json';
+        const comments = await fetchComments(jsonPath);
+        if (comments) replaceComments(rootDiv, comments, {collapseDepth: 3});
+      });
+    </script>
+  </body>
+</html>

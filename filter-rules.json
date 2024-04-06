@@ -1,0 +1,41 @@
+[
+  {
+    "id": 1,
+    "priority": 1,
+    "condition": {
+      "urlFilter": "|*://www.astralcodexten.com/api/v1/post/*/comments?*",
+      "initiatorDomains": ["astralcodexten.com"],
+      "resourceTypes": ["xmlhttprequest"]
+    },
+    "action": {
+      "type": "redirect",
+      "redirect": {
+        "extensionPath": "/no-comments.json"
+      }
+    }
+  },
+  {
+    "id": 2,
+    "priority": 1,
+    "condition": {
+      "urlFilter": "|*://www.astralcodexten.com/api/v1/post/*/comments?*&comment_id=*",
+      "initiatorDomains": ["astralcodexten.com"],
+      "resourceTypes": ["xmlhttprequest"]
+    },
+    "action": {
+      "type": "allow"
+    }
+  },
+  {
+    "id": 3,
+    "priority": 1,
+    "condition": {
+      "urlFilter": "|*://www.astralcodexten.com/api/v1/post/*/comments?no-filter&*",
+      "initiatorDomains": ["astralcodexten.com"],
+      "resourceTypes": ["xmlhttprequest"]
+    },
+    "action": {
+      "type": "allow"
+    }
+  }
+]
