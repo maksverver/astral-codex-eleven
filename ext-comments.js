@@ -38,6 +38,44 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     return elem;
   }
 
+  // Creates DOM nodes for the given comment text, and appends them to the
+  // given parent element. This tries to mirror how Substack seems to process
+  // comments:
+  //
+  //  - Splits text into paragraphs based on newline sequences.
+  //  - Turns http/https URLs into clickable links.
+  //  - Turn email addresses into clickable mailto: links.
+  //
+  function appendComment(parentElem, text) {
+    function makeLink(text, href) {
+      const a = document.createElement('a');
+      a.className = 'linkified';
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'nofollow ugc noopener'
+      a.appendChild(document.createTextNode(text));
+      return a;
+    }
+
+    for (const paragraph of text.split(/\n+/)) {
+      if (!paragraph) continue;
+      const p = createElement(parentElem, 'p');
+      paragraph.split(/(https?:\/\/[^\s]+)/i).forEach((part, i) => {
+        if (i%2 == 0) {
+          part.split(/([^\s]+@[^\s]+.\w+)/).forEach((part, i) => {
+            if (i%2 == 0) {
+              p.appendChild(document.createTextNode(part));
+            } else {
+              p.appendChild(makeLink(part, 'mailto:' + part));
+            }
+          });
+        } else {
+          p.appendChild(makeLink(part, part));
+        }
+      });
+    }
+  }
+
   function createCommentDiv(parentElem, comment, depth) {
     const commentDiv = createElement(parentElem, 'div', 'comment');
     const borderDiv = createElement(commentDiv, 'div', 'border');
@@ -57,10 +95,12 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
     const commentMain = createElement(contentDiv, 'div', 'main');
     // Substack assigns special rendering to <p> and class="comment-body"
-    const commentBody = createElement(commentMain, 'p', 'text comment-body');
-    commentBody.appendChild(document.createTextNode(
-      comment.body ?? (comment.deleted ? "<deleted>" : "<unavailable>")));
-
+    const commentBody = createElement(commentMain, 'div', 'text comment-body');
+    if (comment.body == null) {
+      commentBody.appendChild(document.createTextNode(comment.deleted ? "<deleted>" : "<unavailable>"));
+    } else {
+      appendComment(commentBody, comment.body);
+    }
     const commentComponent = new CommentComponent(commentDiv);
     commentComponent.setExpanded(
         depth === 0 || !options.collapseDepth || depth % options.collapseDepth !== 0);
