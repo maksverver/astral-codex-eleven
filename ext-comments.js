@@ -28,6 +28,10 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
     // If greater than 0, comments at the given depth are collapsed (recursively).
     // Recommend values are 0 or 3.
     collapseDepth: 0,
+
+    // Date formatting options, as accepted by Intl.DateTimeFormat. Can also
+    // be set to null to use the default formatting.
+    dateFormat: Object.freeze({month: 'long', day: 'numeric'}),
 });
 
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
@@ -92,7 +96,8 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     postDateLink.rel = 'nofollow';
     postDateLink.target = '_blank';
 
-    postDateLink.appendChild(document.createTextNode(new Date(comment.date).toLocaleString()));
+    postDateLink.appendChild(document.createTextNode(
+      new Date(comment.date).toLocaleString('en-US', options.dateFormat)));
     postDateLink.title = comment.date;
 
     const commentMain = createElement(contentDiv, 'div', 'main');

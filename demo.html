@@ -14,7 +14,14 @@
         //const jsonPath = 'data/smaller-comments.json';
         const jsonPath = 'data/ivermectin-comments.json';
         const comments = await fetchComments(jsonPath);
-        if (comments) replaceComments(rootDiv, comments, {collapseDepth: 3});
+        if (comments) replaceComments(rootDiv, comments, {
+              ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
+              collapseDepth: 3,
+              dateFormat: {
+                month: 'long', day: 'numeric',
+                hour: '2-digit', minute: '2-digit', second: '2-digit',
+                timeZoneName: 'short'},
+            });
       });
     </script>
   </body>
