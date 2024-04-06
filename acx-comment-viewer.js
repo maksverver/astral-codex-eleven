@@ -1,13 +1,23 @@
 'use strict';
 
-console.info('[ACX Comment Viewer extension]', 'Waiting on load...')
-window.addEventListener('load', async () => {
+(async function(){
   const LOG_TAG = '[ACX Comment Viewer extension]';
-  console.info(LOG_TAG, 'Loaded!');
+  console.info(LOG_TAG, 'Starting.');
 
-  const preloads = window._preloads;
+  // Exfiltrate the _preloads global variable from the real page, using a custom
+  // script append to the document body after the DOM is complete. This is
+  // necessary because in the ISOLATED world we don't have direct access to the
+  // page's global variables.
+  const preloads = await new Promise((resolve) => {
+    document.addEventListener('acx-page-load', (ev) => resolve(ev.detail._preloads));
+
+    const scriptElem = document.createElement('script');
+    scriptElem.textContent = "document.dispatchEvent(new CustomEvent('acx-page-load', {detail: {_preloads}}));";
+    document.body.appendChild(scriptElem);
+  });
+
   if (!preloads) {
-    console.warn(LOG_TAG, "window._preloads not defined! Can't continue.");
+    console.warn(LOG_TAG, "preloads not defined! Can't continue.");
     return;
   }
 
@@ -34,6 +44,7 @@ window.addEventListener('load', async () => {
 
   let comments = undefined;
   try {
+    console.info(LOG_TAG, 'Fetching comments...');
     // Note that I use ?no-filter& to bypass the filter rule that redirects
     // requests from the real page!
     comments = await fetchComments(
@@ -43,5 +54,10 @@ window.addEventListener('load', async () => {
     console.warn(LOG_TAG, 'Failed to fetch comments!', e);
     return;
   }
-  if (comments?.length) replaceComments(rootDiv, comments);
-});
+  if (comments?.length) {
+    console.info(LOG_TAG, `${comments.length} top-level comments found.`);
+    replaceComments(rootDiv, comments);
+  } else {
+    console.info(LOG_TAG, 'No comments found!');
+  }
+})();

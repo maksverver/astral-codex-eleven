@@ -9,25 +9,6 @@
   "host_permissions": [
     "*://www.astralcodexten.com/p/*"
   ],
-  "content_scripts": [
-    {
-      "matches": [
-        "*://www.astralcodexten.com/p/*"
-      ],
-      "exclude_matches": [
-        "*://www.astralcodexten.com/p/*/comment/*",
-        "*://www.astralcodexten.com/p/*/comments"
-      ],
-      "css": [
-        "ext-comments.css"
-      ],
-      "js": [
-        "ext-comments.js",
-        "acx-comment-viewer.js"
-      ],
-      "world": "MAIN"
-    }
-  ],
   "declarative_net_request": {
     "rule_resources": [
       {
@@ -45,6 +26,26 @@
       "resources": [
         "no-comments.json"
       ]
+    }
+  ],
+  "content_scripts": [
+    {
+      "matches": [
+        "*://www.astralcodexten.com/p/*"
+      ],
+      "exclude_matches": [
+        "*://www.astralcodexten.com/p/*/comment/*",
+        "*://www.astralcodexten.com/p/*/comments"
+      ],
+      "css": [
+        "ext-comments.css"
+      ],
+      "js": [
+        "ext-comments.js",
+        "acx-comment-viewer.js"
+      ],
+      "run_at": "document_end",
+      "world": "MAIN"
     }
   ]
 }
