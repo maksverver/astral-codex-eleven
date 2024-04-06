@@ -86,7 +86,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     authorSpan.appendChild(document.createTextNode(
         comment.name ?? (comment.deleted ? "<deleted>" : "<unavailable>")));
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
-    postDateLink.href = `${document.URL}/comment/${comment.id}`;
+    postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
     postDateLink.target = '_blank';
 
