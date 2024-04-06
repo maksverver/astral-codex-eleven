@@ -1,28 +1,28 @@
 'use strict';
 
-(async function(){
-  const LOG_PREFIX = '[ACX Comment Viewer extension]';
-
-  console.info(LOG_PREFIX, 'Starting.');
+console.info('[ACX Comment Viewer extension]', 'Waiting on load...')
+window.addEventListener('load', async () => {
+  const LOG_TAG = '[ACX Comment Viewer extension]';
+  console.info(LOG_TAG, 'Loaded!');
 
   const preloads = window._preloads;
   if (!preloads) {
-    console.warn(LOG_PREFIX, "window._preloads not defined! Can't continue.");
+    console.warn(LOG_TAG, "window._preloads not defined! Can't continue.");
     return;
   }
 
   const postId = preloads.post?.id;
   if (!postId) {
-    console.warn(LOG_PREFIX, "post.id is not defined! Can't continue.");
+    console.warn(LOG_TAG, "post.id is not defined! Can't continue.");
     return;
   }
 
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
-    console.warn(LOG_PREFIX, "Element comments-page not found! Can't continue.");
+    console.warn(LOG_TAG, "Element comments-page not found! Can't continue.");
     return;
   } else {
-    console.info(LOG_PREFIX, 'Hiding comments-page element.');
+    console.info(LOG_TAG, 'Hiding comments-page element.');
     commentsPage.style.display = 'none';
   }
 
@@ -38,11 +38,10 @@
     // requests from the real page!
     comments = await fetchComments(
         `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=oldest_first`);
-    if (!comments?.length) console.warn(LOG_PREFIX, 'No comments found!');
+    if (!comments?.length) console.warn(LOG_TAG, 'No comments found!');
   } catch (e) {
-    console.warn(LOG_PREFIX, 'Failed to fetch comments!', e);
+    console.warn(LOG_TAG, 'Failed to fetch comments!', e);
     return;
   }
   if (comments?.length) replaceComments(rootDiv, comments);
-})();
-
+});

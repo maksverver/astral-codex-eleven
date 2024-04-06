@@ -39,6 +39,16 @@ populated in the normal way, which we know is slow.
      fast enough even for posts with many comments.
 
 
+## Bugs
+
+  - It seems like the comments don't always load because the extension code is
+    never run. I have no idea why this happens! When this happens, there should
+    be a single comment visible that reads “Comments have been filtered out by
+    the Astral Codex Ten Comment Viewer extension.” It can usually be fixed
+    by reloading the page. If anyone knows how to fix this properly, please let
+    me know!
+
+
 ## Limitations
 
   - Comments are currently **read-only**: replying is not supported, even if you

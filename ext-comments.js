@@ -1,4 +1,6 @@
-class CommentComponent {
+'use strict';
+
+class ExtCommentComponent {
   constructor(commentDiv) {
     this.commentDiv = commentDiv;
     this.expanded = undefined;
@@ -101,7 +103,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     } else {
       appendComment(commentBody, comment.body);
     }
-    const commentComponent = new CommentComponent(commentDiv);
+    const commentComponent = new ExtCommentComponent(commentDiv);
     commentComponent.setExpanded(
         depth === 0 || !options.collapseDepth || depth % options.collapseDepth !== 0);
     borderDiv.onclick = commentComponent.toggleExpanded.bind(commentComponent);

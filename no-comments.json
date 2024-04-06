@@ -1,1 +1,40 @@
-{"comments":[]}
+{
+  "comments": [
+    {
+      "id": 0,
+      "body": "Comments have been filtered out by the Astral Codex Ten Comment Viewer extension. If it works correctly, this comment should soon be replaced by the real comment thread. If not, try reloading the page.",
+      "publication_id": 0,
+      "post_id": 0,
+      "user_id": 0,
+      "ancestor_path": "",
+      "type": "comment",
+      "deleted": false,
+      "date": "2024-01-01T00:00:00.000Z",
+      "edited_at": null,
+      "reply_from_post_id": null,
+      "status": "published",
+      "pinned_by_user_id": null,
+      "restacks": 0,
+      "name": "Nobody",
+      "reactor_names": [],
+      "reaction": null,
+      "reaction_count": 0,
+      "children": [],
+      "bans": [],
+      "suppressed": false,
+      "user_banned": false,
+      "user_banned_for_comment": false,
+      "metadata": {
+        "is_author": false,
+        "membership_state": "unsubscribed",
+        "eligibleForGift": false
+      },
+      "user_bestseller_tier": null,
+      "can_dm": false,
+      "score": 1,
+      "children_count": 0,
+      "reported_by_user": false,
+      "restacked": false
+    }
+  ]
+}
