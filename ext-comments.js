@@ -44,6 +44,58 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
     dateFormat: Object.freeze({month: 'short', day: 'numeric'}),
 });
 
+class RadioButtonsComponent {
+  constructor(parentElem, labels, onChange) {
+    const div = document.createElement('div');
+    div.className = 'radio-buttons';
+    this.buttons = labels.map((label, index) => {
+      const button = document.createElement('button');
+      button.className = 'inactive';
+      button.appendChild(document.createTextNode(label));
+      button.onclick = this.change.bind(this, index);
+      div.appendChild(button);
+      return button;
+    });
+    parentElem.appendChild(div);
+    this.elem = div;
+    this.onChange = onChange;
+    this.activeIndex = -1;
+  }
+
+  // Changes the active button index without invoking the onChange callback.
+  activate(index) {
+    const oldButton = this.buttons[this.activeIndex];
+    const newButton = this.buttons[index];
+    if (oldButton) {
+      oldButton.classList.remove('active');
+      oldButton.classList.add('inactive');
+    }
+    if (newButton) {
+      newButton.classList.remove('inactive');
+      newButton.classList.add('active');
+    }
+    this.activeIndex = index;
+  }
+
+  // Changes the active button index and invokes the onChange callback if
+  // the new index is different from the old index.
+  change(index) {
+    if (this.activeIndex === index) return;
+    this.activate(index);
+    if (typeof this.onChange === 'function') this.onChange(index);
+  }
+}
+
+function createRadioButtons(labels, onChange) {
+  const orderButtons = createElement(orderDiv, 'div', 'radio-buttons');
+  const chronologicalButton = createElement(orderButtons, 'button', 'inactive');
+  createTextNode(chronologicalButton, 'Chronological');
+  chronologicalButton.onclick = changeOrder.bind(null, 0);
+  const newFirstButton = createElement(orderButtons, 'button', 'inactive');
+  createTextNode(newFirstButton, 'New First');
+  newFirstButton.onclick = changeOrder.bind(null, 1);
+}
+
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
   const {collapseDepth, dateFormat} = options;
 
@@ -177,18 +229,37 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
         depth === 0 || !collapseDepth || depth % collapseDepth !== 0);
     borderDiv.onclick = commentComponent.toggleExpanded.bind(commentComponent);
 
-    for (const childComment of comment.children) {
-      createCommentDiv(commentMain, childComment, depth + 1);
+    createCommentsList(commentMain, comment.children, depth + 1);
+  }
+
+  function createCommentsList(parentElem, comments, depth) {
+    // Substack uses class names "comments" and "comments-list" and applies
+    // extra styling that I don't want, so I use "comments-holder" instead.
+    const container = createElement(parentElem, 'div', 'comments-holder');
+    for (const comment of comments) {
+      createCommentDiv(container, comment, depth + 1);
     }
   }
 
+  // Clear out the original root.
   rootElem.replaceChildren();
 
-  createTextNode(
-    createElement(rootElem, 'div', 'comments-heading'),
-    `${countCommentsInArray(comments)} Comments`);
+  // Add the comment header which contains the total comment count, and
+  // the comment order radio buttons.
+  {
+    const holderDiv = createElement(rootElem, 'div', 'comments-heading-holder');
 
-  for (const comment of comments) {
-    createCommentDiv(rootElem, comment, 0);
+    const commentsHeading = createElement(holderDiv, 'div', 'comments-heading');
+    createTextNode(commentsHeading, `${countCommentsInArray(comments)} Comments`);
+
+    const orderDiv = createElement(holderDiv, 'div');
+    createTextNode(orderDiv, 'Order: ');
+    new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
+      rootElem.classList.toggle('order-chronological', i === 0);
+      rootElem.classList.toggle('order-new-first',     i === 1);
+    }).change(0);
   }
+
+  // Add the top-level comments list.
+  createCommentsList(rootElem, comments, 0);
 }

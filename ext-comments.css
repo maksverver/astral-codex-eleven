@@ -14,6 +14,13 @@ body {
 
 .ext-comments .comment {
   padding: 4px;
+
+  /* Substack sets margin-top: 12px for all comments *except* for the first
+     (i.e. ".comment:first-child { margin-top: 0px }") which interferes with
+     .order-new-first, which reverses the visible order of comments without
+     changing the order of the DOM nodes. So just fix margin-top to the same
+     value for all comment divs instead. */
+   margin-top: 12px !important;
 }
 
 .ext-comments .comment.collapsed > .content > .main {
@@ -83,4 +90,56 @@ body {
 
 .ext-comments .comment .missing {
   font-style: italic;
+}
+
+/* Comment ordering */
+
+.ext-comments .comments-heading-holder {
+  display: flex;
+  flex-wrap: wrap;
+  flex-direction: row;
+  column-gap: 16px;
+  justify-content: space-between;
+}
+
+.ext-comments .comments-holder {
+  flex-direction: column;
+  display: flex;
+}
+
+.ext-comments.order-new-first .comments-holder {
+  flex-direction: column-reverse;
+}
+
+/* Radio button styling */
+
+.ext-comments .radio-buttons {
+  display: inline-block;
+  font-size: 16px;
+  border-radius: 20px;
+  padding: 2px;
+  background: #0002;
+}
+
+.ext-comments .radio-buttons button {
+  font-size: 16px;
+  margin: 2px;
+  padding: 2px 8px;
+  background: none;
+  border: none;
+  border-radius: 16px;
+}
+
+.ext-comments .radio-buttons button.active {
+  margin: 0px;
+  border: 2px solid #0008;
+  background: #fffe;
+}
+
+.ext-comments .radio-buttons button.inactive {
+  cursor: pointer;
+}
+
+.ext-comments .radio-buttons button.inactive:hover {
+  background: #fff6;
 }
