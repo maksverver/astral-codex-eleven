@@ -40,7 +40,7 @@ body {
 }
 
 .ext-comments .comment .border .line {
-  background: #0004;
+  background: var(--background_contrast_2);
   width: 2px;
   height: 100%;
   margin: auto;
@@ -54,7 +54,7 @@ body {
 }
 
 .ext-comments .comment .border:hover .line {
-  background: #f80a;
+  background: var(--background_pop);
   width: 6px;
   transition: all 0.25s;
 }

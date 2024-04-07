@@ -1,11 +1,17 @@
 /* Styles specific to demo.html, which doesn't inherit the default styles
    provided by astralcodexten.com. */
 
-.ext-comments .comment {
-  margin-top: 12px;
+:root {
+  --background_contrast_1: #d4dfed;
+  --background_contrast_2: #c3cdda;
+  --background_contrast_3: #a2aab5;
+  --background_contrast_4: #828891;
+  --background_contrast_5: #474b50;
+  --background_contrast_pop: rgba(103, 189, 252, 0.4);
+  --background_pop: #67bdfc;
 }
 
-.comment .comment-body p {
+.ext-comments .comment .comment-body p {
   margin: 0 0 8px 0;
 }
 
