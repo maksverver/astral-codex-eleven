@@ -124,7 +124,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     const authorLink = createElement(authorSpan, 'a');
     authorLink.href = makeProfileLink(comment.user_id, comment.name);
     authorLink.appendChild(document.createTextNode(
-        comment.name ?? (comment.deleted ? "<user deleted>" : "<user unavailable>")));
+        comment.name ?? (comment.deleted ? "<deleted>" : "<unavailable>")));
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
@@ -137,7 +137,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     // Substack assigns special rendering to <p> and class="comment-body"
     const commentBody = createElement(commentMain, 'div', 'text comment-body');
     if (comment.body == null) {
-      commentBody.appendChild(document.createTextNode(comment.deleted ? "<comment deleted>" : "<comment unavailable>"));
+      commentBody.appendChild(document.createTextNode(comment.deleted ? "<deleted>" : "<unavailable>"));
     } else {
       appendComment(commentBody, comment.body);
     }
