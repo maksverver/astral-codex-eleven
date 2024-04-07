@@ -44,6 +44,12 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     return elem;
   }
 
+  function createTextNode(parent, text) {
+    const node = document.createTextNode(text);
+    parent.appendChild(node);
+    return node;
+  }
+
   // Creates DOM nodes for the given comment text, and appends them to the
   // given parent element. This tries to mirror how Substack seems to process
   // comments:
@@ -53,13 +59,12 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   //  - Turn email addresses into clickable mailto: links.
   //
   function appendComment(parentElem, text) {
-    function makeLink(text, href) {
-      const a = document.createElement('a');
-      a.className = 'linkified';
+    function createLink(parent, text, href) {
+      const a = createElement(parent, 'a', 'linkified');
       a.href = href;
       a.target = '_blank';
       a.rel = 'nofollow ugc noopener'
-      a.appendChild(document.createTextNode(text));
+      createTextNode(a, text);
       return a;
     }
 
@@ -70,13 +75,13 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
         if (i%2 == 0) {
           part.split(/([^\s]+@[^\s]+.\w+)/).forEach((part, i) => {
             if (i%2 == 0) {
-              p.appendChild(document.createTextNode(part));
+              createTextNode(p, part);
             } else {
-              p.appendChild(makeLink(part, 'mailto:' + part));
+              createLink(p, part, 'mailto:' + part);
             }
           });
         } else {
-          p.appendChild(makeLink(part, part));
+          createLink(p, part, part);
         }
       });
     }
@@ -125,26 +130,26 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     if (profileUrl) {
       const authorLink = createElement(authorSpan, 'a');
       authorLink.href = profileUrl;
-      authorLink.appendChild(document.createTextNode(comment.name))
+      createTextNode(authorLink, comment.name);
     } else if (typeof comment.name === 'string') {
       // Not sure if this can happen: name is present but id is missing.
-      authorSpan.appendChild(document.createTextNode(comment.name))
+      createTextNode(authorSpan, comment.name);
     } else {
-      authorSpan.appendChild(document.createTextNode(comment.deleted ? 'deleted' : 'unavailable'));
+      createTextNode(authorSpan, comment.deleted ? 'deleted' : 'unavailable');
       authorSpan.classList.add('missing');
     }
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
-    postDateLink.appendChild();
+    createTextNode(postDateLink, new Date(comment.date).toLocaleString('en-US', dateFormat));
     postDateLink.title = comment.date;
 
     if (typeof comment.edited_at === 'string') {
-      createElement(commentHeader, 'span', 'comment-publication-name-separator')
-          .appendChild(document.createTextNode('·'));
+      const seperator = createElement(commentHeader, 'span', 'comment-publication-name-separator');
+      createTextNode(seperator, '·');
       const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
-      editedIndicator.appendChild(document.createTextNode('edited ' +
-              new Date(comment.edited_at).toLocaleString('en-US', options.dateFormat)));
+      createTextNode(editedIndicator,
+          'edited ' + new Date(comment.edited_at).toLocaleString('en-US', dateFormat));
       editedIndicator.title = comment.edited_at;
     }
 
@@ -152,14 +157,14 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     // Substack assigns special rendering to <p> and class="comment-body"
     const commentBody = createElement(commentMain, 'div', 'text comment-body');
     if (comment.body == null) {
-      commentBody.appendChild(document.createTextNode(comment.deleted ? "deleted" : "unavailable"));
+      createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
       commentBody.classList.add('missing');
     } else {
       appendComment(commentBody, comment.body);
     }
     const commentComponent = new ExtCommentComponent(commentDiv);
     commentComponent.setExpanded(
-        depth === 0 || !options.collapseDepth || depth % options.collapseDepth !== 0);
+        depth === 0 || !collapseDepth || depth % collapseDepth !== 0);
     borderDiv.onclick = commentComponent.toggleExpanded.bind(commentComponent);
 
     for (const childComment of comment.children) {
