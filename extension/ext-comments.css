@@ -10,6 +10,16 @@ body {
     Use !important to override Substack stylesheet which set overflow-x: hidden.
   */
   overflow-x: auto !important;
+
+  /* Substack forces "cursor: default" which prevents the cursor from changing
+     to the I-beam that indicates text is selectable. It's not really important,
+     but I personally hate it, so I'm going to undo it. */
+  cursor: initial !important;
+}
+
+/* Add underline to links with keyboard focus, to facilitate keyboard navigation. */
+a:focus {
+  text-decoration: solid underline var(--background_pop) 2px !important;
 }
 
 .ext-comments .comment {
@@ -32,14 +42,14 @@ body {
   flex-direction: row;
 }
 
-.ext-comments .comment .border {
+.ext-comments .comment > .border {
   cursor: pointer;
   padding-left: 11px;
   padding-right: 11px;
   transition: all 0.25s;
 }
 
-.ext-comments .comment .border .line {
+.ext-comments .comment > .border > .line {
   background: var(--background_contrast_2);
   width: 2px;
   height: 100%;
@@ -47,13 +57,15 @@ body {
   transition: all 0.25s;
 }
 
-.ext-comments .comment .border:hover {
+.ext-comments .comment > .border:hover,
+.ext-comments .comment:focus > .border {
   padding-left:  9px;
   padding-right: 9px;
   transition: all 0.25s;
 }
 
-.ext-comments .comment .border:hover .line {
+.ext-comments .comment > .border:hover > .line,
+.ext-comments .comment:focus > .border > .line {
   background: var(--background_pop);
   width: 6px;
   transition: all 0.25s;

@@ -224,10 +224,22 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     } else {
       appendComment(commentBody, comment.body);
     }
+
     const commentComponent = new ExtCommentComponent(commentDiv);
     commentComponent.setExpanded(
         depth === 0 || !collapseDepth || depth % collapseDepth !== 0);
-    borderDiv.onclick = commentComponent.toggleExpanded.bind(commentComponent);
+    // Collapse/expand comment by clicking on the left border line.
+    borderDiv.onclick = () => commentComponent.toggleExpanded();
+
+    // Collapse/expand comment with Enter key while in focus.
+    commentDiv.tabIndex = 0;
+    commentDiv.onkeypress = (ev) => {
+      if (ev.type === 'keypress' && ev.key === 'Enter') {
+        commentComponent.toggleExpanded();
+        ev.stopPropagation();
+        ev.preventDefault();
+      }
+    };
 
     createCommentsList(commentMain, comment.children, depth + 1);
   }
