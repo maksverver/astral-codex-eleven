@@ -1,3 +1,17 @@
+/* These are additional styles applied to the extension comments widget,
+   in addition to the styling provided by astralcodexten.com itself. */
+
+body {
+  /* Enable horizontal scrolling if content does not fit in view, which
+    may happen when viewing very deeply nested comment threads. Horizontal
+    scrolling is ugly and should generally be avoided, but it's better than
+    cutting off the comment text.
+
+    Use !important to override Substack stylesheet which set overflow-x: hidden.
+  */
+  overflow-x: auto !important;
+}
+
 .ext-comments .comment {
   padding: 4px;
 }

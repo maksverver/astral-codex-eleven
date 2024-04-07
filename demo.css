@@ -1,3 +1,6 @@
+/* Styles specific to demo.html, which doesn't inherit the default styles
+   provided by astralcodexten.com. */
+
 .ext-comments .comment {
   margin-top: 12px;
 }
