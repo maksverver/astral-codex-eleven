@@ -3,17 +3,18 @@
   <head>
     <title>ACX Comment Viewer (demo)</title>
     <meta charset="UTF-8">
-    <script src="ext-comments.js" async defer></script>
+    <script src="../extension/ext-comments.js" async defer></script>
     <link rel="stylesheet" href="demo.css">
-    <link rel="stylesheet" href="ext-comments.css">
+    <link rel="stylesheet" href="../extension/ext-comments.css">
   </head>
   <body>
     <div id="ext-comments" class="ext-comments"></div>
     <script>
       window.addEventListener('load', async () => {
         const rootDiv = document.getElementById('ext-comments');
-        //const jsonPath = 'data/smaller-comments.json';
-        const jsonPath = 'data/ivermectin-comments.json';
+        // Change this to the JSON comments file you want to load!
+        const jsonPath = 'smaller-comments.json';
+        //const jsonPath = 'ivermectin-comments.json';
         const comments = await fetchComments(jsonPath);
         if (comments) replaceComments(rootDiv, comments, {
               ...REPLACE_COMMENTS_DEFAULT_OPTIONS,

@@ -1,7 +1,8 @@
-# ACX Comment Viewer extension
+# Astral Codex Eleven
 
-This Chrome browser extension improves loading time for Scott Alexander's blog
-[Astral Codex Ten](https://www.astralcodexten.com/) (ACX).
+Astral Codex Eleven is a browser extension for Chrome and Firefox that speeds up
+Scott Alexander's blog [Astral Codex Ten](https://www.astralcodexten.com/) (ACX)
+by reimplementing the comment section.
 
 
 ## Background
@@ -19,19 +20,20 @@ Example of a very slow post with over 2500 comments:
 [Ivermectin: Much More Than You Wanted To Know](https://www.astralcodexten.com/p/ivermectin-much-more-than-you-wanted).
 
 
-## Method of operation
+## Mode of operation
 
 This extension speeds up page load by rewriting the comments section. It works
 as follows:
 
   1. Prevent the Substack scripts from loading the JSON comments (see:
-[filter-rules.json](./filter-rules.json) and
-[filter-rules.txt](./filter-rules.txt)). Blocking access only to this file
-allows the other scripts to work normally, while preventing the comments to be
-populated in the normal way, which we know is slow.
+[filter-rules.json](extension/filter-rules.json) and
+[filter-rules.txt](extension/filter-rules.txt)).
+Blocking access only to this file allows the other scripts to work normally,
+while preventing the comments to be populated in the normal way, which we know
+is slow.
 
-  2. Hide the now-useless Substack comments widget, which would otherwise show 0
-     comments.
+  2. Hide the now-useless Substack comments widget, which would otherwise show
+     no comments.
 
   3. Add a manually reimplemented comments widget.
      I didn't do anything too clever to make this especially fast; I just
@@ -41,12 +43,13 @@ populated in the normal way, which we know is slow.
 
 ## Bugs
 
-  - It seems like the comments don't always load because the extension code is
-    never run. I have no idea why this happens! When this happens, there should
-    be a single comment visible that reads “Comments have been filtered out by
-    the Astral Codex Ten Comment Viewer extension.” It can usually be fixed
-    by reloading the page. If anyone knows how to fix this properly, please let
-    me know!
+  - The comment widget only loads when opening a post directly, not when
+    starting from the ACX homepage and clicking on a post. I think this is
+    caused by Substack handling post clicks specially by replacing the page
+    content dynamically, without causing an actual page reload that would cause
+    the extension's content script to trigger again. I really should fix this!
+
+    Workaround: if the comments don't load, reload the page.
 
 
 ## Limitations
@@ -56,16 +59,17 @@ populated in the normal way, which we know is slow.
 
     However, the current version doesn't change comment deeplinks, so you can
     click on a comment's date to open the original thread, and reply from there.
-    (I realize this makes it difficult to add a toplevel reply.)
+    To make a toplevel reply, click the comment icon on top of the post. (Note
+    that you then have to deal with the usual slowness.)
 
   - A lot of comment metadata is still missing:
-      - profile links
+      - “User is banned”
       - “User was banned for this post”
-      - edited timestamp
-      - user icons (might never happen; these add a lot of overhead, while
-        adding little value)
-      - share links (will probably not happen; I doubt many people use these,
+      - User icons (may never happen; these add a lot of overhead, while adding
+        little value)
+      - Share links (will probably not happen; I doubt many people use these,
         and you can just copy the comment link if you really want to)
+
 
 ## Alternatives
 

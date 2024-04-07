@@ -1,7 +1,7 @@
 'use strict';
 
 (async function(){
-  const LOG_TAG = '[ACX Comment Viewer extension]';
+  const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting.');
 
   // Exfiltrate the _preloads global variable from the real page, using a custom

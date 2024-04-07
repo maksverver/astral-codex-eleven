@@ -1,11 +1,11 @@
 {
   "manifest_version": 3,
-  "name": "Astral Codex Ten Comment Viewer",
+  "name": "Astral Codex Eleven",
   "version": "0.1",
-  "description": "Speeds up loading of comments on https://www.astralcodexten.com/.",
+  "description": "Speeds up loading of comments on Astral Codex Ten (https://www.astralcodexten.com/).",
   "icons": {
-    "48": "icon-48x48.png",
-    "128": "icon-128x128.png"
+    "48": "images/icon-48x48.png",
+    "128": "images/icon-128x128.png"
   },
   "permissions": [
     "declarativeNetRequestWithHostAccess"
@@ -28,7 +28,7 @@
         "*://www.astralcodexten.com/*"
       ],
       "resources": [
-        "no-comments.json"
+        "filtered-comments.json"
       ]
     }
   ],
@@ -46,7 +46,7 @@
       ],
       "js": [
         "ext-comments.js",
-        "acx-comment-viewer.js"
+        "astral-codex-eleven.js"
       ],
       "run_at": "document_end",
       "world": "MAIN"

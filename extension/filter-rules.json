@@ -10,7 +10,7 @@
     "action": {
       "type": "redirect",
       "redirect": {
-        "extensionPath": "/no-comments.json"
+        "extensionPath": "/filtered-comments.json"
       }
     }
   },
