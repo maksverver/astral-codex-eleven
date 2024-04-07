@@ -29,13 +29,13 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
     // Recommend values are 0 or 3.
     collapseDepth: 0,
 
-    // Date formatting options, as accepted by Intl.DateTimeFormat. Can also
-    // be set to null to use the default formatting.
-    dateFormat: Object.freeze({month: 'long', day: 'numeric'}),
+    // Date formatting options, as accepted by Intl.DateTimeFormat().
+    // Can also be set to null to use the default formatting.
+    dateFormat: Object.freeze({month: 'short', day: 'numeric'}),
 });
 
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
-  const {collapseDepth} = options;
+  const {collapseDepth, dateFormat} = options;
 
   function createElement(parent, tag, className) {
     const elem = document.createElement(tag);
@@ -136,10 +136,17 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
-
-    postDateLink.appendChild(document.createTextNode(
-      new Date(comment.date).toLocaleString('en-US', options.dateFormat)));
+    postDateLink.appendChild();
     postDateLink.title = comment.date;
+
+    if (typeof comment.edited_at === 'string') {
+      createElement(commentHeader, 'span', 'comment-publication-name-separator')
+          .appendChild(document.createTextNode('·'));
+      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
+      editedIndicator.appendChild(document.createTextNode('edited ' +
+              new Date(comment.edited_at).toLocaleString('en-US', options.dateFormat)));
+      editedIndicator.title = comment.edited_at;
+    }
 
     const commentMain = createElement(contentDiv, 'div', 'main');
     // Substack assigns special rendering to <p> and class="comment-body"
