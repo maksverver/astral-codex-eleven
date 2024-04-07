@@ -106,7 +106,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   //  - if the suffix is empty, is the trailing hyphen omitted?
   //
   // Nevertheless, the algorithm implemented here seems to work for most users.
-  function makeProfileLink(id, name) {
+  function makeProfileUrl(id, name) {
     if (!Number.isInteger(id)) return undefined;
     if (typeof(name) !== 'string') return undefined;
     const suffix = name.replaceAll(/[^0-9a-zA-Z _-]/g, '')
@@ -121,10 +121,18 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     const contentDiv = createElement(commentDiv, 'div', 'content');
     const commentHeader = createElement(contentDiv, 'header', 'comment-meta');
     const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
-    const authorLink = createElement(authorSpan, 'a');
-    authorLink.href = makeProfileLink(comment.user_id, comment.name);
-    authorLink.appendChild(document.createTextNode(
-        comment.name ?? (comment.deleted ? "<deleted>" : "<unavailable>")));
+    const profileUrl = makeProfileUrl(comment.user_id, comment.name);
+    if (profileUrl) {
+      const authorLink = createElement(authorSpan, 'a');
+      authorLink.href = profileUrl;
+      authorLink.appendChild(document.createTextNode(comment.name))
+    } else if (typeof comment.name === 'string') {
+      // Not sure if this can happen: name is present but id is missing.
+      authorSpan.appendChild(document.createTextNode(comment.name))
+    } else {
+      authorSpan.appendChild(document.createTextNode(comment.deleted ? 'deleted' : 'unavailable'));
+      authorSpan.classList.add('missing');
+    }
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
@@ -137,7 +145,8 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     // Substack assigns special rendering to <p> and class="comment-body"
     const commentBody = createElement(commentMain, 'div', 'text comment-body');
     if (comment.body == null) {
-      commentBody.appendChild(document.createTextNode(comment.deleted ? "<deleted>" : "<unavailable>"));
+      commentBody.appendChild(document.createTextNode(comment.deleted ? "deleted" : "unavailable"));
+      commentBody.classList.add('missing');
     } else {
       appendComment(commentBody, comment.body);
     }

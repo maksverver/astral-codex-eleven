@@ -65,3 +65,7 @@ body {
   max-height: initial !important;
   overflow-y: initial !important;
 }
+
+.ext-comments .comment .missing {
+  font-style: italic;
+}
