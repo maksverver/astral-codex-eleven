@@ -1,5 +1,15 @@
 'use strict';
 
+function countCommentsInObject(comment) {
+  return 1 + countCommentsInArray(comment.children);
+}
+
+function countCommentsInArray(comments) {
+  let n = 0;
+  for (const comment of comments) n += countCommentsInObject(comment);
+  return n;
+}
+
 class ExtCommentComponent {
   constructor(commentDiv) {
     this.commentDiv = commentDiv;
@@ -173,6 +183,11 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   }
 
   rootElem.replaceChildren();
+
+  createTextNode(
+    createElement(rootElem, 'div', 'comments-heading'),
+    `${countCommentsInArray(comments)} Comments`);
+
   for (const comment of comments) {
     createCommentDiv(rootElem, comment, 0);
   }
