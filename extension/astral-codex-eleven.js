@@ -45,19 +45,27 @@
   let comments = undefined;
   try {
     console.info(LOG_TAG, 'Fetching comments...');
+    const start = performance && performance.now();
     // Note that I use ?no-filter& to bypass the filter rule that redirects
     // requests from the real page!
     comments = await fetchComments(
         `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=oldest_first`);
-    if (!comments?.length) console.warn(LOG_TAG, 'No comments found!');
+    const duration = performance && Math.round(performance.now() - start);
+    console.info(LOG_TAG, `fetch() completed in ${duration} ms.`)
   } catch (e) {
     console.warn(LOG_TAG, 'Failed to fetch comments!', e);
     return;
   }
-  if (comments?.length) {
+  if (!Array.isArray(comments)) {
+    console.warn(LOG_TAG, "comments is not an Array! Can't continue.");
+    return;
+  }
+
+  {
     console.info(LOG_TAG, `${comments.length} top-level comments found.`);
+    const start = performance && performance.now();
     replaceComments(rootDiv, comments);
-  } else {
-    console.info(LOG_TAG, 'No comments found!');
+    const duration = performance && Math.round(performance.now() - start);
+    console.info(LOG_TAG, `DOM updated in ${duration} ms.`)
   }
 })();
