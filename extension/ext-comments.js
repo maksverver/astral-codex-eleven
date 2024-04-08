@@ -86,16 +86,6 @@ class RadioButtonsComponent {
   }
 }
 
-function createRadioButtons(labels, onChange) {
-  const orderButtons = createElement(orderDiv, 'div', 'radio-buttons');
-  const chronologicalButton = createElement(orderButtons, 'button', 'inactive');
-  createTextNode(chronologicalButton, 'Chronological');
-  chronologicalButton.onclick = changeOrder.bind(null, 0);
-  const newFirstButton = createElement(orderButtons, 'button', 'inactive');
-  createTextNode(newFirstButton, 'New First');
-  newFirstButton.onclick = changeOrder.bind(null, 1);
-}
-
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
   const {collapseDepth, dateFormat} = options;
 
