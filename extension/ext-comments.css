@@ -44,9 +44,7 @@ a:focus {
 
 .ext-comments .comment > .border {
   cursor: pointer;
-  padding-left: 11px;
-  padding-right: 11px;
-  transition: all 0.25s;
+  width: 16px;
 }
 
 .ext-comments .comment > .border > .line {
@@ -54,21 +52,19 @@ a:focus {
   width: 2px;
   height: 100%;
   margin: auto;
-  transition: all 0.25s;
+  transition: width 0.1s;
 }
 
-.ext-comments .comment > .border:hover,
-.ext-comments .comment:focus > .border {
-  padding-left:  9px;
-  padding-right: 9px;
-  transition: all 0.25s;
-}
-
-.ext-comments .comment > .border:hover > .line,
 .ext-comments .comment:focus > .border > .line {
+  background: var(--background_contrast_3);
+  width: 4px;
+  transition: width 0.1s;
+}
+
+.ext-comments .comment > .border:hover > .line {
   background: var(--background_pop);
   width: 6px;
-  transition: all 0.25s;
+  transition: width 0.2s;
 }
 
 .ext-comments .comment .edited-indicator {
