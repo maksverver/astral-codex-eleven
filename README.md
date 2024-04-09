@@ -6,6 +6,8 @@ by reimplementing the comment section.
 
 It also adds some quality-of-life improvements:
 
+  - Fix the main menu to the top of the page.
+
   - Keyboard navigation:
 
       - `Enter`: collapse/expand comment

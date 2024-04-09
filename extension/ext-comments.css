@@ -17,6 +17,15 @@ body {
   cursor: initial !important;
 }
 
+/* Fix the main menu to the top of the page. By default, it will scroll back
+   into view whenever the user scrolls up, but this interferes with keyboard
+   navigation (e.g., when focusing a comment, the main menu may overlap the
+   top of the comment) and is generally obnoxious. */
+.main-menu-content {
+  position: relative !important;
+  top: 0 !important;
+}
+
 /* Add underline to links with keyboard focus, to facilitate keyboard navigation. */
 a:focus {
   text-decoration: solid underline var(--background_pop) 2px !important;
