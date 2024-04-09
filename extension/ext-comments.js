@@ -11,9 +11,19 @@ function countCommentsInArray(comments) {
 }
 
 class ExtCommentComponent {
-  constructor(commentDiv) {
-    this.commentDiv = commentDiv;
-    this.expanded = undefined;
+  constructor(commentDiv, parent, collapseDepth) {
+    const depth = parent ? parent.depth + 1 : 0;
+    const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
+    this.commentDiv  = commentDiv;
+    this.depth       = depth;
+    this.parent      = parent;
+    this.children    = undefined;
+    this.prevSibling = undefined;
+    this.nextSibling = undefined;
+    this.expanded    = expanded;
+    commentDiv.tabIndex = 0;
+    commentDiv.onkeydown = this.handleKeyDown.bind(this);
+    commentDiv.classList.add(expanded ? 'expanded' : 'collapsed');
   }
 
   setExpanded(expanded) {
@@ -25,6 +35,86 @@ class ExtCommentComponent {
 
   toggleExpanded() {
     this.setExpanded(!this.expanded);
+  }
+
+  focus() {
+    this.commentDiv.focus();
+    // Make sure the top of the comment is visible after it is focused:
+    if (this.commentDiv.getBoundingClientRect().top < 0) {
+      this.commentDiv.scrollIntoView();
+    }
+  }
+
+  findNext() {
+    if (this.expanded && this.children.length > 0) {
+      // If this node has children, then the next node is its first child.
+      return this.children[0];
+    } else {
+      // If this node does not have children, then the next node is its next
+      // sibling, or the next sibling of the nearest ancestor that has one.
+      let node = this;
+      while (node && !node.nextSibling) node = node.parent;
+      return node && node.nextSibling;
+    }
+  }
+
+  findPrevious() {
+    if (!this.prevSibling) {
+      // If this node is its parent's first child, then the previous node is the parent.
+      return this.parent;
+    } else {
+      // If this node is not its parent's first child, then the previous node is
+      // the last descendant of its previous sibling:
+      let node = this.prevSibling;
+      while (node.expanded && node.children.length > 0) {
+        node = node.children[node.children.length - 1];
+      }
+      return node;
+    }
+  }
+
+  handleKeyDown(ev) {
+    // Don't handle key events when one of these modifiers is held:
+    if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
+    switch (ev.key) {
+      case 'Enter':
+        this.toggleExpanded();
+        break;
+
+      case 'H':  // Move to top-level comment
+        let root = this;
+        while (root.parent) root = root.parent;
+        root.focus();
+        break;
+
+      case 'J': // Move to next sibling
+        if (this.nextSibling) this.nextSibling.focus();
+        break;
+
+      case 'K': // Move to previous sibling
+        if (this.prevSibling) this.prevSibling.focus();
+        break;
+
+      case 'h':  // Move to parent
+        if (this.parent) this.parent.focus();
+        break;
+
+      case 'j': // Move to next comment
+        const next = this.findNext();
+        if (next) next.focus();
+        break;
+
+      case 'k':  // Move to previous comment
+        const prev = this.findPrevious();
+        if (prev) prev.focus();
+        break;
+
+      default:
+        // Unrecognized key; return without stopping propagation.
+        return;
+    }
+    ev.stopPropagation();
+    ev.preventDefault();
   }
 }
 
@@ -171,7 +261,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     return `https://substack.com/profile/${id}-${suffix}`;
   }
 
-  function createCommentDiv(parentElem, comment, depth) {
+  function createComment(parentElem, comment, parentComponent) {
     const commentDiv = createElement(parentElem, 'div', 'comment');
     const borderDiv = createElement(commentDiv, 'div', 'border');
     createElement(borderDiv, 'div', 'line');
@@ -215,32 +305,25 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       appendComment(commentBody, comment.body);
     }
 
-    const commentComponent = new ExtCommentComponent(commentDiv);
-    commentComponent.setExpanded(
-        depth === 0 || !collapseDepth || depth % collapseDepth !== 0);
+    const commentComponent = new ExtCommentComponent(commentDiv, parentComponent, collapseDepth);
+
     // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = () => commentComponent.toggleExpanded();
 
-    // Collapse/expand comment with Enter key while in focus.
-    commentDiv.tabIndex = 0;
-    commentDiv.onkeypress = (ev) => {
-      if (ev.type === 'keypress' && ev.key === 'Enter') {
-        commentComponent.toggleExpanded();
-        ev.stopPropagation();
-        ev.preventDefault();
-      }
-    };
-
-    createCommentsList(commentMain, comment.children, depth + 1);
+    commentComponent.children = createCommentsList(commentMain, comment.children, commentComponent);
+    return commentComponent;
   }
 
-  function createCommentsList(parentElem, comments, depth) {
+  function createCommentsList(parentElem, comments, parentComponent) {
     // Substack uses class names "comments" and "comments-list" and applies
     // extra styling that I don't want, so I use "comments-holder" instead.
-    const container = createElement(parentElem, 'div', 'comments-holder');
-    for (const comment of comments) {
-      createCommentDiv(container, comment, depth + 1);
+    const div = createElement(parentElem, 'div', 'comments-holder');
+    const commentComponents = comments.map((comment) => createComment(div, comment, parentComponent));
+    for (let i = 0; i + 1 < commentComponents.length; ++i) {
+      commentComponents[i].nextSibling = commentComponents[i + 1];
+      commentComponents[i + 1].prevSibling = commentComponents[i];
     }
+    return commentComponents;
   }
 
   // Clear out the original root.

@@ -4,10 +4,17 @@ Astral Codex Eleven is a browser extension for Chrome and Firefox that speeds up
 Scott Alexander's blog [Astral Codex Ten](https://www.astralcodexten.com/) (ACX)
 by reimplementing the comment section.
 
-It also adds a few small quality-of-life improvements:
+It also adds some quality-of-life improvements:
 
-  - Keyboard navigation: tab/shift-tab to move the focus forward/backward,
-    and Enter to collapse/expand a comment thread.
+  - Keyboard navigation:
+
+      - `Enter`: collapse/expand comment
+      - `h`: move to parent comment
+      - `j`: move to next comment
+      - `k`: move to previous comment
+      - `shift` + `h`: move to toplevel comment
+      - `shift` + `j`: move to next sibling comment
+      - `shift` + `k`: move to previous sibling comment
 
   - Full precision timestamp shown when hovering over the post date.
 
