@@ -28,7 +28,8 @@
         "*://www.astralcodexten.com/*"
       ],
       "resources": [
-        "filtered-comments.json"
+        "filtered-comments.json",
+        "main-script.js"
       ]
     }
   ],
@@ -48,8 +49,7 @@
         "ext-comments.js",
         "astral-codex-eleven.js"
       ],
-      "run_at": "document_end",
-      "world": "MAIN"
+      "run_at": "document_end"
     }
   ]
 }

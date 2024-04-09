@@ -2,28 +2,22 @@
 
 (async function(){
   const LOG_TAG = '[Astral Codex Eleven]';
-  console.info(LOG_TAG, 'Starting.');
+  console.info(LOG_TAG, 'Starting extension.');
 
-  // Exfiltrate the _preloads global variable from the real page, using a custom
-  // script append to the document body after the DOM is complete. This is
-  // necessary because in the ISOLATED world we don't have direct access to the
-  // page's global variables.
-  const preloads = await new Promise((resolve) => {
-    document.addEventListener('acx-page-load', (ev) => resolve(ev.detail._preloads));
+  // Exfiltrate the _preloads.post.id global variable from the real page, using
+  // a custom script append to the document body after the DOM is complete. This
+  // is necessary because in the ISOLATED world we don't have direct access to
+  // the main page's global variables.
+  const {postId} = await new Promise((resolve) => {
+    document.addEventListener('acx-page-load', (ev) => resolve(ev.detail));
 
     const scriptElem = document.createElement('script');
-    scriptElem.textContent = "document.dispatchEvent(new CustomEvent('acx-page-load', {detail: {_preloads}}));";
+    scriptElem.src = chrome.runtime.getURL('main-script.js');
     document.body.appendChild(scriptElem);
   });
 
-  if (!preloads) {
-    console.warn(LOG_TAG, "preloads not defined! Can't continue.");
-    return;
-  }
-
-  const postId = preloads.post?.id;
   if (!postId) {
-    console.warn(LOG_TAG, "post.id is not defined! Can't continue.");
+    console.warn(LOG_TAG, "postId not defined! Can't continue.");
     return;
   }
 
