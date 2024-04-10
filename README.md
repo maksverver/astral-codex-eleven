@@ -97,3 +97,10 @@ https://acxreader.github.io/ contains static HTML copies of the posts only.
 Those pages load extremely fast because they cut out all the Substack crap, but
 they lack the comments, which are often just as interesting as the posts
 themselves.
+
+I found another browser extension called
+[acx-tweaks](https://chromewebstore.google.com/detail/acx-tweaks/jdpghojhfigbpoeiadalafcmohaekgl)
+which adds a ton of cool features, some of which I also have (like keyboard
+navigation and being able to view the full comment timestamp) but it does not
+speed up comment loading, unfortunately, which was the main problem I tried to
+fix. In an ideal world, our extensions would be combined into one.
