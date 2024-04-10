@@ -56,18 +56,6 @@ is slow.
      materialized the entire DOM tree from the comments JSON file. This seems
      fast enough even for posts with many comments.
 
-
-## Bugs
-
-  - The comment widget only loads when opening a post directly, not when
-    starting from the ACX homepage and clicking on a post. I think this is
-    caused by Substack handling post clicks specially by replacing the page
-    content dynamically, without causing an actual page reload that would cause
-    the extension's content script to trigger again. I really should fix this!
-
-    Workaround: if the comments don't load, reload the page.
-
-
 ## Limitations
 
   - Comments are currently **read-only**: replying is not supported, even if you
@@ -85,6 +73,22 @@ is slow.
         little value)
       - Share links (will probably not happen; I doubt many people use these,
         and you can just copy the comment link if you really want to)
+
+  - Page navigation is somewhat slower than before.
+
+    Background: Substack blogs are partially single-page applications. If you
+    visit the homepage and click on a linked post, the page doesn't fully
+    reload, but instead loads the post into the existing DOM tree dynamically.
+    This makes navigation from the homepage slightly faster, but it also makes
+    it difficult to execute the extension code in response to page changes.
+    (It's only partially a single-page application, since many links do cause a
+    full page reload, like for example clicking the blog title on top of a post
+    page to return to the homepage.)
+
+    My current solution to this problem is to block the dynamic loading of
+    pages. Whenever the document URL changes, I force a regular page reload, so
+    that the extension script triggers properly. (See the `pushState()`
+    related logic in [main-script.js](extension/main-script.js)).
 
 
 ## Alternatives

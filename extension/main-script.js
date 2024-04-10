@@ -15,4 +15,22 @@
     console.info(LOG_TAG, 'Broadcasting post id', postId);
     document.dispatchEvent(new CustomEvent('acx-page-load', {detail: {postId}}));
   }
+
+  // Hack to force a proper page load whenever the URL changes, which is
+  // necessary to trigger the extension script properly. This is easier than
+  // rerunning the extension script, because:
+  //
+  //  1. when this happens, the post page might not have been loaded yet
+  //  2. it's difficult to figure out the post id of the loaded page
+  //
+  // I did not intercept replaceState(), which is not used to redirect to posts.
+  const originalPushState = window.history.pushState;
+  window.history.pushState = (state, unused, url) => {
+    if (!url) {
+      originalPushState(state, unused, url);
+    } else {
+      // URL changed! Force a real page load, to trigger the extension script.
+      document.location.href = url;
+    }
+  }
 })();
