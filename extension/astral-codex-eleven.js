@@ -31,7 +31,7 @@
   }
 
   const rootDiv = document.createElement('div');
-  rootDiv.innerHTML = `<p>Loading comments...</p>`;
+  rootDiv.innerHTML = `<p>Astral Codex Eleven extension loading comments...</p>`;
   // The 'container' causes Substack to limit the width of the div.
   rootDiv.className = 'ext-comments container';
   commentsPage.parentElement.insertBefore(rootDiv, commentsPage);
