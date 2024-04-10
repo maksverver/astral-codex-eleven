@@ -109,6 +109,14 @@ a:focus {
   font-style: italic;
 }
 
+/* Dates */
+
+.date > .long { display: none }
+.date:hover > .long { display: initial }
+.date:focus > .long { display: initial }
+.date:hover > .short { display: none }
+.date:focus > .short { display: none }
+
 /* Comment ordering */
 
 .ext-comments .comments-heading-holder {

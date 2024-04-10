@@ -131,7 +131,11 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
 
     // Date formatting options, as accepted by Intl.DateTimeFormat().
     // Can also be set to null to use the default formatting.
-    dateFormat: Object.freeze({month: 'short', day: 'numeric'}),
+    dateFormatShort: new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'}),
+    dateFormatLong: new Intl.DateTimeFormat('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric',
+        hour: '2-digit', minute: '2-digit', second: '2-digit',
+        timeZoneName: 'short'}),
 });
 
 class RadioButtonsComponent {
@@ -177,7 +181,7 @@ class RadioButtonsComponent {
 }
 
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
-  const {collapseDepth, dateFormat} = options;
+  const {collapseDepth, dateFormatShort, dateFormatLong} = options;
 
   function createElement(parent, tag, className) {
     const elem = document.createElement(tag);
@@ -261,6 +265,18 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     return `https://substack.com/profile/${id}-${suffix}`;
   }
 
+  function createDate(parentElem, dateString) {
+    parentElem.classList.add('date');
+    parentElem.tabIndex = 0;
+    const date = new Date(dateString);
+    createTextNode(
+      createElement(parentElem, 'span', 'short'),
+      dateFormatShort.format(date));
+    createTextNode(
+      createElement(parentElem, 'span', 'long'),
+      dateFormatLong.format(date));
+  }
+
   function createComment(parentElem, comment, parentComponent) {
     const commentDiv = createElement(parentElem, 'div', 'comment');
     const borderDiv = createElement(commentDiv, 'div', 'border');
@@ -283,16 +299,14 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
     postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
     postDateLink.rel = 'nofollow';
-    createTextNode(postDateLink, new Date(comment.date).toLocaleString('en-US', dateFormat));
-    postDateLink.title = comment.date;
+    createDate(postDateLink, comment.date);
 
     if (typeof comment.edited_at === 'string') {
       const seperator = createElement(commentHeader, 'span', 'comment-publication-name-separator');
       createTextNode(seperator, '·');
       const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
-      createTextNode(editedIndicator,
-          'edited ' + new Date(comment.edited_at).toLocaleString('en-US', dateFormat));
-      editedIndicator.title = comment.edited_at;
+      createTextNode(editedIndicator, 'edited ');
+      createDate(editedIndicator, comment.edited_at);
     }
 
     const commentMain = createElement(contentDiv, 'div', 'main');

@@ -18,7 +18,7 @@ It also adds some quality-of-life improvements:
       - `shift` + `j`: move to next sibling comment
       - `shift` + `k`: move to previous sibling comment
 
-  - Full precision timestamp shown when hovering over the post date.
+  - Full precision timestamp shown when hovering over/focusing on the post date.
 
 
 ## Background
