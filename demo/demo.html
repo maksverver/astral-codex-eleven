@@ -1,29 +1,18 @@
 <!DOCTYPE html>
 <html lang="en">
   <head>
-    <title>ACX Comment Viewer (demo)</title>
+    <title>Comments widget demo</title>
     <meta charset="UTF-8">
     <script src="../extension/ext-comments.js" async defer></script>
     <link rel="stylesheet" href="demo.css">
     <link rel="stylesheet" href="../extension/ext-comments.css">
   </head>
   <body>
+    <h1>Comments widget demo</h1>
+    <table>
+      <tr><th>Comments JSON:</th><td><input id="file-input" type="file" accept=".json" /></td></tr>
+    </table>
     <div id="ext-comments" class="ext-comments"></div>
-    <script>
-      window.addEventListener('load', async () => {
-        const rootDiv = document.getElementById('ext-comments');
-        // Change this to the JSON comments file you want to load!
-        const jsonPath = 'smaller-comments.json';
-        //const jsonPath = 'ivermectin-comments.json';
-        const comments = await fetchComments(jsonPath);
-        if (comments) replaceComments(rootDiv, comments, {
-              ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
-              collapseDepth: 3,
-              dateFormatShort: new Intl.DateTimeFormat('en-US', {
-                month: 'long', day: 'numeric',
-                hour: '2-digit', minute: '2-digit'}),
-            });
-      });
-    </script>
+    <script src="demo.js" async defer></script>
   </body>
 </html>

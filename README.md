@@ -121,26 +121,21 @@ make test
 
 Manual testing of the comments widget is facilitated by
 [demo.html](demo/demo.html).
+
 To use it, a set of comments in JSON format must be downloaded first.
 For example, to download the (large) set of comments from the post
 “Ivermectin: Much More Than You Wanted To Know”, run:
 
 ```
-% curl 'https://www.astralcodexten.com/api/v1/post/43667275/comments?token=&all_comments=true&sort=oldest_first&last_comment_at' > demo/ivermectin-comments.json
+% curl -o demo/ivermectin-comments.json 'https://www.astralcodexten.com/api/v1/post/43667275/comments?token=&all_comments=true&sort=oldest_first&last_comment_at'
 ```
 
 Or download a smaller set of comments for faster loading. You can find the
 post id by opening a blog post and evaluating _preloads.post.id, or by logging
 the network request made.
 
-To run the demo, start a local webserver, e.g. at port 8000:
-
-```
-% python -m http.server 8000
-```
-
-Then open http://localhost:8000/demo/demo.html in the browser to view the
-comments.
+To view the comments, open demo.html in a browser and select the downloaded
+json file.
 
 The demo page looks very ugly, but the functionality should be comparable to
 the live extension. Note that the demo only covers the comments widget
