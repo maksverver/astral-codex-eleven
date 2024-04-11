@@ -1,5 +1,74 @@
 'use strict';
 
+// Below is a beautiful regex to match URLs that may occur in text. It's tricky
+// because we want to allow characters that occur in URLs that are technically
+// reserved, while excluding characters that are likely intended as punctuation.
+// For example:
+//
+//   - "(http://example.com/)" should match "http://example.com/" without the
+//      surrounding parentheses.
+//
+//   - "http://example.com/(bla)" should match "http://example.com/(bla)" with
+//      the parentheses included in the URL.
+//
+//   - "Read http://the-manual.com!" should match "http://the-manual.com"
+//      without the exclamation mark.
+//
+// and so on. This is achieved by dividing the ASCII characters into the ones
+// that are most likely part of the URL:
+//
+//    #$%&'*+-/<=>@&_|~ (as well as letters and digits)
+//
+// And those that are likely part of the punctuation, not the URL:
+//
+//    "!()*,.:;?`  (as well as non-ASCII Unicode characters like — or “”)
+//
+// And those that are part of the URL only if they are occur in pairs:
+//
+//    () {} []
+//
+// (so that "http://example.com/foo+(bar)?a[1]=2" is parsed as a single URL).
+//
+// Additionally, we want to support backslash escapes, so that
+// "http://example.com/a\ b\)c" matches as a single URL. Only non-alphanumeric
+// characters can be escaped, so that we can unescape simply by dropping the
+// slashes (\\ -> \, \; -> ;, etc.), without having to deal with complex
+// sequences like \n, \0, \040, \x10 etc.
+//
+// Putting it together, the URL regex first matches http:// or https:// (other
+// protocols are intentionally not supported) and the rest of the string can be
+// divided into parts that are either:
+//
+//  - A two-character escape sequence (\ followed by a non-alphanumeric char).
+//  - A sequence of non-space characters that ends with a character that is
+//    likely part of the URL (#, _, etc.)
+//  - A balanced bracket sequence like "(bla)" or "[bla]" or "{bla}". Within,
+//    these sequences, escapes are allowed (e.g. "(bla\)bla)" or "[\ ]").
+//    Nested bracket sequences are not parsed; that's impossible. So "[[]]"
+//    matches only the first three characters; to match all four you must write
+//    "[[\]]" (note that escaping characters unnecessarily is always allowed, so
+//    the same sequence can be safely written as "\[\[\]\]").
+//
+const URL_REGEX = /(https?:\/\/(?:\\[^A-Z0-9]|[^\s(){}\[\]]*[A-Z0-9#$%&'+\-\/<=>@&_|~]|\((?:\\[^A-Z0-9]|[^\s)])*\)|\[(?:\\[^A-Z0-9]|[^\s\]])*\]|{(?:\\[^A-Z0-9]|[^\s}])*})+)/i;
+
+function splitByUrl(s) {
+  return s.split(URL_REGEX);
+}
+
+function unescapeUrl(s) {
+  return s.replace(/\\([^A-Z0-9])/ig, '$1');
+}
+
+// The email regex is much simpler, since I assume it always ends with a TLD
+// that consists of alphanumeric characters or hyphens. This is not perfect, but
+// I'm not going to support esoteric features like embedded comments, IP-based
+// hosts, quoted usernames, non-Latin usernames, and so on.
+const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
+
+function splitByEmail(s) {
+  return s.split(EMAIL_REGEX);
+}
+
 function countCommentsInObject(comment) {
   return 1 + countCommentsInArray(comment.children);
 }
@@ -217,17 +286,17 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     for (const paragraph of text.split(/\n+/)) {
       if (!paragraph) continue;
       const p = createElement(parentElem, 'p');
-      paragraph.split(/(https?:\/\/[^\s]+)/i).forEach((part, i) => {
-        if (i%2 == 0) {
-          part.split(/([^\s]+@[^\s]+.\w+)/).forEach((part, i) => {
-            if (i%2 == 0) {
-              createTextNode(p, part);
+      splitByUrl(paragraph).forEach((part, i) => {
+        if (i%2 === 0) {
+          splitByEmail(part).forEach((part, i) => {
+            if (i%2 === 0) {
+              if (part) createTextNode(p, part);
             } else {
-              createLink(p, part, 'mailto:' + part);
+              createLink(p, part, 'mailto:' + encodeURIComponent(part));
             }
           });
         } else {
-          createLink(p, part, part);
+          createLink(p, part, unescapeUrl(part));
         }
       });
     }
