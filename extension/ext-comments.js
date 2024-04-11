@@ -320,6 +320,9 @@ class ExtCommentComponent {
   }
 
   handleKeyDown(ev) {
+    // Don't handle key events when the comment div itself does not have focus.
+    // This happens when activating a link within the comment.
+    if (ev.target !== this.commentDiv) return;
     // Don't handle key events when one of these modifiers is held:
     if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
     switch (ev.key) {
