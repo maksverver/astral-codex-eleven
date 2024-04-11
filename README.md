@@ -56,6 +56,7 @@ is slow.
      materialized the entire DOM tree from the comments JSON file. This seems
      fast enough even for posts with many comments.
 
+
 ## Limitations
 
   - Comments are currently **read-only**: replying is not supported, even if you
@@ -104,3 +105,46 @@ which adds a ton of cool features, some of which I also have (like keyboard
 navigation and being able to view the full comment timestamp) but it does not
 speed up comment loading, unfortunately, which was the main problem I tried to
 fix. In an ideal world, our extensions would be combined into one.
+
+
+## Local development
+
+### Running tests
+
+Tests require [Node.js](https://nodejs.org/) to be installed. Run them with:
+
+```
+make test
+```
+
+### Manually testing the comments widget
+
+Manual testing of the comments widget is facilitated by
+[demo.html](demo/demo.html).
+To use it, a set of comments in JSON format must be downloaded first.
+For example, to download the (large) set of comments from the post
+“Ivermectin: Much More Than You Wanted To Know”, run:
+
+```
+% curl 'https://www.astralcodexten.com/api/v1/post/43667275/comments?token=&all_comments=true&sort=oldest_first&last_comment_at' > demo/ivermectin-comments.json
+```
+
+Or download a smaller set of comments for faster loading. You can find the
+post id by opening a blog post and evaluating _preloads.post.id, or by logging
+the network request made.
+
+To run the demo, start a local webserver, e.g. at port 8000:
+
+```
+% python -m http.server 8000
+```
+
+Then open http://localhost:8000/demo/demo.html in the browser to view the
+comments.
+
+The demo page looks very ugly, but the functionality should be comparable to
+the live extension. Note that the demo only covers the comments widget
+([ext-comments.js](extension/ext-comments.js)), not the main extension code
+([astral-codex-eleven.js](extension/astral-codex-eleven.js),
+[main-script.js](extension/main-script.js)), so the demo is not a complete
+substitute for live testing.
