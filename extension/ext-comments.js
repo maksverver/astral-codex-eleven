@@ -250,7 +250,7 @@ class ExtCommentComponent {
     }
 
     const commentMain = createElement(contentDiv, 'div', 'main');
-    // Substack assigns special rendering to <p> and class="comment-body"
+    // Substack assigns special rendering to class="comment-body"
     const commentBody = createElement(commentMain, 'div', 'text comment-body');
     if (comment.body == null) {
       createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
