@@ -1,5 +1,21 @@
 'use strict';
 
+async function fetchComments(jsonPath) {
+  const fetchResponse = await fetch(jsonPath);
+  const responseJson = await fetchResponse.json();
+  return responseJson?.comments;
+}
+
+function countCommentsInObject(comment) {
+  return 1 + countCommentsInArray(comment.children);
+}
+
+function countCommentsInArray(comments) {
+  let n = 0;
+  for (const comment of comments) n += countCommentsInObject(comment);
+  return n;
+}
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -69,30 +85,188 @@ function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
 
-function countCommentsInObject(comment) {
-  return 1 + countCommentsInArray(comment.children);
+function createElement(parent, tag, className) {
+  const elem = document.createElement(tag);
+  parent.appendChild(elem);
+  if (className) elem.className = className;
+  return elem;
 }
 
-function countCommentsInArray(comments) {
-  let n = 0;
-  for (const comment of comments) n += countCommentsInObject(comment);
-  return n;
+function createTextNode(parent, text) {
+  const node = document.createTextNode(text);
+  parent.appendChild(node);
+  return node;
+}
+
+class ExtCommentListComponent {
+  constructor(parentElem, commentObjects, parentCommentComponent, options) {
+    // Substack uses class names "comments" and "comments-list" and applies
+    // extra styling that I don't want, so I use "comments-holder" instead.
+    const div = createElement(parentElem, 'div', 'comments-holder');
+    const childComponents = commentObjects.map(
+        (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
+    for (let i = 0; i + 1 < childComponents.length; ++i) {
+      childComponents[i].nextSibling = childComponents[i + 1];
+      childComponents[i + 1].prevSibling = childComponents[i];
+    }
+    this.children = childComponents;
+  }
 }
 
 class ExtCommentComponent {
-  constructor(commentDiv, parent, collapseDepth) {
-    const depth = parent ? parent.depth + 1 : 0;
+  // Constructs the DOM elements to represent a single comment thread.
+  //
+  //  - parentElem is the DOM element that is the parent of this comment.
+  //  - comment is an object describing the comment, from the JSON object
+  //    returned by the comments API. It contains fields like:
+  //    user_id, name, date, edited_at, deleted, body, children.
+  //  - parentCommentComponent is the ExtCommentComponent corresponding to this
+  //    comments parent, or undefined if this is a toplevel comment.
+  //  - options is the object passed to replaceComments().
+  //
+  constructor(parentElem, comment, parentCommentComponent, options) {
+    const {collapseDepth, dateFormatShort, dateFormatLong} = options;
+
+    // Creates DOM nodes for the given comment text, and appends them to the
+    // given parent element. This tries to mirror how Substack seems to process
+    // comments:
+    //
+    //  - Splits text into paragraphs based on newline sequences.
+    //  - Turns http/https URLs into clickable links.
+    //  - Turn email addresses into clickable mailto: links.
+    //
+    function appendCommentText(parentElem, text) {
+      function createLink(parentElem, text, href) {
+        const a = createElement(parentElem, 'a', 'linkified');
+        a.href = href;
+        a.target = '_blank';
+        a.rel = 'nofollow ugc noopener'
+        createTextNode(a, text);
+        return a;
+      }
+
+      for (const paragraph of text.split(/\n+/)) {
+        if (!paragraph) continue;
+        const p = createElement(parentElem, 'p');
+        splitByUrl(paragraph).forEach((part, i) => {
+          if (i%2 === 0) {
+            splitByEmail(part).forEach((part, i) => {
+              if (i%2 === 0) {
+                if (part) createTextNode(p, part);
+              } else {
+                createLink(p, part, 'mailto:' + encodeURIComponent(part));
+              }
+            });
+          } else {
+            createLink(p, part, unescapeUrl(part));
+          }
+        });
+      }
+    }
+
+    // Constructs a Substack profile link from a user id and name.
+    //
+    // I don't know the exact algorithm, but based on observation, I determined
+    // that the username is transformed into a suffix as follows:
+    //
+    //  - characters other than ASCII letters, digits, underscores, and hyphens
+    //    are deleted (notably, letters in foreign scripts are stripped, as are
+    //    periods, which are technically URL-safe).
+    //  - spaces are converted to hyphens, except leading/trailing spaces, which
+    //    are trimmed.
+    //  - letters are converted to lower case
+    //
+    // For example:
+    //
+    // "TimW"            -> https://substack.com/profile/1234567-timw
+    // "A.M. Charlebois" -> https://substack.com/profile/1234567-am-charlebois
+    // "Анна Musk"       -> https://substack.com/profile/1234567-musk
+    //
+    // There are some details I don't know:
+    //
+    //  - are consecutive spaces mapped to a single hyphen, or multiple?
+    //  - if the suffix is empty, is the trailing hyphen omitted?
+    //
+    // Nevertheless, the algorithm implemented here seems to work for most users.
+    function makeProfileUrl(id, name) {
+      if (!Number.isInteger(id)) return undefined;
+      if (typeof(name) !== 'string') return undefined;
+      const suffix = name.replaceAll(/[^0-9a-zA-Z _-]/g, '')
+          .trim().replaceAll(/ +/g, '-').toLowerCase();
+      return `https://substack.com/profile/${id}-${suffix}`;
+    }
+
+    function createDate(parentElem, dateString) {
+      parentElem.classList.add('date');
+      parentElem.tabIndex = 0;
+      const date = new Date(dateString);
+      createTextNode(
+        createElement(parentElem, 'span', 'short'),
+        dateFormatShort.format(date));
+      createTextNode(
+        createElement(parentElem, 'span', 'long'),
+        dateFormatLong.format(date));
+    }
+
+    const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
     const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
-    this.commentDiv  = commentDiv;
-    this.depth       = depth;
-    this.parent      = parent;
-    this.children    = undefined;
-    this.prevSibling = undefined;
-    this.nextSibling = undefined;
-    this.expanded    = expanded;
+
+    const commentDiv = createElement(parentElem, 'div', 'comment');
     commentDiv.tabIndex = 0;
     commentDiv.onkeydown = this.handleKeyDown.bind(this);
     commentDiv.classList.add(expanded ? 'expanded' : 'collapsed');
+
+    const borderDiv = createElement(commentDiv, 'div', 'border');
+    createElement(borderDiv, 'div', 'line');
+    // Collapse/expand comment by clicking on the left border line.
+    borderDiv.onclick = this.toggleExpanded.bind(this);
+
+    const contentDiv = createElement(commentDiv, 'div', 'content');
+    const commentHeader = createElement(contentDiv, 'header', 'comment-meta');
+    const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
+    const profileUrl = makeProfileUrl(comment.user_id, comment.name);
+    if (profileUrl) {
+      const authorLink = createElement(authorSpan, 'a');
+      authorLink.href = profileUrl;
+      createTextNode(authorLink, comment.name);
+    } else if (typeof comment.name === 'string') {
+      // Not sure if this can happen: name is present but id is missing.
+      createTextNode(authorSpan, comment.name);
+    } else {
+      createTextNode(authorSpan, comment.deleted ? 'deleted' : 'unavailable');
+      authorSpan.classList.add('missing');
+    }
+    const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
+    postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
+    postDateLink.rel = 'nofollow';
+    createDate(postDateLink, comment.date);
+
+    if (typeof comment.edited_at === 'string') {
+      const seperator = createElement(commentHeader, 'span', 'comment-publication-name-separator');
+      createTextNode(seperator, '·');
+      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
+      createTextNode(editedIndicator, 'edited ');
+      createDate(editedIndicator, comment.edited_at);
+    }
+
+    const commentMain = createElement(contentDiv, 'div', 'main');
+    // Substack assigns special rendering to <p> and class="comment-body"
+    const commentBody = createElement(commentMain, 'div', 'text comment-body');
+    if (comment.body == null) {
+      createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
+      commentBody.classList.add('missing');
+    } else {
+      appendCommentText(commentBody, comment.body);
+    }
+
+    this.commentDiv  = commentDiv;
+    this.depth       = depth;
+    this.parent      = parentCommentComponent;
+    this.expanded    = expanded;
+    this.prevSibling = undefined;
+    this.nextSibling = undefined;
+    this.childList   = !comment.children?.length ? undefined :
+        new ExtCommentListComponent(commentMain, comment.children, this, options);
   }
 
   setExpanded(expanded) {
@@ -114,32 +288,34 @@ class ExtCommentComponent {
     }
   }
 
+  get firstVisibleChild() {
+    return this.childList && this.expanded ?
+        this.childList.children[0] : undefined;
+  }
+
+  get lastVisibleChild() {
+    return this.childList && this.expanded ?
+        this.childList.children[this.childList.children.length - 1] : undefined;
+  }
+
   findNext() {
-    if (this.expanded && this.children.length > 0) {
-      // If this node has children, then the next node is its first child.
-      return this.children[0];
-    } else {
-      // If this node does not have children, then the next node is its next
-      // sibling, or the next sibling of the nearest ancestor that has one.
-      let node = this;
-      while (node && !node.nextSibling) node = node.parent;
-      return node && node.nextSibling;
-    }
+    // If this node has visible children, then the next node is its first child.
+    const child = this.firstVisibleChild;
+    if (child) return child;
+    // Otherwise, the next node is its next sibling, or the next sibling of the
+    // nearest ancestor that has one.
+    let node = this;
+    while (node && !node.nextSibling) node = node.parent;
+    return node && node.nextSibling;
   }
 
   findPrevious() {
-    if (!this.prevSibling) {
-      // If this node is its parent's first child, then the previous node is the parent.
-      return this.parent;
-    } else {
-      // If this node is not its parent's first child, then the previous node is
-      // the last descendant of its previous sibling:
-      let node = this.prevSibling;
-      while (node.expanded && node.children.length > 0) {
-        node = node.children[node.children.length - 1];
-      }
-      return node;
-    }
+    // If this node is its parent's first child, then the previous node is the parent.
+    if (!this.prevSibling) return this.parent;
+    // Otherwise, the previous node is is the last descendant of its previous sibling:
+    let node = this.prevSibling, child;
+    while ((child = node.lastVisibleChild)) node = child;
+    return node;
   }
 
   handleKeyDown(ev) {
@@ -187,36 +363,14 @@ class ExtCommentComponent {
   }
 }
 
-async function fetchComments(jsonPath) {
-  const fetchResponse = await fetch(jsonPath);
-  const responseJson = await fetchResponse.json();
-  return responseJson?.comments;
-}
-
-const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
-    // If greater than 0, comments at the given depth are collapsed (recursively).
-    // Recommend values are 0 or 3.
-    collapseDepth: 0,
-
-    // Date formatting options, as accepted by Intl.DateTimeFormat().
-    // Can also be set to null to use the default formatting.
-    dateFormatShort: new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'}),
-    dateFormatLong: new Intl.DateTimeFormat('en-US', {
-        month: 'long', day: 'numeric', year: 'numeric',
-        hour: '2-digit', minute: '2-digit', second: '2-digit',
-        timeZoneName: 'short'}),
-});
-
 class RadioButtonsComponent {
   constructor(parentElem, labels, onChange) {
     const div = document.createElement('div');
     div.className = 'radio-buttons';
     this.buttons = labels.map((label, index) => {
-      const button = document.createElement('button');
-      button.className = 'inactive';
-      button.appendChild(document.createTextNode(label));
+      const button = createElement(div, 'button', 'inactive');
+      createTextNode(button, label);
       button.onclick = this.change.bind(this, index);
-      div.appendChild(button);
       return button;
     });
     parentElem.appendChild(div);
@@ -249,166 +403,21 @@ class RadioButtonsComponent {
   }
 }
 
+const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
+  // If greater than 0, comments at the given depth are collapsed (recursively).
+  // Recommend values are 0 or 3.
+  collapseDepth: 0,
+
+  // Date formatting options, as accepted by Intl.DateTimeFormat().
+  // Can also be set to null to use the default formatting.
+  dateFormatShort: new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'}),
+  dateFormatLong: new Intl.DateTimeFormat('en-US', {
+      month: 'long', day: 'numeric', year: 'numeric',
+      hour: '2-digit', minute: '2-digit', second: '2-digit',
+      timeZoneName: 'short'}),
+});
+
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
-  const {collapseDepth, dateFormatShort, dateFormatLong} = options;
-
-  function createElement(parent, tag, className) {
-    const elem = document.createElement(tag);
-    parent.appendChild(elem);
-    if (className) elem.className = className;
-    return elem;
-  }
-
-  function createTextNode(parent, text) {
-    const node = document.createTextNode(text);
-    parent.appendChild(node);
-    return node;
-  }
-
-  // Creates DOM nodes for the given comment text, and appends them to the
-  // given parent element. This tries to mirror how Substack seems to process
-  // comments:
-  //
-  //  - Splits text into paragraphs based on newline sequences.
-  //  - Turns http/https URLs into clickable links.
-  //  - Turn email addresses into clickable mailto: links.
-  //
-  function appendComment(parentElem, text) {
-    function createLink(parent, text, href) {
-      const a = createElement(parent, 'a', 'linkified');
-      a.href = href;
-      a.target = '_blank';
-      a.rel = 'nofollow ugc noopener'
-      createTextNode(a, text);
-      return a;
-    }
-
-    for (const paragraph of text.split(/\n+/)) {
-      if (!paragraph) continue;
-      const p = createElement(parentElem, 'p');
-      splitByUrl(paragraph).forEach((part, i) => {
-        if (i%2 === 0) {
-          splitByEmail(part).forEach((part, i) => {
-            if (i%2 === 0) {
-              if (part) createTextNode(p, part);
-            } else {
-              createLink(p, part, 'mailto:' + encodeURIComponent(part));
-            }
-          });
-        } else {
-          createLink(p, part, unescapeUrl(part));
-        }
-      });
-    }
-  }
-
-  // Constructs a Substack profile link from a user id and name.
-  //
-  // I don't know the exact algorithm, but based on observation, I determined
-  // that the username is transformed into a suffix as follows:
-  //
-  //  - characters other than ASCII letters, digits, underscores, and hyphens
-  //    are deleted (notably, letters in foreign scripts are stripped, as are
-  //    periods, which are technically URL-safe).
-  //  - spaces are converted to hyphens, except leading/trailing spaces, which
-  //    are trimmed.
-  //  - letters are converted to lower case
-  //
-  // For example:
-  //
-  // "TimW"            -> https://substack.com/profile/1234567-timw
-  // "A.M. Charlebois" -> https://substack.com/profile/1234567-am-charlebois
-  // "Анна Musk"       -> https://substack.com/profile/1234567-musk
-  //
-  // There are some details I don't know:
-  //
-  //  - are consecutive spaces mapped to a single hyphen, or multiple?
-  //  - if the suffix is empty, is the trailing hyphen omitted?
-  //
-  // Nevertheless, the algorithm implemented here seems to work for most users.
-  function makeProfileUrl(id, name) {
-    if (!Number.isInteger(id)) return undefined;
-    if (typeof(name) !== 'string') return undefined;
-    const suffix = name.replaceAll(/[^0-9a-zA-Z _-]/g, '')
-        .trim().replaceAll(/ +/g, '-').toLowerCase();
-    return `https://substack.com/profile/${id}-${suffix}`;
-  }
-
-  function createDate(parentElem, dateString) {
-    parentElem.classList.add('date');
-    parentElem.tabIndex = 0;
-    const date = new Date(dateString);
-    createTextNode(
-      createElement(parentElem, 'span', 'short'),
-      dateFormatShort.format(date));
-    createTextNode(
-      createElement(parentElem, 'span', 'long'),
-      dateFormatLong.format(date));
-  }
-
-  function createComment(parentElem, comment, parentComponent) {
-    const commentDiv = createElement(parentElem, 'div', 'comment');
-    const borderDiv = createElement(commentDiv, 'div', 'border');
-    createElement(borderDiv, 'div', 'line');
-    const contentDiv = createElement(commentDiv, 'div', 'content');
-    const commentHeader = createElement(contentDiv, 'header', 'comment-meta');
-    const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
-    const profileUrl = makeProfileUrl(comment.user_id, comment.name);
-    if (profileUrl) {
-      const authorLink = createElement(authorSpan, 'a');
-      authorLink.href = profileUrl;
-      createTextNode(authorLink, comment.name);
-    } else if (typeof comment.name === 'string') {
-      // Not sure if this can happen: name is present but id is missing.
-      createTextNode(authorSpan, comment.name);
-    } else {
-      createTextNode(authorSpan, comment.deleted ? 'deleted' : 'unavailable');
-      authorSpan.classList.add('missing');
-    }
-    const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
-    postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
-    postDateLink.rel = 'nofollow';
-    createDate(postDateLink, comment.date);
-
-    if (typeof comment.edited_at === 'string') {
-      const seperator = createElement(commentHeader, 'span', 'comment-publication-name-separator');
-      createTextNode(seperator, '·');
-      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
-      createTextNode(editedIndicator, 'edited ');
-      createDate(editedIndicator, comment.edited_at);
-    }
-
-    const commentMain = createElement(contentDiv, 'div', 'main');
-    // Substack assigns special rendering to <p> and class="comment-body"
-    const commentBody = createElement(commentMain, 'div', 'text comment-body');
-    if (comment.body == null) {
-      createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
-      commentBody.classList.add('missing');
-    } else {
-      appendComment(commentBody, comment.body);
-    }
-
-    const commentComponent = new ExtCommentComponent(commentDiv, parentComponent, collapseDepth);
-
-    // Collapse/expand comment by clicking on the left border line.
-    borderDiv.onclick = () => commentComponent.toggleExpanded();
-
-    commentComponent.children = createCommentsList(commentMain, comment.children, commentComponent);
-    return commentComponent;
-  }
-
-  function createCommentsList(parentElem, comments, parentComponent) {
-    // Substack uses class names "comments" and "comments-list" and applies
-    // extra styling that I don't want, so I use "comments-holder" instead.
-    const div = createElement(parentElem, 'div', 'comments-holder');
-    const commentComponents = comments.map((comment) => createComment(div, comment, parentComponent));
-    for (let i = 0; i + 1 < commentComponents.length; ++i) {
-      commentComponents[i].nextSibling = commentComponents[i + 1];
-      commentComponents[i + 1].prevSibling = commentComponents[i];
-    }
-    return commentComponents;
-  }
-
   // Clear out the original root.
   rootElem.replaceChildren();
 
@@ -429,5 +438,5 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   }
 
   // Add the top-level comments list.
-  createCommentsList(rootElem, comments, 0);
+  new ExtCommentListComponent(rootElem, comments, undefined, options);
 }
