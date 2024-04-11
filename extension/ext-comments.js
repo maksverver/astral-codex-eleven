@@ -251,7 +251,7 @@ class ExtCommentComponent {
     }
 
     // Substack assigns special rendering to class="comment-body"
-    const commentBody = createElement(commentDiv, 'div', 'text comment-body');
+    const commentBody = createElement(commentDiv, 'div', 'comment-body');
     if (comment.body == null) {
       createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
       commentBody.classList.add('missing');
