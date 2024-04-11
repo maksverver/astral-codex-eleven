@@ -14,7 +14,7 @@ function repopulate() {
       });
 }
 
-fileInput.addEventListener('change', () => {
+function handleFileChange() {
   if (fileInput.files.length > 0) {
     const file = fileInput.files[0];
     const reader = new FileReader();
@@ -24,4 +24,10 @@ fileInput.addEventListener('change', () => {
     };
     reader.readAsText(file);
   }
-});
+}
+
+fileInput.addEventListener('change', handleFileChange);
+
+// Trigger once at startup, in case the file input is already populated, which
+// can happen when navigating forward and back after selecting a file.
+handleFileChange();

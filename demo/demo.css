@@ -11,6 +11,7 @@
   --background_contrast_5: #474b50;
   --background_contrast_pop: rgba(103, 189, 252, 0.4);
   --background_pop: #67bdfc;
+  --background_pop_darken: #4eb2fc;
 }
 
 body {
@@ -39,8 +40,11 @@ body {
 }
 
 a {
+  color: var(--background_pop);
+}
+
+.comment-meta a {
   color: var(--print_on_web_bg_color);
-  text-decoration: none;
 }
 
 p {
