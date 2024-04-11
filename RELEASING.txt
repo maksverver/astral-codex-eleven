@@ -1,0 +1,18 @@
+Before packaging the extension:
+
+  - smoke test on Chrome & Firefox
+  - ensure the version number in manifest.json has been bumped!
+
+To package, run ./build.sh (or equivalently, `make dist`).
+
+To publish a new addon, Firefox requires adding the following snippet to be
+added to extension/manifest.json:
+
+  "browser_specific_settings": {
+    "gecko": {
+      "id": "astral-codex-eleven@verver.ch"
+    }
+  }
+
+It shouldn't be necessary to include this in subsequent updates. More info:
+https://extensionworkshop.com/documentation/develop/extensions-and-the-add-on-id/
