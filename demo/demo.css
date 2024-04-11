@@ -20,6 +20,23 @@ body {
   font-size: 15px;
 }
 
+p {
+  color: #444;
+}
+
+a {
+  color: var(--background_pop);
+  text-decoration: none;
+}
+
+a:hover {
+  text-decoration: underline;
+}
+
+.comment .comment-meta a {
+  color: var(--print_on_web_bg_color);
+}
+
 .ext-comments .comment .comment-body p {
   margin: 0 0 8px 0;
 }
@@ -39,14 +56,7 @@ body {
   opacity: 50%;
 }
 
-a {
-  color: var(--background_pop);
-}
-
-.comment-meta a {
-  color: var(--print_on_web_bg_color);
-}
-
-p {
-  color: #444;
+.options th {
+  text-align: left;
+  padding-right: 16px;
 }

@@ -9,9 +9,38 @@
   </head>
   <body>
     <h1>Comments widget demo</h1>
-    <table>
-      <tr><th>Comments JSON:</th><td><input id="file-input" type="file" accept=".json" /></td></tr>
+    <table class="options">
+      <tr>
+        <th>Comments JSON:</th>
+        <td><input id="file-input" type="file" accept=".json" onchange="handleFileChange()" /></td>
+      </tr>
+      <tr>
+        <th>Date format:</th><td>
+          <label>
+            <input type="radio" name="date-format" value="default" onchange="setDateFormat(this.value)"/>
+            Default
+          </label>
+          <label>
+            <input type="radio" name="date-format" value="longer" checked onchange="setDateFormat(this.value)"/>
+            Longer
+          </label>
+        <td>
+      </tr>
+    </tr>
+      <tr>
+        <th>Collapse depth:</th>
+        <td style="display:inline-flex; flex-direction: row; justify-content: center;">
+          <input type="range" min="0" max="10" value="3" class="slider"
+              onchange="setCollapseDepth(this.value)"
+              oninput="document.getElementById('collapse-depth-value').innerText = this.value">
+          &nbsp;
+          <span id="collapse-depth-value">3</span>
+        </td>
+      </tr>
     </table>
+
+    <hr/>
+
     <div id="ext-comments" class="ext-comments"></div>
     <script src="demo.js" async defer></script>
   </body>
