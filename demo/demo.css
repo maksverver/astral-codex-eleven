@@ -2,6 +2,8 @@
    provided by astralcodexten.com. */
 
 :root {
+  --web_bg_color: #E2eDfC;
+  --print_on_web_bg_color: hsl(214.6153846153846, 21.00057339449543%, 28.607843137254907%);
   --background_contrast_1: #d4dfed;
   --background_contrast_2: #c3cdda;
   --background_contrast_3: #a2aab5;
@@ -9,6 +11,12 @@
   --background_contrast_5: #474b50;
   --background_contrast_pop: rgba(103, 189, 252, 0.4);
   --background_pop: #67bdfc;
+}
+
+body {
+  background-color: var(--web_bg_color);
+  font-family: system-ui, -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif, "Apple Color Emoji", "Segoe UI Emoji", "Segoe UI Symbol";
+  font-size: 15px;
 }
 
 .ext-comments .comment .comment-body p {
@@ -28,4 +36,13 @@
 
 .ext-comments .comment header .comment-timestamp {
   opacity: 50%;
+}
+
+a {
+  color: var(--print_on_web_bg_color);
+  text-decoration: none;
+}
+
+p {
+  color: #444;
 }

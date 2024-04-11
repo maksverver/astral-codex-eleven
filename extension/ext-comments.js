@@ -211,18 +211,19 @@ class ExtCommentComponent {
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
     const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
 
-    const commentDiv = createElement(parentElem, 'div', 'comment');
-    commentDiv.tabIndex = 0;
-    commentDiv.onkeydown = this.handleKeyDown.bind(this);
-    commentDiv.classList.add(expanded ? 'expanded' : 'collapsed');
+    const threadDiv = createElement(parentElem, 'div', 'comment-thread');
+    threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
-    const borderDiv = createElement(commentDiv, 'div', 'border');
+    const borderDiv = createElement(threadDiv, 'div', 'border');
     createElement(borderDiv, 'div', 'line');
     // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = this.toggleExpanded.bind(this);
 
-    const contentDiv = createElement(commentDiv, 'div', 'content');
-    const commentHeader = createElement(contentDiv, 'header', 'comment-meta');
+    const contentDiv = createElement(threadDiv, 'div', 'content');
+    const commentDiv = createElement(contentDiv, 'div', 'comment');;
+    commentDiv.tabIndex = 0;
+    commentDiv.onkeydown = this.handleKeyDown.bind(this);
+    const commentHeader = createElement(commentDiv, 'header', 'comment-meta');
     const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
     const profileUrl = makeProfileUrl(comment.user_id, comment.name);
     if (profileUrl) {
@@ -249,9 +250,8 @@ class ExtCommentComponent {
       createDate(editedIndicator, comment.edited_at);
     }
 
-    const commentMain = createElement(contentDiv, 'div', 'main');
     // Substack assigns special rendering to class="comment-body"
-    const commentBody = createElement(commentMain, 'div', 'text comment-body');
+    const commentBody = createElement(commentDiv, 'div', 'text comment-body');
     if (comment.body == null) {
       createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
       commentBody.classList.add('missing');
@@ -259,6 +259,7 @@ class ExtCommentComponent {
       appendCommentText(commentBody, comment.body);
     }
 
+    this.threadDiv   = threadDiv;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
@@ -266,14 +267,14 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = !comment.children?.length ? undefined :
-        new ExtCommentListComponent(commentMain, comment.children, this, options);
+        new ExtCommentListComponent(contentDiv, comment.children, this, options);
   }
 
   setExpanded(expanded) {
     expanded = Boolean(expanded);
     this.expanded = expanded;
-    this.commentDiv.classList.toggle('collapsed', !expanded);
-    this.commentDiv.classList.toggle('expanded', expanded);
+    this.threadDiv.classList.toggle('collapsed', !expanded);
+    this.threadDiv.classList.toggle('expanded', expanded);
   }
 
   toggleExpanded() {

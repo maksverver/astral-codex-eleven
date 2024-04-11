@@ -31,57 +31,67 @@ a:focus {
   text-decoration: solid underline var(--background_pop) 2px !important;
 }
 
-.ext-comments .comment {
+.ext-comments .comment-thread {
   padding: 4px;
-
-  /* Substack sets margin-top: 12px for all comments *except* for the first
-     (i.e. ".comment:first-child { margin-top: 0px }") which interferes with
-     .order-new-first, which reverses the visible order of comments without
-     changing the order of the DOM nodes. So just fix margin-top to the same
-     value for all comment divs instead. */
-   margin-top: 12px !important;
 }
 
-.ext-comments .comment.collapsed > .content > .main {
+.ext-comments .comment-thread.collapsed > .content > .comment > .comment-body,
+.ext-comments .comment-thread.collapsed > .content > .comments-holder {
   display: none;
 }
 
-.ext-comments .comment {
+.ext-comments .comment-thread {
   display: flex;
   flex-direction: row;
+  margin-top: 12px;
 }
 
-.ext-comments .comment > .border {
+.ext-comments .comment-thread > .border {
   cursor: pointer;
   width: 16px;
 }
 
-.ext-comments .comment > .border > .line {
+.ext-comments .comment-thread > .border > .line {
   background: var(--background_contrast_2);
   width: 2px;
   height: 100%;
   margin: auto;
-  transition: width 0.1s;
+  transition: width 0.2s;
 }
 
-.ext-comments .comment:focus > .border > .line {
-  background: var(--background_contrast_3);
-  width: 4px;
-  transition: width 0.1s;
-}
-
-.ext-comments .comment > .border:hover > .line {
+.ext-comments .comment-thread > .border:hover > .line {
   background: var(--background_pop);
   width: 6px;
   transition: width 0.2s;
 }
+
+.ext-comments .comment:focus {
+  background-color: rgba(0, 0, 0, 4%);
+  /*border-right: 2px solid #0002;*/
+}
+
+.ext-comments .comment:focus p {
+  color: #222;  /* darker than Substack uses by default. */
+}
+
+.ext-comments .comment:focus a {
+  color: var(--background_pop_darken);
+}
+
+/* Enable these transition so the focus indicator is animated. I find it more
+   distracting than helpful, so I've disabled them for now. */
+/*
+.ext-comments .comment { transition: background-color 0.2s; }
+.ext-comments .comment a,
+.ext-comments .comment p { transition: color 0.2s; }
+*/
 
 .ext-comments .comment .edited-indicator {
   font-style: italic;
 }
 
 .ext-comments .comment .edited-indicator,
-.ext-comments .comment .comment-publication-name-separator,
+.ext-comments .comment .comment-thread-publication-name-separator,
 .ext-comments .comment .missing {
   /* Remove the underline that the Substack stylesheet gives these elements
     despite not being clickable. */
@@ -89,24 +99,29 @@ a:focus {
     cursor: inherit !important;
 }
 
-.ext-comments .comment .content header {
+.ext-comments .comment header {
   padding-bottom: 8px;
 }
 
-.ext-comments .comment .content .text {
+.ext-comments .comment .comment-body {
   white-space: preserve pretty;
   overflow-wrap: anywhere;
   max-width: 40em;
   min-width: 20em;
   margin: 0;
   /* remove the max-height: 600px, overflow-y: hidden that Substack CSS
-     applies to .comment-body */
+     applies to .comment-thread-body */
   max-height: initial !important;
   overflow-y: initial !important;
 }
 
 .ext-comments .comment .missing {
   font-style: italic;
+}
+
+.ext-comments .comment {
+  /* Override margin applied by Substack */
+  margin-top: 0px !important;
 }
 
 /* Dates */
@@ -127,12 +142,12 @@ a:focus {
   justify-content: space-between;
 }
 
-.ext-comments .comments-holder {
+.ext-comments .comment-threads-holder {
   flex-direction: column;
   display: flex;
 }
 
-.ext-comments.order-new-first .comments-holder {
+.ext-comments.order-new-first .comment-threads-holder {
   flex-direction: column-reverse;
 }
 
