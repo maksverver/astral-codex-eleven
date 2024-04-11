@@ -140,12 +140,12 @@ a:focus {
   justify-content: space-between;
 }
 
-.ext-comments .comment-threads-holder {
+.ext-comments .comments-holder {
   flex-direction: column;
   display: flex;
 }
 
-.ext-comments.order-new-first .comment-threads-holder {
+.ext-comments.order-new-first .comments-holder {
   flex-direction: column-reverse;
 }
 
