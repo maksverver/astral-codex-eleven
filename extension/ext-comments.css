@@ -90,9 +90,7 @@ a:focus {
   font-style: italic;
 }
 
-.ext-comments .comment .edited-indicator,
-.ext-comments .comment .comment-thread-publication-name-separator,
-.ext-comments .comment .missing {
+.ext-comments .comment .comment-meta span:hover {
   /* Remove the underline that the Substack stylesheet gives these elements
     despite not being clickable. */
     text-decoration: none !important;
