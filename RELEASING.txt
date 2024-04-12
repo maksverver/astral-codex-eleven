@@ -2,6 +2,7 @@ Before packaging the extension:
 
   - smoke test on Chrome & Firefox
   - ensure the version number in manifest.json has been bumped!
+  - create a corresponding git tag (e.g. `git tag v0.1`)
 
 To package, run ./build.sh (or equivalently, `make dist`).
 
