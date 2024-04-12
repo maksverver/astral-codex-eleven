@@ -13,3 +13,4 @@ output=astral-codex-eleven-${version}.zip
 rm -f "${output}"
 
 (cd extension && zip -9 ../"${output}" *.* images/*)
+zip -9 "${output}" LICENSE.txt
