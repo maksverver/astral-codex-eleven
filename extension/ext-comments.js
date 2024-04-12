@@ -109,8 +109,8 @@ class ExtCommentListComponent {
 
   constructor(parentElem, commentObjects, parentCommentComponent, options) {
     // Substack uses class names "comments" and "comments-list" and applies
-    // extra styling that I don't want, so I use "comments-holder" instead.
-    const div = createElement(parentElem, 'div', 'comments-holder');
+    // extra styling that I don't want, so I use "ext-comments-list" instead.
+    const div = createElement(parentElem, 'div', 'ext-comments-list');
     const childComponents = commentObjects.map(
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;

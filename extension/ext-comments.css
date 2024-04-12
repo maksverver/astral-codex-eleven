@@ -36,7 +36,7 @@ a:focus {
 }
 
 .ext-comments .comment-thread.collapsed > .content > .comment > .comment-body,
-.ext-comments .comment-thread.collapsed > .content > .comments-holder {
+.ext-comments .comment-thread.collapsed > .content > .ext-comments-list {
   display: none;
 }
 
