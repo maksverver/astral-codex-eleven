@@ -49,6 +49,7 @@ a:focus {
 .ext-comments .comment-thread > .border {
   cursor: pointer;
   width: 16px;
+  flex: 0 0 auto;
 }
 
 .ext-comments .comment-thread > .border > .line {
@@ -108,8 +109,10 @@ a:focus {
 .ext-comments .comment .comment-body {
   white-space: preserve pretty;
   overflow-wrap: anywhere;
-  max-width: 40em;
-  min-width: 20em;
+  min-width: 300px;
+  /* This is the space available in the default layout, when no deep comments
+     exist that push the comment section outside its right boundary. */
+  max-width: 704px;
   margin: 0;
   /* remove the max-height: 600px, overflow-y: hidden that Substack CSS
      applies to .comment-thread-body */
