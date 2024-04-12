@@ -85,10 +85,11 @@ function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
 
-function createElement(parent, tag, className) {
+function createElement(parent, tag, className, textContent) {
   const elem = document.createElement(tag);
   parent.appendChild(elem);
   if (className) elem.className = className;
+  if (textContent != null) elem.appendChild(document.createTextNode(textContent));
   return elem;
 }
 
@@ -150,11 +151,10 @@ class ExtCommentComponent {
     //
     function appendCommentText(parentElem, text) {
       function createLink(parentElem, text, href) {
-        const a = createElement(parentElem, 'a', 'linkified');
+        const a = createElement(parentElem, 'a', 'linkified', text);
         a.href = href;
         a.target = '_blank';
-        a.rel = 'nofollow ugc noopener'
-        createTextNode(a, text);
+        a.rel = 'nofollow ugc noopener';
         return a;
       }
 
@@ -213,12 +213,8 @@ class ExtCommentComponent {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createTextNode(
-        createElement(parentElem, 'span', 'short'),
-        dateFormatShort.format(date));
-      createTextNode(
-        createElement(parentElem, 'span', 'long'),
-        dateFormatLong.format(date));
+      createElement(parentElem, 'span', 'short', dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
@@ -240,9 +236,7 @@ class ExtCommentComponent {
     const authorSpan = createElement(commentHeader, 'span', 'commenter-name');
     const profileUrl = makeProfileUrl(comment.user_id, comment.name);
     if (profileUrl) {
-      const authorLink = createElement(authorSpan, 'a');
-      authorLink.href = profileUrl;
-      createTextNode(authorLink, comment.name);
+      createElement(authorSpan, 'a', undefined, comment.name).href = profileUrl;
     } else if (typeof comment.name === 'string') {
       // Not sure if this can happen: name is present but id is missing.
       createTextNode(authorSpan, comment.name);
@@ -256,10 +250,8 @@ class ExtCommentComponent {
     createDate(postDateLink, comment.date);
 
     if (typeof comment.edited_at === 'string') {
-      const seperator = createElement(commentHeader, 'span', 'comment-publication-name-separator');
-      createTextNode(seperator, '·');
-      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator');
-      createTextNode(editedIndicator, 'edited ');
+      createElement(commentHeader, 'span', 'comment-publication-name-separator', '·');
+      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator', 'edited ');
       createDate(editedIndicator, comment.edited_at);
     }
 
@@ -389,8 +381,7 @@ class RadioButtonsComponent {
     const div = document.createElement('div');
     div.className = 'radio-buttons';
     this.buttons = labels.map((label, index) => {
-      const button = createElement(div, 'button', 'inactive');
-      createTextNode(button, label);
+      const button = createElement(div, 'button', 'inactive', label);
       button.onclick = this.change.bind(this, index);
       return button;
     });
@@ -447,11 +438,10 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   {
     const holderDiv = createElement(rootElem, 'div', 'comments-heading-holder');
 
-    const commentsHeading = createElement(holderDiv, 'div', 'comments-heading');
-    createTextNode(commentsHeading, `${countCommentsInArray(comments)} Comments`);
+    createElement(holderDiv, 'div', 'comments-heading',
+        `${countCommentsInArray(comments)} Comments`);
 
-    const orderDiv = createElement(holderDiv, 'div');
-    createTextNode(orderDiv, 'Order: ');
+    const orderDiv = createElement(holderDiv, 'div', 'Order: ');
     let currentOrder = 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {
