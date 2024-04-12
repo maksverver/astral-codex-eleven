@@ -99,17 +99,30 @@ function createTextNode(parent, text) {
 }
 
 class ExtCommentListComponent {
+  static assignSiblings(children) {
+    const n = children.length;
+    for (let i = 0; i < n; ++i) {
+      children[i].prevSibling = children[i - 1];
+      children[i].nextSibling = children[i + 1];
+    }
+  }
+
   constructor(parentElem, commentObjects, parentCommentComponent, options) {
     // Substack uses class names "comments" and "comments-list" and applies
     // extra styling that I don't want, so I use "comments-holder" instead.
     const div = createElement(parentElem, 'div', 'comments-holder');
     const childComponents = commentObjects.map(
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
-    for (let i = 0; i + 1 < childComponents.length; ++i) {
-      childComponents[i].nextSibling = childComponents[i + 1];
-      childComponents[i + 1].prevSibling = childComponents[i];
-    }
+    this.commentsHolder = div;
     this.children = childComponents;
+    ExtCommentListComponent.assignSiblings(this.children);
+  }
+
+  reverse() {
+    this.commentsHolder.replaceChildren(
+        ...Array.from(this.commentsHolder.childNodes).reverse());
+    ExtCommentListComponent.assignSiblings(this.children.reverse());
+    for (const child of this.children) child.reverse();
   }
 }
 
@@ -365,6 +378,10 @@ class ExtCommentComponent {
     ev.stopPropagation();
     ev.preventDefault();
   }
+
+  reverse() {
+    if (this.childList) this.childList.reverse();
+  }
 }
 
 class RadioButtonsComponent {
@@ -435,12 +452,15 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
     const orderDiv = createElement(holderDiv, 'div');
     createTextNode(orderDiv, 'Order: ');
+    let currentOrder = 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
-      rootElem.classList.toggle('order-chronological', i === 0);
-      rootElem.classList.toggle('order-new-first',     i === 1);
+      if (i === 1 - currentOrder) {
+        commentList.reverse();
+        currentOrder = i;
+      }
     }).change(0);
   }
 
   // Add the top-level comments list.
-  new ExtCommentListComponent(rootElem, comments, undefined, options);
+  const commentList = new ExtCommentListComponent(rootElem, comments, undefined, options);
 }

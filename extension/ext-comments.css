@@ -140,15 +140,6 @@ a:focus {
   justify-content: space-between;
 }
 
-.ext-comments .comments-holder {
-  flex-direction: column;
-  display: flex;
-}
-
-.ext-comments.order-new-first .comments-holder {
-  flex-direction: column-reverse;
-}
-
 /* Radio button styling */
 
 .ext-comments .radio-buttons {
