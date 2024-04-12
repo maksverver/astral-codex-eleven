@@ -94,17 +94,26 @@ is slow.
 
 ## Alternatives
 
-https://acxreader.github.io/ contains static HTML copies of the posts only.
-Those pages load extremely fast because they cut out all the Substack crap, but
-they lack the comments, which are often just as interesting as the posts
-themselves.
+  - [ACX Reader](https://acxreader.github.io/) contains static HTML copies of
+    the posts only.
+    Those pages load extremely fast because they cut out all the Substack crap, but
+    they lack the comments, which are often just as interesting as the posts
+    themselves.
 
-I found another browser extension called
-[acx-tweaks](https://chromewebstore.google.com/detail/acx-tweaks/jdpghojhfigbpoeiadalafcmohaekgl)
-which adds a ton of cool features, some of which I also have (like keyboard
-navigation and being able to view the full comment timestamp) but it does not
-speed up comment loading, unfortunately, which was the main problem I tried to
-fix. In an ideal world, our extensions would be combined into one.
+  - A Chrome extension called
+    [acx-tweaks](https://chromewebstore.google.com/detail/acx-tweaks/jdpghojhfigbpoeiadalafcmohaekglf),
+    which adds a ton of cool features, some of which I also have (like keyboard
+    navigation and being able to view the full comment timestamp) but it does not
+    speed up comment loading, unfortunately, which was the main problem I tried to
+    fix. In an ideal world, our extensions would be combined into one.
+
+  - A Firefox add-on called
+    [Astral Codex Ten Speedifier](https://addons.mozilla.org/en-US/firefox/addon/astral-codex-ten-speedifier/),
+    which re-renders the comments, much like my extension does. It does work,
+    and is quite fast, but it's very basic: it disables all Javascript (breaking most of Substack's functionality), it doesn't work when accessing posts
+    through the home page, it doesn't support collapsing comments, it renders
+    deeply nested comments with a very narrow width, etc. It's also available
+    for Firefox only. Overall, I think my extension offers a more polished experience.
 
 
 ## Local development
