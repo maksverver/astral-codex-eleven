@@ -15,7 +15,7 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  replaceComments(rootDiv, comments, replaceCommentOptions);
+  if (comments) replaceComments(rootDiv, comments, replaceCommentOptions);
 }
 
 function handleFileChange() {
@@ -42,7 +42,3 @@ function setCollapseDepth(value) {
   replaceCommentOptions.collapseDepth = Number(value);
   repopulate();
 }
-
-// Trigger once at startup, in case the file input is already populated, which
-// can happen when navigating forward and back after selecting a file.
-handleFileChange();
