@@ -65,9 +65,13 @@ a:focus {
   transition: width 0.2s;
 }
 
+.ext-comments .comment-thread .content {
+  flex: 1;
+}
+
 .ext-comments .comment:focus {
   background-color: rgba(0, 0, 0, 4%);
-  /*border-right: 2px solid #0002;*/
+  border-right: 2px solid #0002;
 }
 
 .ext-comments .comment:focus p {
@@ -93,8 +97,8 @@ a:focus {
 .ext-comments .comment .comment-meta span:hover {
   /* Remove the underline that the Substack stylesheet gives these elements
     despite not being clickable. */
-    text-decoration: none !important;
-    cursor: inherit !important;
+  text-decoration: none !important;
+  cursor: inherit !important;
 }
 
 .ext-comments .comment header {
