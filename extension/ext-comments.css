@@ -91,7 +91,7 @@ a:focus {
   color: #222;  /* darker than Substack uses by default. */
 }
 
-.ext-comments .comment:focus a {
+.ext-comments .comment:focus .comment-body a {
   color: var(--background_pop_darken);
 }
 
