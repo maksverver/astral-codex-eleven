@@ -12,6 +12,7 @@
   --background_contrast_pop: rgba(103, 189, 252, 0.4);
   --background_pop: #67bdfc;
   --background_pop_darken: #4eb2fc;
+  --border-radius-md: 12px;
 }
 
 body {

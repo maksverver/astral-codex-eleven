@@ -547,8 +547,8 @@ class CommentEditorComponent {
     textarea.placeholder = 'Write a comment…';
     textarea.focus();
     const buttons = createElement(rootDiv, 'div', 'buttons');
-    const submitButton = createElement(buttons, 'button', undefined, 'Submit');
-    const discardButton = createElement(buttons, 'button', undefined, 'Discard');
+    const submitButton = createElement(buttons, 'button', 'button primary', 'Post');
+    const discardButton = createElement(buttons, 'button', 'button cancel', 'Cancel');
 
     this.initialText = initialText;
     this.rootDiv = rootDiv;

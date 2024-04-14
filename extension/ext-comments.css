@@ -114,16 +114,12 @@ a:focus {
   cursor: inherit !important;
 }
 
-.ext-comments .comment header {
-  padding-bottom: 8px;
-}
-
 .ext-comments .comment .comment-body {
   white-space: preserve pretty;
   overflow-wrap: anywhere;
   min-width: var(--comment-min-width);
   max-width: var(--comment-max-width);
-  margin: 0;
+  margin: 4px 0 0 0;
   /* remove the max-height: 600px, overflow-y: hidden that Substack CSS
      applies to .comment-thread-body */
   max-height: initial !important;
@@ -228,24 +224,36 @@ a:focus {
 }
 
 .ext-comments .comment-editor textarea {
-  height: 100px;
+  height: 96px;
+  max-height: 400px;
+  padding: 0.25em 0.5em;
+  border-radius: var(--border-radius-md);
+  background: var(--web_bg_color);
+  color: var(--print_on_web_bg_color);
+  overflow: auto;
 }
 
 .ext-comments .comment-editor .buttons {
   display: flex;
   flex-direction: row;
-  justify-content: flex-end;
+  justify-content: space-between;
   gap: 6px;
 }
 
 /* Why does substack remove focus indicators from everything?! */
-.ext-comments .comment-editor textarea:focus,
-.ext-comments .comment-editor button:focus {
+.ext-comments .comment-editor textarea:focus {
   border: 2px solid var(--background_pop) !important;
 }
 
-.ext-comments .comment-editor textarea,
 .ext-comments .comment-editor button {
-  border-radius: 0.5em;
-  padding: 0.25em 0.5em;
+  padding: 10px 20px;
+}
+
+.ext-comments .comment-editor button:focus {
+  border: 2px solid var(--background_pop) !important;
+  padding: 8px 18px;
+}
+
+.ext-comments .comment-editor button.primary:focus {
+  border-color: #0008 !important;
 }
