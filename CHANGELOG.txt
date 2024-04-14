@@ -1,3 +1,9 @@
+Version 0.2.1
+-------------
+
+  - Respect default comment ordering.
+  - Minor cosmetic improvements.
+
 Version 0.2.0
 -------------
 
