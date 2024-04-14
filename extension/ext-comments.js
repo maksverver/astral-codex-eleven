@@ -116,15 +116,15 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
-    this.newestFirst = false;  // default is chronological order
+    this.newFirst = false;  // default is chronological order
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
   addComment(comment, parentCommentComponent, options) {
     // This is a bit of a hack to ensure that comments are added at the top in
-    // the newest-first ordering. It's kinda slow for large threads, but I don't
+    // the new-first ordering. It's kinda slow for large threads, but I don't
     // know if it's worth it to try to make it faster.
-    const reverse = this.newestFirst;
+    const reverse = this.newFirst;
     if (reverse) this.reverseSelfOnly();
     const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
     if (this.children.length > 0) {
@@ -138,7 +138,7 @@ class ExtCommentListComponent {
   }
 
   reverseSelfOnly() {
-    this.newestFirst = !this.newestFirst;
+    this.newFirst = !this.newFirst;
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
@@ -627,6 +627,9 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZoneName: 'short'}),
 
+  // Set to true when comments are provided in reverse chronological order.
+  newFirst: false,
+
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
@@ -652,13 +655,13 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     }
 
     const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
-    let currentOrder = 0;
+    let currentOrder = options.newFirst ? 1 : 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {
         commentList.reverse();
         currentOrder = i;
       }
-    }).change(0);
+    }).change(currentOrder);
   }
 
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');

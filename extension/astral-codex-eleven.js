@@ -52,7 +52,7 @@ class CommentApi {
   // a custom script append to the document body after the DOM is complete. This
   // is necessary because in the ISOLATED world we don't have direct access to
   // the main page's global variables.
-  const {postId, userId} = await new Promise((resolve) => {
+  const {postId, userId, commentSort} = await new Promise((resolve) => {
     document.addEventListener('ACXI-load-comments', (ev) => resolve(ev.detail));
 
     const scriptElem = document.createElement('script');
@@ -68,6 +68,12 @@ class CommentApi {
   if (!userId) {
     console.info(LOG_TAG, 'userId not defined! Commenting will be disabled.');
   }
+
+  if (commentSort !== 'oldest_first' && commentSort !== 'most_recent_first') {
+    console.info(LOG_TAG, 'Invalid value for commentSort! Will default to oldest_first.');
+    commentSort = 'oldest_first';
+  }
+  const newFirst = commentSort === 'most_recent_first';
 
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
@@ -91,7 +97,7 @@ class CommentApi {
     // Note that I use ?no-filter& to bypass the filter rule that redirects
     // requests from the real page!
     comments = await fetchComments(
-        `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=oldest_first`);
+        `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=${commentSort}`);
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `fetch() completed in ${duration} ms.`)
   } catch (e) {
@@ -109,8 +115,8 @@ class CommentApi {
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst});
     const duration = performance && Math.round(performance.now() - start);
-    console.info(LOG_TAG, `DOM updated in ${duration} ms.`)
+    console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
 })();

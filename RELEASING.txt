@@ -52,12 +52,12 @@ Things to test before release:
 
       - Click the home page link from the post page.
 
-  - Comment ordering: verify switching between "Chronological" and
-    "Newest First" works as expected.
+  - Comment ordering: verify switching between "Chronological" and "New First"
+    works as expected.
 
   - Keyboard navigation:
 
-    - Verify all keys work, in both "Chronological" and "Newest First" ordering.
+    - Verify all keys work, in both "Chronological" and "New First" ordering.
     - Verify tab navigation works (all interactive fields are reachable,
       dates expand when you focus on them, all elements have visible focus).
 

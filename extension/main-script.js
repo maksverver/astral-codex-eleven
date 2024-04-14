@@ -9,13 +9,18 @@
   // might not exist, which is different from having the value undefined!)
   if (typeof _preloads === 'object') {
     const postId = _preloads.post?.id;
-    const userId = _preloads.user?.id;
     if (!postId) {
       // This is expected on the homepage or any page that's not a post page.
       console.info(LOG_TAG, "Post id not defined.");
     } else {
-      console.info(LOG_TAG, `Broadcasting post id (${postId}) and user id (${userId})`);
-      document.dispatchEvent(new CustomEvent('ACXI-load-comments', {detail: {postId, userId}}));
+      const userId = _preloads.user?.id;
+      const commentSort =
+          _preloads.post?.default_comment_sort ||
+          _preloads.pub?.default_comment_sort ||
+          'oldest_first';
+      const detail = {postId, userId, commentSort};
+      console.info(LOG_TAG, `Broadcasting`, detail);
+      document.dispatchEvent(new CustomEvent('ACXI-load-comments', {detail}));
     }
   }
 
