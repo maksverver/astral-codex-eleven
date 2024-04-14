@@ -327,10 +327,14 @@ class ExtCommentComponent {
     const replyHolder = !comment.deleted && options.userId ?
         createElement(contentDiv, 'div', 'reply-holder') : undefined;
 
+    // Check if editing this comment is possible:
+    const editHolder = !comment.deleted && options.userId === comment.user_id ?
+        createElement(contentDiv, 'div', 'edit-holder') : undefined;
+
     const childCommentList =
         new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
 
-    // If replyHolder is created above, then enable replying:
+    // If replyHolder is created above, then enable replying to this comment:
     if (replyHolder) {
       const replySeparator = createElement(commentHeader, 'span', undefined, '·');
       const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
@@ -341,10 +345,9 @@ class ExtCommentComponent {
         childCommentList, this, comment.id, options);
     }
 
-    // Check if editing/deleting the comment is possible:
-    if (!comment.deleted && options.userId === comment.user_id) {
+    // If editHolder is created above, then enabled editing/deleting this comment:
+    if (editHolder) {
       // Add support for editing the comment.
-      const editHolder = createElement(contentDiv, 'div', 'edit-holder');
       const editSeparator = createElement(commentHeader, 'span', undefined, '·');
       const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
       editLink.href = '#';
