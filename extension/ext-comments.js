@@ -603,7 +603,7 @@ const COMMENT_API_UNIMPLEMENTED = Object.freeze({
 
   // Deletes an existing comment.
   //
-  // Returns undefined, or throws an error on failure.
+  // Returns an empty object, or throws an error on failure.
   async deleteComment(id) {
     throw new Error('deleteComment() not implemented');
   },

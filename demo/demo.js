@@ -42,6 +42,7 @@ let replaceCommentOptions = {
       if (!isCommentApiEnabled()) {
         throw new Error("Can't delete comment. Comment API is disabled.");
       }
+      return {};
     },
   }
 };

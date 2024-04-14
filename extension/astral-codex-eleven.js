@@ -1,5 +1,49 @@
 'use strict';
 
+// This class implements the real, live Substack comment API.
+class CommentApi {
+  constructor(postId) {
+    this.postId = postId;
+  }
+
+  async executeRpc(method, path, request) {
+    if (typeof request !== 'object') throw new Error('request is not an object');
+    const fetchResult = await fetch(path, {method, headers: {
+        'Accept': 'application/json',
+        'Content-Type': 'application/json'},
+      body: JSON.stringify(request)});
+    if (!fetchResult.ok) {
+      throw new Error(`fetch ${path} failed with status code ${fetchResult.status}`);
+    }
+    const response = await fetchResult.json();
+    if (typeof response !== 'object') throw new Error('response is not an object');
+    return response;
+  }
+
+  async createComment(parentId, body) {
+    if (typeof body !== 'string') throw new Error('body must be a string');
+    const request = {body};
+    if (parentId) {
+      if (!Number.isInteger(parentId)) throw new Error('parentId must be an integer');
+      request.parent_id = parentId;
+    }
+    return await this.executeRpc('POST', `/api/v1/post/${this.postId}/comment`, request);
+  }
+
+  async editComment(id, body) {
+    if (!Number.isInteger(id)) throw new Error('id must be an integer');
+    if (typeof body !== 'string') throw new Error('body must be a string');
+    const response = await this.executeRpc('PATCH', `/api/v1/comment/${id}`, {body});
+    if (typeof response.edited !== 'object') throw new Error('response.edited is not an object');
+    return response.edited;
+  }
+
+  async deleteComment(id) {
+    if (!Number.isInteger(id)) throw new Error('id must be an integer');
+    return await this.executeRpc('DELETE', `/api/v1/comment/${id}`, {});
+  }
+}
+
 (async function(){
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
@@ -58,12 +102,14 @@
     console.warn(LOG_TAG, "comments is not an Array! Can't continue.");
     return;
   }
+  console.info(LOG_TAG, `${comments.length} top-level comments found.`);
+
+  const commentApi = new CommentApi(postId);
 
   {
-    console.info(LOG_TAG, `${comments.length} top-level comments found.`);
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`)
   }
