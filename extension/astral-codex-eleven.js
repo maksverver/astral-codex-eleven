@@ -8,8 +8,8 @@
   // a custom script append to the document body after the DOM is complete. This
   // is necessary because in the ISOLATED world we don't have direct access to
   // the main page's global variables.
-  const {postId} = await new Promise((resolve) => {
-    document.addEventListener('acx-page-load', (ev) => resolve(ev.detail));
+  const {postId, userId} = await new Promise((resolve) => {
+    document.addEventListener('ACXI-load-comments', (ev) => resolve(ev.detail));
 
     const scriptElem = document.createElement('script');
     scriptElem.src = chrome.runtime.getURL('main-script.js');
@@ -19,6 +19,10 @@
   if (!postId) {
     console.warn(LOG_TAG, "postId not defined! Can't continue.");
     return;
+  }
+
+  if (!userId) {
+    console.info(LOG_TAG, 'userId not defined! Commenting will be disabled.');
   }
 
   const commentsPage = document.querySelector('.comments-page');
@@ -58,7 +62,8 @@
   {
     console.info(LOG_TAG, `${comments.length} top-level comments found.`);
     const start = performance && performance.now();
-    replaceComments(rootDiv, comments);
+    replaceComments(rootDiv, comments,
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`)
   }

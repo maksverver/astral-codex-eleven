@@ -13,21 +13,21 @@
     <table class="options">
       <tr>
         <th>Comments JSON:</th>
-        <td><input id="file-input" type="file" accept=".json" onchange="handleFileChange()" /></td>
+        <td><input id="file-input" type="file" accept=".json" onchange="handleFileChange()"></td>
       </tr>
       <tr>
-        <th>Date format:</th><td>
+        <th>Date format:</th>
+        <td>
           <label>
-            <input type="radio" name="date-format" value="default" onchange="setDateFormat(this.value)"/>
+            <input type="radio" name="date-format" value="default" onchange="setDateFormat(this.value)">
             Default
           </label>
           <label>
-            <input type="radio" name="date-format" value="longer" checked onchange="setDateFormat(this.value)"/>
+            <input type="radio" name="date-format" value="longer" checked onchange="setDateFormat(this.value)">
             Longer
           </label>
-        <td>
+        </td>
       </tr>
-    </tr>
       <tr>
         <th>Collapse depth:</th>
         <td style="display:inline-flex; flex-direction: row; justify-content: center;">
@@ -38,9 +38,22 @@
           <span id="collapse-depth-value">3</span>
         </td>
       </tr>
+      <tr>
+        <th>User id:</th>
+        <td><input type="text" onchange="setUserId(Number(this.value))" size="10"></td>
+      </tr>
+      <tr>
+        <th>Comment API:</th>
+        <td>
+          <label>
+            <input id="comment-api-enabled" type="checkbox" checked>
+            Enabled
+          </label>
+        </td>
+      </tr>
     </table>
 
-    <hr/>
+    <hr>
 
     <div id="ext-comments" class="ext-comments"></div>
   </body>

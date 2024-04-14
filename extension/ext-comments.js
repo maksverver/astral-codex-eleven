@@ -87,7 +87,7 @@ function splitByEmail(s) {
 
 function createElement(parent, tag, className, textContent) {
   const elem = document.createElement(tag);
-  parent.appendChild(elem);
+  if (parent) parent.appendChild(elem);
   if (className) elem.className = className;
   if (textContent != null) elem.appendChild(document.createTextNode(textContent));
   return elem;
@@ -119,12 +119,59 @@ class ExtCommentListComponent {
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
+  addComment(comment, parentCommentComponent, options) {
+    const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
+    if (this.children.length > 0) {
+      const prevSibling = this.children[this.children.length - 1];
+      prevSibling.nextSibling = commentComponent;
+      commentComponent.prevSibling = prevSibling;
+    }
+    this.children.push(commentComponent);
+    return commentComponent;
+  }
+
   reverse() {
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
     for (const child of this.children) child.reverse();
   }
+}
+
+const EMPTY_STRING_PROVIDER = () => '';
+
+function connectCommentEditor(link, editorHolder, elementsToHide, textProvider, callback) {
+  link.onclick = (ev) => {
+    ev.stopPropagation();
+    ev.preventDefault();
+    for (const elem of elementsToHide) elem.style.setProperty('display', 'none');
+    const editor = new CommentEditorComponent(editorHolder, textProvider(), async (body) => {
+      if (await callback(body)) {
+        editor.close();
+        for (const elem of elementsToHide) elem.style.removeProperty('display');
+      }
+    });
+  };
+}
+
+function enableCommentReply(link, editorHolder, elementsToHide,
+      commentList, parentCommentComponent, parentCommentId, options) {
+  connectCommentEditor(
+      link, editorHolder, elementsToHide, EMPTY_STRING_PROVIDER,
+      async (body) => {
+        if (body == null) return true;  // Reply discarded.
+        try {
+          const comment = await options.commentApi.createComment(parentCommentId, body);
+          commentList.addComment(comment, parentCommentComponent, options).focus();
+          return true;
+        } catch (e) {
+          console.warn(e);
+          alert('Failed to add comment!\n\nSee the JavaScript console for details.');
+          // Return false here so the editor is NOT removed, which allows the user
+          // to retry the submission or save his comment text.
+          return false;
+        }
+      });
 }
 
 class ExtCommentComponent {
@@ -250,7 +297,7 @@ class ExtCommentComponent {
     createDate(postDateLink, comment.date);
 
     if (typeof comment.edited_at === 'string') {
-      createElement(commentHeader, 'span', 'comment-publication-name-separator', '·');
+      createTextNode(commentHeader, '·');
       const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator', 'edited ');
       createDate(editedIndicator, comment.edited_at);
     }
@@ -264,6 +311,71 @@ class ExtCommentComponent {
       appendCommentText(commentBody, comment.body);
     }
 
+    // Check if replying to this comment is possible:
+    const replyHolder = !comment.deleted && options.userId ?
+        createElement(contentDiv, 'div', 'reply-holder') : undefined;
+
+    const childCommentList =
+        new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
+
+    // If replyHolder is created above, then enable replying:
+    if (replyHolder) {
+      const replySeparator = createElement(commentHeader, 'span', undefined, '·');
+      const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
+      replyLink.href = '#';
+
+      enableCommentReply(
+        replyLink, replyHolder, [replySeparator, replyLink],
+        childCommentList, this, comment.id, options);
+    }
+
+    // Check if editing/deleting the comment is possible:
+    if (!comment.deleted && options.userId === comment.user_id) {
+      // Add support for editing the comment.
+      const editHolder = createElement(contentDiv, 'div', 'edit-holder');
+      const editSeparator = createElement(commentHeader, 'span', undefined, '·');
+      const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
+      editLink.href = '#';
+      connectCommentEditor(
+          editLink, editHolder, [editSeparator, editLink, commentBody],
+          () => comment.body,
+          async (newText) => {
+            if (newText == null) return true;  // Edit discarded.
+            if (newText === comment.body) return true;  // No changes made.
+            try {
+              comment = await options.commentApi.editComment(comment.id, newText);
+              commentBody.replaceChildren();
+              appendCommentText(commentBody, comment.body);
+              return true;
+            } catch (e) {
+              console.warn(e);
+              alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
+              // Return false here so the editor is NOT removed, which allows the user
+              // to retry the submission or save his comment text.
+              return false;
+            }
+          });
+
+      // Add support for deleting the comment.
+      const deleteSeparator = createTextNode(commentHeader, '·');
+      const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
+      deleteLink.href = '#';
+      deleteLink.onclick = async (ev) => {
+        ev.stopPropagation();
+        ev.preventDefault();
+        if (confirm('Are you sure you want to delete this comment?')) {
+          try {
+            await options.commentApi.deleteComment(comment.id);
+            commentBody.innerText = 'deleted';
+            commentBody.classList.add('missing');
+          } catch (e) {
+            console.warn(e);
+            alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
+          }
+        }
+      };
+    }
+
     this.threadDiv   = threadDiv;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
@@ -271,8 +383,7 @@ class ExtCommentComponent {
     this.expanded    = expanded;
     this.prevSibling = undefined;
     this.nextSibling = undefined;
-    this.childList   = !comment.children?.length ? undefined :
-        new ExtCommentListComponent(contentDiv, comment.children, this, options);
+    this.childList   = childCommentList;
   }
 
   setExpanded(expanded) {
@@ -295,13 +406,11 @@ class ExtCommentComponent {
   }
 
   get firstVisibleChild() {
-    return this.childList && this.expanded ?
-        this.childList.children[0] : undefined;
+    return this.expanded ? this.childList.children[0] : undefined;
   }
 
   get lastVisibleChild() {
-    return this.childList && this.expanded ?
-        this.childList.children[this.childList.children.length - 1] : undefined;
+    return this.expanded ? this.childList.children[this.childList.children.length - 1] : undefined;
   }
 
   findNext() {
@@ -372,7 +481,7 @@ class ExtCommentComponent {
   }
 
   reverse() {
-    if (this.childList) this.childList.reverse();
+    this.childList.reverse();
   }
 }
 
@@ -415,6 +524,81 @@ class RadioButtonsComponent {
   }
 }
 
+class CommentEditorComponent {
+  constructor(parentElem, initialText, callback) {
+    const rootDiv = createElement(parentElem, 'div', 'comment-editor');
+    const textarea = createElement(rootDiv, 'textarea');
+    textarea.value = initialText;
+    textarea.placeholder = 'Write a comment…';
+    textarea.focus();
+    const buttons = createElement(rootDiv, 'div', 'buttons');
+    const submitButton = createElement(buttons, 'button', undefined, 'Submit');
+    const discardButton = createElement(buttons, 'button', undefined, 'Discard');
+
+    this.initialText = initialText;
+    this.rootDiv = rootDiv;
+    this.textarea = textarea;
+
+    submitButton.onclick = () => callback(textarea.value);
+
+    discardButton.onclick = () => {
+      if (textarea.value === initialText ||
+          confirm("Are you sure you want to discard your comment?\n\n\
+  Push OK to discard, or Cancel to keep editing.")) {
+        callback(undefined);
+      }
+    };
+
+    this.beforeUnloadHandler = (ev) => {
+      if (textarea.value !== initialText) {
+        // This causes the browser to ask for confirmation before navigating away.
+        ev.preventDefault();
+      }
+    };
+    window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  }
+
+  get dirty() {
+    return this.textarea.value !== this.initialText;
+  }
+
+  close() {
+    window.removeEventListener('beforeunload', this.beforeUnloadHandler);
+    this.rootDiv.parentElement.removeChild(this.rootDiv);
+  }
+}
+
+// Skeleton for the implementation of the comments API. Will be replaced in the
+// extension with a real instance, and in the demo page with a fake instance for
+// local testing. This object exists to show the expected interface.
+const COMMENT_API_UNIMPLEMENTED = Object.freeze({
+  // Create a new comment with the given body text.
+  //
+  // parentId is the numeric id of the comment to reply to, or undefined to
+  // create a top-level comment.
+  //
+  // Returns a new comment object, or throws an error on failure.
+  async createComment(parentId, body) {
+    throw new Error('createComment() not implemented');
+  },
+
+  // Edits an existing comment with the given body text.
+  //
+  // Returns an updated comment object, or throws an error on failure.
+  async editComment(id, body) {
+    throw new Error('editComment() not implemented');
+  },
+
+  // Deletes an existing comment.
+  //
+  // Returns undefined, or throws an error on failure.
+  async deleteComment(id) {
+    throw new Error('deleteComment() not implemented');
+  },
+});
+
+// Default options for replaceComments(). Callers should override the fields
+// they want to customize.
 const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
   // If greater than 0, comments at the given depth are collapsed (recursively).
   // Recommend values are 0 or 3.
@@ -427,6 +611,12 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
       month: 'long', day: 'numeric', year: 'numeric',
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZoneName: 'short'}),
+
+  // Set to the numeric id of the currently logged-in user, to enable commenting.
+  userId: undefined,
+
+  // Interface used to created/update/delete comments.
+  commentApi: COMMENT_API_UNIMPLEMENTED
 });
 
 function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
@@ -435,13 +625,18 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
   // Add the comment header which contains the total comment count, and
   // the comment order radio buttons.
+  let addCommentLink = undefined;
   {
     const holderDiv = createElement(rootElem, 'div', 'comments-heading-holder');
-
     createElement(holderDiv, 'div', 'comments-heading',
         `${countCommentsInArray(comments)} Comments`);
 
-    const orderDiv = createElement(holderDiv, 'div', 'Order: ');
+    if (options.userId) {
+      addCommentLink = createElement(holderDiv, 'a', undefined, 'add a top-level comment');
+      addCommentLink.href = '#';
+    }
+
+    const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
     let currentOrder = 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {
@@ -451,6 +646,14 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     }).change(0);
   }
 
+  const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');
+
   // Add the top-level comments list.
   const commentList = new ExtCommentListComponent(rootElem, comments, undefined, options);
+
+  if (addCommentLink) {
+    enableCommentReply(
+          addCommentLink, replyHolder, [addCommentLink],
+          commentList, undefined, undefined, options);
+  }
 }

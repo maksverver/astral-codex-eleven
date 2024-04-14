@@ -17,6 +17,11 @@ body {
   cursor: initial !important;
 }
 
+/* Force textareas to be resizable. */
+textarea {
+  resize: both !important
+}
+
 /* Fix the main menu to the top of the page. By default, it will scroll back
    into view whenever the user scrolls up, but this interferes with keyboard
    navigation (e.g., when focusing a comment, the main menu may overlap the
@@ -29,6 +34,13 @@ body {
 /* Add underline to links with keyboard focus, to facilitate keyboard navigation. */
 a:focus {
   text-decoration: solid underline var(--background_pop) 2px !important;
+}
+
+.ext-comments {
+  --comment-min-width: 300px;
+  /* This is the space available in the default layout, when no deep comments
+     exist that push the comment section outside its right boundary. */
+  --comment-max-width: 704px;
 }
 
 .ext-comments .comment-thread {
@@ -109,10 +121,8 @@ a:focus {
 .ext-comments .comment .comment-body {
   white-space: preserve pretty;
   overflow-wrap: anywhere;
-  min-width: 300px;
-  /* This is the space available in the default layout, when no deep comments
-     exist that push the comment section outside its right boundary. */
-  max-width: 704px;
+  min-width: var(--comment-min-width);
+  max-width: var(--comment-max-width);
   margin: 0;
   /* remove the max-height: 600px, overflow-y: hidden that Substack CSS
      applies to .comment-thread-body */
@@ -143,8 +153,12 @@ a:focus {
   display: flex;
   flex-wrap: wrap;
   flex-direction: row;
-  column-gap: 16px;
-  justify-content: space-between;
+  align-items: center;
+  column-gap: 1em;
+}
+
+.ext-comments .comments-heading-holder .comment-order {
+  margin-left: auto;  /* right-aligns this item in the flex container */
 }
 
 /* Radio button styling */
@@ -184,4 +198,53 @@ a:focus {
 .ext-comments .radio-buttons button.inactive:hover,
 .ext-comments .radio-buttons button.inactive:focus {
   background: #fff6;
+}
+
+/* Comment editing */
+
+.ext-comments .top-level-reply,
+.ext-comments .comment-reply {
+  margin-left: 16px;
+  margin-top: 12px;
+}
+
+.ext-comments .comments-heading-holder a {
+  text-decoration: none;
+  font-size: 15px;
+  /* color: var(--background_pop) !important; */
+}
+
+.ext-comments .comments-heading-holder a:hover {
+  text-decoration: underline;
+}
+
+.ext-comments .comment-editor {
+  min-width: var(--comment-min-width);
+  max-width: var(--comment-max-width);
+  display: flex;
+  flex-direction: column;
+  gap: 6px;
+}
+
+.ext-comments .comment-editor textarea {
+  height: 100px;
+}
+
+.ext-comments .comment-editor .buttons {
+  display: flex;
+  flex-direction: row;
+  justify-content: flex-end;
+  gap: 6px;
+}
+
+/* Why does substack remove focus indicators from everything?! */
+.ext-comments .comment-editor textarea:focus,
+.ext-comments .comment-editor button:focus {
+  border: 2px solid var(--background_pop) !important;
+}
+
+.ext-comments .comment-editor textarea,
+.ext-comments .comment-editor button {
+  border-radius: 0.5em;
+  padding: 0.25em 0.5em;
 }
