@@ -1,10 +1,34 @@
-Before packaging the extension:
+To release a new version:
 
-  - smoke test on Chrome & Firefox
-  - ensure the version number in manifest.json has been bumped!
-  - create a corresponding git tag (e.g. `git tag v0.1`)
+ 1. Ensure the version number in manifest.json has been bumped!
 
-To package, run ./build.sh (or equivalently, `make dist`).
+ 2. Summarize the changes in CHANGELOG.txt (and commit)
+
+ 3. Run tests with `make test` (limited coverage)
+
+ 4. Smoke test on Chrome and Firefox (see below for details)
+
+    To load for testing/development:
+
+      - Chrome: chrome://extensions/ (Load Unpacked)
+      - Firefox: about:debugging (Load Temporary Add-On)
+
+    Make sure only ONE version of the extension is installed!
+
+ 5. Create a .zip file with ./build.sh (or equivalently, `make dist`).
+
+ 6. Upload new version.
+
+      - Chrome Web Store: https://chrome.google.com/webstore/devconsole/
+      - Firefox: https://addons.mozilla.org/en-US/developers/addons
+
+ 7. Create a git tag:
+
+    % git tag v0.1     # replace v0.1 with the current version
+    % git push --all
+
+
+Extra notes for uploading the Firefox Add-on:
 
 To publish a new addon, Firefox requires adding the following snippet to be
 added to extension/manifest.json:
@@ -17,3 +41,39 @@ added to extension/manifest.json:
 
 It shouldn't be necessary to include this in subsequent updates. More info:
 https://extensionworkshop.com/documentation/develop/extensions-and-the-add-on-id/
+
+
+Things to test before release:
+
+  - Navigation:
+
+      - Click a post link from the home page (e.g. one of the top posts);
+        the comments on the post page should load in the extension widget.
+
+      - Click the home page link from the post page.
+
+  - Comment ordering: verify switching between "Chronological" and
+    "Newest First" works as expected.
+
+  - Keyboard navigation:
+
+    - Verify all keys work, in both "Chronological" and "Newest First" ordering.
+    - Verify tab navigation works (all interactive fields are reachable,
+      dates expand when you focus on them, all elements have visible focus).
+
+  - Mouse support:
+
+    - Dates expand when hovering over them.
+    - Links have underlines when hovering over them.
+    - Clicking on the left border line of a comment collapses/expands it.
+    - Comment author links to Substack user profile page.
+    - Comment date links to comment permalink.
+
+  - Comment API (warning, this makes publicly-visible changes!):
+
+    - Create a top-level comment.
+    - Add a reply.
+    - Edit the reply.
+    - Refresh the page and verify the comments look as expected.
+    - Delete the reply.
+    - Delete the top-level comment.

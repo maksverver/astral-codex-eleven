@@ -1,0 +1,11 @@
+Version 0.2.0
+-------------
+
+  - Added commenting support.
+  - Improved keyboard navigation.
+
+
+Version 0.1.0
+-------------
+
+ - Initial release. Speeds up page load by rerendering comments. Readonly.

@@ -63,6 +63,11 @@ is slow.
      materialized the entire DOM tree from the comments JSON file. This seems
      fast enough even for posts with many comments.
 
+Performance could be improved further by only populating part of the DOM tree
+and adding links to "load more comments" on demand, but I'm not sure it's worth
+the effort. This also has downsides, like requiring more user action to view all
+comments, and making it more difficult to search through all comments.
+
 
 ## Limitations
 
