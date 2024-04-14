@@ -21,6 +21,13 @@ It also adds some quality-of-life improvements:
   - Full precision timestamp shown when hovering over/focusing on the post date.
 
 
+## Installation
+
+Chrome extension: https://chromewebstore.google.com/detail/astral-codex-eleven/lmdipmgaknhfbndeaibopjnlckgghemn
+
+Firefox add-on: https://addons.mozilla.org/firefox/addon/astral-codex-eleven/
+
+
 ## Background
 
 ACX is hosted on blogging platform [Substack](https://substack.com/Substack).
@@ -59,13 +66,7 @@ is slow.
 
 ## Limitations
 
-  - Comments are currently **read-only**: replying is not supported, even if you
-    are logged in! (I would like to fix this.)
-
-    However, the current version doesn't change comment deeplinks, so you can
-    click on a comment's date to open the original thread, and reply from there.
-    To make a toplevel reply, click the comment icon on top of the post. (Note
-    that you then have to deal with the usual slowness.)
+  - The current version doesn't change comment deeplinks.
 
   - A lot of comment metadata is still missing:
       - “User is banned”
@@ -110,10 +111,13 @@ is slow.
   - A Firefox add-on called
     [Astral Codex Ten Speedifier](https://addons.mozilla.org/en-US/firefox/addon/astral-codex-ten-speedifier/),
     which re-renders the comments, much like my extension does. It does work,
-    and is quite fast, but it's very basic: it disables all Javascript (breaking most of Substack's functionality), it doesn't work when accessing posts
+    and is quite fast, but it's very basic: it disables all Javascript
+    (breaking most of Substack's functionality), it doesn't support
+    adding/editing/deleting comments, it doesn't work when accessing posts
     through the home page, it doesn't support collapsing comments, it renders
     deeply nested comments with a very narrow width, etc. It's also available
-    for Firefox only. Overall, I think my extension offers a more polished experience.
+    for Firefox only. Overall, I think my extension offers a much more
+    featureful and polished experience.
 
 
 ## Local development
