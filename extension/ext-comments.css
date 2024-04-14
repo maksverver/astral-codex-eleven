@@ -219,6 +219,7 @@ a:focus {
 }
 
 .ext-comments .comment-editor {
+  margin-top: 12px;
   min-width: var(--comment-min-width);
   max-width: var(--comment-max-width);
   display: flex;

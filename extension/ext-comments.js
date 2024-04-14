@@ -559,7 +559,7 @@ class CommentEditorComponent {
     discardButton.onclick = () => {
       if (textarea.value === initialText ||
           confirm("Are you sure you want to discard your comment?\n\n\
-  Push OK to discard, or Cancel to keep editing.")) {
+Push OK to discard, or Cancel to keep editing.")) {
         callback(undefined);
       }
     };

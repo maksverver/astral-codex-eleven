@@ -1,7 +1,7 @@
 {
   "manifest_version": 3,
   "name": "Astral Codex Eleven",
-  "version": "0.2",
+  "version": "0.2.0.999",
   "description": "Speeds up loading of comments on Astral Codex Ten (https://www.astralcodexten.com/).",
   "icons": {
     "48": "images/icon-48x48.png",
