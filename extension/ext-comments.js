@@ -116,10 +116,16 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
+    this.newestFirst = false;  // default is chronological order
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
   addComment(comment, parentCommentComponent, options) {
+    // This is a bit of a hack to ensure that comments are added at the top in
+    // the newest-first ordering. It's kinda slow for large threads, but I don't
+    // know if it's worth it to try to make it faster.
+    const reverse = this.newestFirst;
+    if (reverse) this.reverseSelfOnly();
     const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
     if (this.children.length > 0) {
       const prevSibling = this.children[this.children.length - 1];
@@ -127,13 +133,19 @@ class ExtCommentListComponent {
       commentComponent.prevSibling = prevSibling;
     }
     this.children.push(commentComponent);
+    if (reverse) this.reverseSelfOnly();
     return commentComponent;
   }
 
-  reverse() {
+  reverseSelfOnly() {
+    this.newestFirst = !this.newestFirst;
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
+  }
+
+  reverse() {
+    this.reverseSelfOnly();
     for (const child of this.children) child.reverse();
   }
 }
