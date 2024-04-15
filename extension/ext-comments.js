@@ -116,7 +116,7 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
-    this.newFirst = false;  // default is chronological order
+    this.newFirst = options.newFirst;
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
