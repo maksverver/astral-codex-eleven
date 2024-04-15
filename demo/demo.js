@@ -16,6 +16,7 @@ let replaceCommentOptions = {
   ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
   collapseDepth: 3,
   dateFormatShort: longerDateFormat,
+  newFirst: false,
   commentApi: {
     async createComment(parentId, body) {
       if (!isCommentApiEnabled()) {
@@ -68,6 +69,11 @@ function setDateFormat(value) {
       value === 'longer'
           ? longerDateFormat
           : REPLACE_COMMENTS_DEFAULT_OPTIONS.dateFormatShort;
+  repopulate();
+}
+
+function setCommentOrder(value) {
+  replaceCommentOptions.newFirst = value === 'most_recent_first';
   repopulate();
 }
 

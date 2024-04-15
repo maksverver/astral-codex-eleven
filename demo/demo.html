@@ -29,6 +29,24 @@
         </td>
       </tr>
       <tr>
+        <th>Initial comment order*: </th>
+        <td>
+          <label>
+            <input type="radio" name="comment-order" value="oldest_first" checked onchange="setCommentOrder(this.value)">
+            Chronological
+          </label>
+          <label>
+            <input type="radio" name="comment-order" value="most_recent_first" onchange="setCommentOrder(this.value)">
+            New First
+          </label>
+        </td>
+      </tr>
+      <tr style="font-size: small; color: #000a">
+        <td colspan="2">
+          * This only describes the order of comments in the JSON file. It does not actually reverse them!
+        </td>
+      </tr>
+      <tr>
         <th>Collapse depth:</th>
         <td style="display:inline-flex; flex-direction: row; justify-content: center;">
           <input type="range" min="0" max="10" value="3" class="slider"
