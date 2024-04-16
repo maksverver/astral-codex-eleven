@@ -122,7 +122,7 @@ function storageChangeHandler(changes, namespace) {
 
     if (newValueString !== oldValueString) {
       optionShadow[key] = newValue;
-      OPTIONS[key]?.onValueChange(newValue);
+      OPTIONS[key]?.onValueChange?.(newValue);
     }
   }
 }
@@ -134,6 +134,22 @@ function isValidOption(option) {
 
   if (!option.hasOwnProperty('default')) {
     return [false, 'must contain a default value'];
+  }
+
+  if (option.hasOwnProperty('onValueChange') && typeof(option.onValueChange) !== 'function') {
+    return [false, 'onValueChange must be a function if defined'];
+  }
+
+  if (option.hasOwnProperty('onLoad') && typeof(option.onLoad) !== 'function') {
+    return [false, 'onLoad must be a function if defined'];
+  }
+
+  if (option.hasOwnProperty('processComment') && typeof(option.processComment) !== 'function') {
+    return [false, 'processComment must be a function if defined'];
+  }
+
+  if (option.hasOwnProperty('processHeader') && typeof(option.processHeader) !== 'function') {
+    return [false, 'processHeader must be a function if defined'];
   }
 
   return [true, undefined];

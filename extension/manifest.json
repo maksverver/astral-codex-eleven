@@ -53,5 +53,9 @@
       ],
       "run_at": "document_end"
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ACXI"
+  }
 }
