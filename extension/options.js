@@ -71,9 +71,61 @@ const optionArray = [
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
+const OPTION_KEY = "acxi-options";
 
-// Stores a local copy of the current option values.
-const optionShadow = {};
+// Stores a local copy of the current option values. It should not be modified
+// directly, instead setOption below should be used.
+let optionShadow = {};
+
+async function loadSavedOptions() {
+  const v = await chrome.storage.local.get(OPTION_KEY).catch((e) => {
+    console.error(LOG_OPTION_TAG, e);
+    return undefined;
+  });
+  optionShadow = v?.[OPTION_KEY] ?? {};
+}
+
+async function saveOptions() {
+  await chrome.storage.local.set({[OPTION_KEY]: optionShadow}).catch((e) => {
+    console.error(LOG_OPTION_TAG, e);
+  });
+}
+
+async function setOption(key, value) {
+  optionShadow[key] = value;
+  return await saveOptions();
+}
+
+function initializeOptionValues() {
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (!optionShadow.hasOwnProperty(key)) {
+      optionShadow[key] = option.default;
+    }
+
+    if (typeof(option.onLoad) === 'function') {
+      option.onLoad(optionShadow[key]);
+    }
+  }
+}
+
+function storageChangeHandler(changes, namespace) {
+  if (namespace !== 'local' || !changes[OPTION_KEY]
+      || typeof(changes[OPTION_KEY].newValue) !== 'object') {
+    return;
+  }
+
+  for (const [key, newValue] of Object.entries(changes[OPTION_KEY].newValue)) {
+    // stringify is a simple way to compare values that may be dicts, and
+    // performance isn't a concern here since the function doesn't run often.
+    const newValueString = JSON.stringify(newValue);
+    const oldValueString = JSON.stringify(optionShadow[key]);
+
+    if (newValueString !== oldValueString) {
+      optionShadow[key] = newValue;
+      OPTIONS[key]?.onValueChange(newValue);
+    }
+  }
+}
 
 function isValidOption(option) {
   if (typeof(option.key) !== 'string') {

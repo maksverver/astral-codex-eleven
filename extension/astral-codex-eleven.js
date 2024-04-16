@@ -44,18 +44,6 @@ class CommentApi {
   }
 }
 
-function initializeOptionValues() {
-  for (const [key, option] of Object.entries(OPTIONS)) {
-    if (!optionShadow.hasOwnProperty(key)) {
-      optionShadow[key] = option.default;
-    }
-
-    if (typeof(option.onLoad) === 'function') {
-      option.onLoad(optionShadow[key]);
-    }
-  }
-}
-
 (async function(){
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
@@ -72,7 +60,9 @@ function initializeOptionValues() {
     document.body.appendChild(scriptElem);
   });
 
+  await loadSavedOptions();
   initializeOptionValues();
+  chrome.storage.onChanged.addListener(storageChangeHandler);
 
   if (!postId) {
     console.warn(LOG_TAG, "postId not defined! Can't continue.");
