@@ -46,6 +46,7 @@
         "ext-comments.css"
       ],
       "js": [
+        "options.js",
         "ext-comments.js",
         "astral-codex-eleven.js"
       ],

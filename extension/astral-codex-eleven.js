@@ -44,6 +44,18 @@ class CommentApi {
   }
 }
 
+function initializeOptionValues() {
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (!optionShadow.hasOwnProperty(key)) {
+      optionShadow[key] = option.default;
+    }
+
+    if (typeof(option.onLoad) === 'function') {
+      option.onLoad(optionShadow[key]);
+    }
+  }
+}
+
 (async function(){
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
@@ -59,6 +71,8 @@ class CommentApi {
     scriptElem.src = chrome.runtime.getURL('main-script.js');
     document.body.appendChild(scriptElem);
   });
+
+  initializeOptionValues();
 
   if (!postId) {
     console.warn(LOG_TAG, "postId not defined! Can't continue.");
@@ -112,10 +126,14 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
+  const commentModifiers = Object.values(OPTIONS).filter((e) => e.processComment);
+
+  const headerModifiers = Object.values(OPTIONS).filter((e) => e.processHeader);
+
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, commentModifiers, headerModifiers});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
