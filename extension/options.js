@@ -22,7 +22,7 @@ const templateOption = {
    * The key for this option. Must be unique, and will be how the option is
    * stored in local storage and accessed from the popup.
    */
-  key: "template-key",
+  key: 'template-key',
 
   /**
    * (Required)
@@ -66,12 +66,12 @@ const templateOption = {
 };
 
 const use24HourOption = {
-  key: "use24Hour",
+  key: 'use24Hour',
   default: false
 };
 
 const showFullDateOption = {
-  key: "showFullDate",
+  key: 'showFullDate',
   default: false
 };
 
@@ -83,7 +83,7 @@ const optionArray = [
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
-const OPTION_KEY = "acxi-options";
+const OPTION_KEY = 'acxi-options';
 
 // Stores a local copy of the current option values. It should not be modified
 // directly, instead setOption below should be used.
