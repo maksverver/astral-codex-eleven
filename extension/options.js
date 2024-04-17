@@ -70,10 +70,16 @@ const use24HourOption = {
   default: false
 };
 
+const showFullDateOption = {
+  key: "showFullDate",
+  default: false
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
   use24HourOption,
+  showFullDateOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';

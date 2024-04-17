@@ -127,6 +127,9 @@ class CommentApi {
         month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
         minute: '2-digit', second: '2-digit', timeZoneName: 'short',
         hour12: !optionShadow.use24Hour})
+    if (optionShadow.showFullDate) {
+      commentOptions.dateFormatShort = commentOptions.dateFormatLong;
+    }
     replaceComments(rootDiv, comments, commentOptions);
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
