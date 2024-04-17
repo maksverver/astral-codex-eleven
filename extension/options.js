@@ -65,9 +65,15 @@ const templateOption = {
   processHeader: (headerElem) => {}
 };
 
+const use24HourOption = {
+  key: "use24Hour",
+  default: false
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  use24HourOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';

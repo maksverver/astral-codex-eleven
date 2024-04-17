@@ -122,8 +122,12 @@ class CommentApi {
 
   {
     const start = performance && performance.now();
-    replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, commentModifiers, headerModifiers});
+    const commentOptions = {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, commentModifiers, headerModifiers};
+    commentOptions.dateFormatLong = new Intl.DateTimeFormat('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
+        minute: '2-digit', second: '2-digit', timeZoneName: 'short',
+        hour12: !optionShadow.use24Hour})
+    replaceComments(rootDiv, comments, commentOptions);
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
