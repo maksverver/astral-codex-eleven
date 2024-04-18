@@ -70,10 +70,10 @@ const templateOption = {
 const hideUsersOption = {
   key: 'hideUsers',
   default: '',
-  onLoad: (currentValue) => {
+  onLoad: function(currentValue) {
     this.cachedSet = new Set(currentValue.split(',').map((e) => e.trim()).filter((x) => x));
   },
-  processComment: (commentData, commentElem) => {
+  processComment: function(commentData, commentElem) {
     if (this.cachedSet.has(commentData.name)) {
       commentElem.classList.add('hidden');
     }
