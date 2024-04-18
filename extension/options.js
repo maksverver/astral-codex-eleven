@@ -67,9 +67,23 @@ const templateOption = {
   processHeader: (commentData, headerElem) => {}
 };
 
+const hideUsersOption = {
+  key: 'hideUsers',
+  default: '',
+  onLoad: (currentValue) => {
+    this.cachedSet = new Set(currentValue.split(',').map((e) => e.trim()).filter((x) => x));
+  },
+  processComment: (commentData, commentElem) => {
+    if (this.cachedSet.has(commentData.name)) {
+      commentElem.classList.add('hidden');
+    }
+  }
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  hideUsersOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
