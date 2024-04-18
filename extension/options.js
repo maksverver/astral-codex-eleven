@@ -51,18 +51,20 @@ const templateOption = {
    * Applied to the comment DOM element of each comment. The element itself
    * should be modified directly, as any return value is discarded. This only
    * runs if the current value of the option is truthy.
+   * @param commentData - the current comment data as JSON
    * @param {Element} commentElem - the DOM element of the comment
    */
-  processComment: (commentElem) => {},
+  processComment: (commentData, commentElem) => {},
 
   /**
    * (Optional)
    * Applied to the header DOM element of each comment. The element itself
    * should be modified directly, as any return value is discarded. This only
    * runs if the current value of the option is truthy.
+   * @param commentData - the current comment data as JSON
    * @param {Element} headerElem - the DOM element of the header
    */
-  processHeader: (headerElem) => {}
+  processHeader: (commentData, headerElem) => {}
 };
 
 const use24HourOption = {
