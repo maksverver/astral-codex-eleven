@@ -393,13 +393,13 @@ class ExtCommentComponent {
 
     for (const option of commentModifiers) {
       if (optionShadow[option.key]) {
-        option.processComment(threadDiv);
+        option.processComment(comment, threadDiv);
       }
     }
 
     for (const option of headerModifiers) {
       if (optionShadow[option.key]) {
-        option.processHeader(commentHeader);
+        option.processHeader(comment, commentHeader);
       }
     }
 
