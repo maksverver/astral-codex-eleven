@@ -12,8 +12,8 @@
  * set is required.
  *
  * The order when processing a comment is:
- *   - processComment
  *   - processHeader
+ *   - processComment
  */
 
 const templateOption = {
@@ -48,23 +48,23 @@ const templateOption = {
 
   /**
    * (Optional)
-   * Applied to the comment DOM element of each comment. The element itself
-   * should be modified directly, as any return value is discarded. This only
-   * runs if the current value of the option is truthy.
-   * @param commentData - the current comment data as JSON
-   * @param {Element} commentElem - the DOM element of the comment
-   */
-  processComment: (commentData, commentElem) => {},
-
-  /**
-   * (Optional)
    * Applied to the header DOM element of each comment. The element itself
    * should be modified directly, as any return value is discarded. This only
    * runs if the current value of the option is truthy.
    * @param commentData - the current comment data as JSON
    * @param {Element} headerElem - the DOM element of the header
    */
-  processHeader: (commentData, headerElem) => {}
+  processHeader: (commentData, headerElem) => {},
+
+  /**
+   * (Optional)
+   * Applied to the comment DOM element of each comment. The element itself
+   * should be modified directly, as any return value is discarded. This only
+   * runs if the current value of the option is truthy.
+   * @param commentData - the current comment data as JSON
+   * @param {Element} commentElem - the DOM element of the comment
+   */
+  processComment: (commentData, commentElem) => {}
 };
 
 // All options should be added here.
@@ -74,6 +74,13 @@ const optionArray = [
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = "acxi-options";
+
+class OptionApiFuncs {
+  constructor(headerFuncs, commentFuncs) {
+    this.headerFuncs = headerFuncs ?? [];
+    this.commentFuncs = commentFuncs ?? [];
+  }
+}
 
 // Stores a local copy of the current option values. It should not be modified
 // directly, instead setOption below should be used.

@@ -198,7 +198,7 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {collapseDepth, dateFormatShort, dateFormatLong, commentModifiers, headerModifiers} = options;
+    const {collapseDepth, dateFormatShort, dateFormatLong, optionApiFuncs} = options;
 
     // Creates DOM nodes for the given comment text, and appends them to the
     // given parent element. This tries to mirror how Substack seems to process
@@ -391,15 +391,15 @@ class ExtCommentComponent {
       };
     }
 
-    for (const option of commentModifiers) {
+    for (const option of optionApiFuncs.headerFuncs) {
       if (optionShadow[option.key]) {
-        option.processComment(comment, threadDiv);
+        option.processHeader(comment, commentHeader);
       }
     }
 
-    for (const option of headerModifiers) {
+    for (const option of optionApiFuncs.commentFuncs) {
       if (optionShadow[option.key]) {
-        option.processHeader(comment, commentHeader);
+        option.processComment(comment, threadDiv);
       }
     }
 
@@ -645,11 +645,8 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
-  // Option objects that run on each generated comment element.
-  commentModifiers: [],
-
-  // Option objects that run on each generated comment header element.
-  headerModifiers: [],
+  // Holder for all option API functions
+  optionApiFuncs: new OptionApiFuncs(),
 
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED

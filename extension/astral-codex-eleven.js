@@ -116,14 +116,15 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
-  const commentModifiers = Object.values(OPTIONS).filter((e) => e.processComment);
-
-  const headerModifiers = Object.values(OPTIONS).filter((e) => e.processHeader);
+  const options = Object.values(OPTIONS);
+  const headerFuncs = options.filter((e) => e.processHeader);
+  const commentFuncs = options.filter((e) => e.processComment);
+  const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
 
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, commentModifiers, headerModifiers});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, optionApiFuncs});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
