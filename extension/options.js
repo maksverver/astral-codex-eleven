@@ -115,6 +115,7 @@ function initializeOptionValues() {
       option.onLoad(optionShadow[key]);
     }
   }
+  saveOptions();
 }
 
 function storageChangeHandler(changes, namespace) {
