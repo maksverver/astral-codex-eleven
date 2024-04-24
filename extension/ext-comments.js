@@ -393,13 +393,13 @@ class ExtCommentComponent {
 
     for (const option of optionApiFuncs.headerFuncs) {
       if (optionShadow[option.key]) {
-        option.processHeader(comment, commentHeader);
+        option.processHeader.bind(this)(comment, commentHeader);
       }
     }
 
     for (const option of optionApiFuncs.commentFuncs) {
       if (optionShadow[option.key]) {
-        option.processComment(comment, threadDiv);
+        option.processComment.bind(this)(comment, threadDiv);
       }
     }
 

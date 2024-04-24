@@ -6,6 +6,9 @@
  * new option, create an object with the following fields and add it to
  * optionArray.
  *
+ * The value of `this` is set to the calling ExtCommentComponent object. As
+ * such, API functions should not use arrow function expressions.
+ *
  * The value of the option must be truthy in order for processHeader and
  * processComment to be run. onLoad is called for every option when the page is
  * first loaded, and is passed the current value, so checking that the option is
@@ -36,7 +39,7 @@ const templateOption = {
    * This will be called any time the option changes value.
    * @param {*} newValue - the new value of the option
    */
-  onValueChange: (newValue) => {},
+  onValueChange: function(newValue) {},
 
   /**
    * (Optional)
@@ -44,7 +47,7 @@ const templateOption = {
    * falsy. Useful for applying custom CSS styling.
    * @param {*} currentValue - the current value of the option
    */
-  onLoad: (currentValue) => {},
+  onLoad: function(currentValue) {},
 
   /**
    * (Optional)
@@ -54,7 +57,7 @@ const templateOption = {
    * @param commentData - the current comment data as JSON
    * @param {Element} headerElem - the DOM element of the header
    */
-  processHeader: (commentData, headerElem) => {},
+  processHeader: function(commentData, headerElem) {},
 
   /**
    * (Optional)
@@ -64,7 +67,7 @@ const templateOption = {
    * @param commentData - the current comment data as JSON
    * @param {Element} commentElem - the DOM element of the comment
    */
-  processComment: (commentData, commentElem) => {}
+  processComment: function(commentData, commentElem) {}
 };
 
 // All options should be added here.
