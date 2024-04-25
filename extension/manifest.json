@@ -52,7 +52,7 @@
         "ext-comments.js",
         "astral-codex-eleven.js"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
   ],
   "action": {
