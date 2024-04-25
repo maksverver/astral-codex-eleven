@@ -48,6 +48,21 @@ class CommentApi {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
 
+  // Hack to keep the displayed number of comments correct. As all of substack's
+  // API requests are redirected, it thinks there's only 1 comment. If we just
+  // change the content of the element, then substack overwrites our changes, so
+  // we clone the element and hide the original.
+  function makeSubstackProofClone(element) {
+    const cloned = element.cloneNode(true);
+    element.style.display = 'none';
+    element.after(cloned);
+  }
+
+  const likeHeader = document.querySelector('.post-header .like-button-container');
+  const likeFooter = document.querySelector('.post-footer .like-button-container');
+  makeSubstackProofClone(likeHeader.nextSibling);
+  makeSubstackProofClone(likeFooter.nextSibling);
+
   // Exfiltrate the _preloads.post.id global variable from the real page, using
   // a custom script append to the document body after the DOM is complete. This
   // is necessary because in the ISOLATED world we don't have direct access to
