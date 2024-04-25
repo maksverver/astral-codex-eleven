@@ -85,6 +85,11 @@ class OptionApiFuncs {
   }
 }
 
+// Reprocess all comments with the given option key.
+function reprocessComments(key) {
+  commentListRoot.processAllChildren([key]);
+}
+
 // Stores a local copy of the current option values. It should not be modified
 // directly, instead setOption below should be used.
 let optionShadow = {};

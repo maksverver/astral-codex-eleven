@@ -16,6 +16,9 @@ function countCommentsInArray(comments) {
   return n;
 }
 
+// Holds the root ExtCommentListComponent.
+let commentListRoot;
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -147,6 +150,14 @@ class ExtCommentListComponent {
   reverse() {
     this.reverseSelfOnly();
     for (const child of this.children) child.reverse();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processAllChildren(keys) {
+    for (let child of this.children) {
+      child.processSelfAndChildren(keys);
+    }
   }
 }
 
@@ -391,19 +402,10 @@ class ExtCommentComponent {
       };
     }
 
-    for (const option of optionApiFuncs.headerFuncs) {
-      if (optionShadow[option.key]) {
-        option.processHeader.bind(this)(comment, commentHeader);
-      }
-    }
-
-    for (const option of optionApiFuncs.commentFuncs) {
-      if (optionShadow[option.key]) {
-        option.processComment.bind(this)(comment, threadDiv);
-      }
-    }
-
+    this.commentData = comment;
+    this.optionFuncs = optionApiFuncs;
     this.threadDiv   = threadDiv;
+    this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
@@ -411,6 +413,26 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = childCommentList;
+
+    this.doOptionApiFunctions();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  doOptionApiFunctions(keys) {
+    for (const option of this.optionFuncs.headerFuncs) {
+      if (keys && !keys.includes(option.key)) continue;
+      if (optionShadow[option.key]) {
+        option.processHeader.bind(this)(this.commentData, this.headerDiv);
+      }
+    }
+
+    for (const option of this.optionFuncs.commentFuncs) {
+      if (keys && !keys.includes(option.key)) continue;
+      if (optionShadow[option.key]) {
+        option.processComment.bind(this)(this.commentData, this.threadDiv);
+      }
+    }
   }
 
   setExpanded(expanded) {
@@ -509,6 +531,13 @@ class ExtCommentComponent {
 
   reverse() {
     this.childList.reverse();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processSelfAndChildren(keys) {
+    this.doOptionApiFunctions(keys);
+    this.childList.processAllChildren(keys);
   }
 }
 
@@ -673,7 +702,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     let currentOrder = options.newFirst ? 1 : 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {
-        commentList.reverse();
+        commentListRoot.reverse();
         currentOrder = i;
       }
     }).change(currentOrder);
@@ -682,11 +711,11 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');
 
   // Add the top-level comments list.
-  const commentList = new ExtCommentListComponent(rootElem, comments, undefined, options);
+  commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
 
   if (addCommentLink) {
     enableCommentReply(
           addCommentLink, replyHolder, [addCommentLink],
-          commentList, undefined, undefined, options);
+          commentListRoot, undefined, undefined, options);
   }
 }
