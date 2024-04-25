@@ -58,13 +58,14 @@ a:focus {
   margin-top: 12px;
 }
 
-.ext-comments .comment-thread > .border {
+.ext-comments .comment-thread > .comment-head > .border {
   cursor: pointer;
   width: 16px;
+  height: 100%;
   flex: 0 0 auto;
 }
 
-.ext-comments .comment-thread > .border > .line {
+.ext-comments .comment-thread > .comment-head > .border > .line {
   background: var(--background_contrast_2);
   width: 2px;
   height: 100%;
@@ -72,7 +73,7 @@ a:focus {
   transition: width 0.2s;
 }
 
-.ext-comments .comment-thread > .border:hover > .line {
+.ext-comments .comment-thread > .comment-head > .border:hover > .line {
   background: var(--background_pop);
   width: 6px;
   transition: width 0.2s;

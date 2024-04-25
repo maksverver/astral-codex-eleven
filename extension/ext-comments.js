@@ -293,7 +293,8 @@ class ExtCommentComponent {
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
     threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
-    const borderDiv = createElement(threadDiv, 'div', 'border');
+    const commentHead = createElement(threadDiv, 'div', 'comment-head');
+    const borderDiv = createElement(commentHead, 'div', 'border');
     createElement(borderDiv, 'div', 'line');
     // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = this.toggleExpanded.bind(this);

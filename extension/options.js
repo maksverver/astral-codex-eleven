@@ -70,9 +70,52 @@ const templateOption = {
   processComment: function(commentData, commentElem) {}
 };
 
+const showUserAvatarsOption = {
+  key: 'showUserAvatars',
+  default: true,
+  onLoad: function(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange: function(newValue) {
+    setStyleEnabled(this.key, newValue);
+    if (newValue) {
+      reprocessComments(this.key);
+    } else {
+      // This is slow compared to just hiding with styling, but is only done
+      // when the option value changes
+      document.querySelectorAll('.avatar').forEach((e) => e.remove());
+      document.querySelectorAll('.comment-collapse-toggle').forEach((e) => e.remove());
+    }
+  },
+  processComment: function(commentData, commentElem) {
+    function getDefaultAvatar(userId) {
+      const colors = ['purple', 'yellow', 'orange', 'green', 'black'];
+      const color = userId ? colors[userId % colors.length] : 'logged-out';
+      return `https://substack.com/img/avatars/${color}.png`;
+    }
+
+    function getAvatarUrl() {
+      const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
+      const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill,f_auto,q_auto:good,fl_progressive:steep/';
+      return baseUrl + encodeURIComponent(photoUrl);
+    }
+
+    const commentHead = commentElem.querySelector(':scope > .comment-head');
+    const avatar = createElement(undefined, 'img', 'avatar');
+    avatar.src = getAvatarUrl();
+    commentHead.prepend(avatar);
+
+    const content = commentElem.querySelector(':scope > .content');
+    const button = createElement(content, 'button', 'button outline comment-collapse-toggle', 'Expand comment');
+    button.onclick = this.toggleExpanded.bind(this);
+  }
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  showUserAvatarsOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
