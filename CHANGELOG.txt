@@ -1,3 +1,13 @@
+Version 0.2.3
+-------------
+  - Fix the comment count (bug #2; thanks Pycea!)
+
+Version 0.2.2
+-------------
+
+  - Fixed bug where replies to a thread with "New First" comment order would
+    incorrectly appear at the bottom instead of the top of the thread.
+
 Version 0.2.1
 -------------
 
