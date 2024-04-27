@@ -58,7 +58,9 @@ class CommentApi {
     element.after(cloned);
   }
 
-  for (const commentButton of document.querySelectorAll('.post-header .post-ufi-comment-button')) {
+  for (const commentButton of document.querySelectorAll(`
+      .post-header .post-ufi-comment-button,
+      .post-footer .post-ufi-comment-button`)) {
     makeSubstackProofClone(commentButton);
   }
 
