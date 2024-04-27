@@ -41,6 +41,8 @@ a:focus {
   /* This is the space available in the default layout, when no deep comments
      exist that push the comment section outside its right boundary. */
   --comment-max-width: 704px;
+
+  --user-icon-size: 32px;
 }
 
 .ext-comments .comment-thread {
@@ -48,7 +50,8 @@ a:focus {
 }
 
 .ext-comments .comment-thread.collapsed > .content > .comment > .comment-body,
-.ext-comments .comment-thread.collapsed > .content > .ext-comments-list {
+.ext-comments .comment-thread.collapsed > .content > .ext-comments-list,
+.ext-comments .comment-thread.collapsed > .border > img.user-icon {
   display: none;
 }
 
@@ -60,16 +63,33 @@ a:focus {
 
 .ext-comments .comment-thread > .border {
   cursor: pointer;
-  width: 16px;
   flex: 0 0 auto;
+  width: var(--user-icon-size);
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+}
+
+.ext-comments img.user-icon {
+  width: var(--user-icon-size);
+  height: var(--user-icon-size);
+  margin-bottom: 8px;
+  border-radius: 50%;
+  background: #0002;  /* applies when image is not loaded yet */
+  transition: all 0.2s;
+}
+
+.ext-comments .comment-thread > .border:hover > img.user-icon {
+  height: 0px;
+  margin-bottom: 0px;
+  transition: all 0.2s;
 }
 
 .ext-comments .comment-thread > .border > .line {
   background: var(--background_contrast_2);
   width: 2px;
-  height: 100%;
-  margin: auto;
   transition: width 0.2s;
+  flex: 1;
 }
 
 .ext-comments .comment-thread > .border:hover > .line {
@@ -78,7 +98,7 @@ a:focus {
   transition: width 0.2s;
 }
 
-.ext-comments .comment-thread .content {
+.ext-comments .comment-thread > .content {
   flex: 1;
 }
 
@@ -133,6 +153,9 @@ a:focus {
 .ext-comments .comment {
   /* Override margin applied by Substack */
   margin-top: 0px !important;
+
+  padding: 4px;
+  margin-left: 4px;
 }
 
 /* Dates */

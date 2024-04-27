@@ -1,5 +1,7 @@
 Version 0.2.3
 -------------
+
+  - Show user icons.
   - Fix the comment count (bug #2; thanks Pycea!)
 
 Version 0.2.2

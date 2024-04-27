@@ -81,6 +81,16 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
+// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
+// to request an image with corresponding resolution. The image URL seems to
+// support Cloudinary transformation parameters:
+// https://cloudinary.com/documentation/transformation_reference
+const USER_ICON_BASE_URL = (() => {
+  const pixelRatio = window.devicePixelRatio || 1;
+  const size = Math.round(32 * pixelRatio);
+  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+})();
+
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
@@ -282,10 +292,19 @@ class ExtCommentComponent {
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
     threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
+    // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
-    createElement(borderDiv, 'div', 'line');
-    // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = this.toggleExpanded.bind(this);
+    // Add profile picture to the top of the border. Some comments don't have
+    // photo_url defined. Substack renders these with some default image, but
+    // it's not entirely clear to me how these get assigned, so I decided to
+    // just omit them.
+    if (comment.photo_url) {
+      createElement(borderDiv, 'img', 'user-icon').src =
+          USER_ICON_BASE_URL + encodeURIComponent(comment.photo_url);
+    }
+    // Finally, add a vertical line that covers the remaining space.
+    createElement(borderDiv, 'div', 'line');
 
     const contentDiv = createElement(threadDiv, 'div', 'content');
     const commentDiv = createElement(contentDiv, 'div', 'comment');;
