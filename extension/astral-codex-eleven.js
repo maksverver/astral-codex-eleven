@@ -58,10 +58,9 @@ class CommentApi {
     element.after(cloned);
   }
 
-  const likeHeader = document.querySelector('.post-header .like-button-container');
-  const likeFooter = document.querySelector('.post-footer .like-button-container');
-  makeSubstackProofClone(likeHeader.nextSibling);
-  makeSubstackProofClone(likeFooter.nextSibling);
+  for (const commentButton of document.querySelectorAll('.post-header .post-ufi-comment-button')) {
+    makeSubstackProofClone(commentButton);
+  }
 
   // Exfiltrate the _preloads.post.id global variable from the real page, using
   // a custom script append to the document body after the DOM is complete. This
