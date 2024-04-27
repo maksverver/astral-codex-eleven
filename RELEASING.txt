@@ -28,21 +28,6 @@ To release a new version:
     % git push --all
 
 
-Extra notes for uploading the Firefox Add-on:
-
-To publish a new addon, Firefox requires adding the following snippet to be
-added to extension/manifest.json:
-
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "astral-codex-eleven@verver.ch"
-    }
-  }
-
-It shouldn't be necessary to include this in subsequent updates. More info:
-https://extensionworkshop.com/documentation/develop/extensions-and-the-add-on-id/
-
-
 Things to test before release:
 
   - Navigation:

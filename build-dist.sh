@@ -9,8 +9,14 @@ if [ -z "$version" ]; then
 fi
 
 output=astral-codex-eleven-${version}.zip
+output_firefox=astral-codex-eleven-${version}-firefox.zip
 
 rm -f "${output}"
 
 (cd extension && zip -9 ../"${output}" *.* images/*)
 zip -9 "${output}" LICENSE.txt
+
+cp "${output}" "${output_firefox}"
+patch extension/manifest.json firefox-manifest.patch
+(cd extension && zip -9 ../"${output-firefox}" manifest.json)
+patch -R extension/manifest.json firefox-manifest.patch
