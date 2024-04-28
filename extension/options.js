@@ -43,8 +43,16 @@ const templateOption = {
 
   /**
    * (Optional)
-   * Runs whenever a page is first loaded, even if the value of the option is
-   * falsy. Useful for applying custom CSS styling.
+   * Runs immediately when a page is first opened, even if the value of the
+   * option is falsy. Useful for applying custom CSS styling.
+   * @param {*} currentValue - the current value of the option
+   */
+  onStart: function(currentValue) {},
+
+  /**
+   * (Optional)
+   * Runs when a page is fully loaded, after DOM creation and the rest of the
+   * extension changes, even if the value of the option is falsy.
    * @param {*} currentValue - the current value of the option
    */
   onLoad: function(currentValue) {},
@@ -119,16 +127,24 @@ function initializeOptionValues() {
       optionShadow[key] = option.default;
     }
 
-    if (typeof(option.onLoad) === 'function') {
-      option.onLoad(optionShadow[key]);
+    if (typeof option.onStart === 'function') {
+      option.onStart(optionShadow[key]);
     }
   }
   saveOptions();
 }
 
+function runOptionsOnLoad() {
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (typeof option.onLoad === 'function') {
+      option.onLoad(optionShadow[key]);
+    }
+  }
+}
+
 function storageChangeHandler(changes, namespace) {
   if (namespace !== 'local' || !changes[OPTION_KEY]
-      || typeof(changes[OPTION_KEY].newValue) !== 'object') {
+      || typeof changes[OPTION_KEY].newValue !== 'object') {
     return;
   }
 
@@ -146,7 +162,7 @@ function storageChangeHandler(changes, namespace) {
 }
 
 function isValidOption(option) {
-  if (typeof(option.key) !== 'string') {
+  if (typeof option.key !== 'string') {
     return [false, 'must contain property "key" as a string'];
   }
 
@@ -154,19 +170,23 @@ function isValidOption(option) {
     return [false, 'must contain a default value'];
   }
 
-  if (option.hasOwnProperty('onValueChange') && typeof(option.onValueChange) !== 'function') {
+  if (option.hasOwnProperty('onValueChange') && typeof option.onValueChange !== 'function') {
     return [false, 'onValueChange must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onLoad') && typeof(option.onLoad) !== 'function') {
+  if (option.hasOwnProperty('onStart') && typeof option.onStart !== 'function') {
+    return [false, 'onStart must be a function if defined'];
+  }
+
+  if (option.hasOwnProperty('onLoad') && typeof option.onLoad !== 'function') {
     return [false, 'onLoad must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processComment') && typeof(option.processComment) !== 'function') {
+  if (option.hasOwnProperty('processComment') && typeof option.processComment !== 'function') {
     return [false, 'processComment must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processHeader') && typeof(option.processHeader) !== 'function') {
+  if (option.hasOwnProperty('processHeader') && typeof option.processHeader !== 'function') {
     return [false, 'processHeader must be a function if defined'];
   }
 

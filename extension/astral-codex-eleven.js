@@ -130,6 +130,8 @@ async function onLoad() {
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
+
+  runOptionsOnLoad();
 };
 
 (async function() {
