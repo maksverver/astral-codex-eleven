@@ -7,6 +7,12 @@ Nice-to-haves:
         edit/reply on a collapsed comment, and cancel the active edit/reply
         when the comment (or one of its ancestors!) is collapsed?
 
+  - Cosmetic: default icons for users without a photo_url in the comments.json
+        Currently, comments from these users simply don't have a user icon in
+        the extension, but Substack assigns them a default icon (like
+        https://substack.com/img/avatars/green.png), but it's not clear to me
+        how these are assigned to users.
+
   - Smooth scrolling when changing focus with keyboard navigation?
         I experimented a bit with using scrollIntoView({behavior:'smooth'})
         but I didn't like the way it felt.

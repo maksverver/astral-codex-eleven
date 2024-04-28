@@ -95,6 +95,25 @@ function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
 
+// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
+// `now` and `now` minus 24 hours, or returns undefined otherwise.
+function formatRecentDate(now, date) {
+  const minuteMillis = 60 * 1000;
+  const hourMillis = 60 * minuteMillis;
+  const dayMillis = 24 * hourMillis;
+  const timeAgoMillis = now - date;
+  if (timeAgoMillis < 0) return undefined;  // date is in the future?!
+  if (timeAgoMillis < hourMillis) {
+    const mins = Math.floor(timeAgoMillis / minuteMillis);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
+  }
+  if (timeAgoMillis < dayMillis) {
+    const hrs = Math.floor(timeAgoMillis / hourMillis);
+    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
+  }
+  return undefined;  // date is more than a day ago.
+}
+
 function createElement(parent, tag, className, textContent) {
   const elem = document.createElement(tag);
   if (parent) parent.appendChild(elem);
@@ -278,11 +297,13 @@ class ExtCommentComponent {
       return `https://substack.com/profile/${id}-${suffix}`;
     }
 
+    const dateNow = Date.now();
+
     function createDate(parentElem, dateString) {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'short', formatRecentDate(date, dateNow) || dateFormatShort.format(date));
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
