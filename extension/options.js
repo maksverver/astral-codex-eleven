@@ -78,9 +78,25 @@ const templateOption = {
   processComment: function(commentData, commentElem) {}
 };
 
+const defaultSortOption = {
+  key: 'defaultSort',
+  default: 'auto',
+  onLoad: function(currentValue) {
+    const orderToggle = document.querySelector('#comment-order .radio-buttons');
+    const chronoButton = orderToggle.firstChild;
+    const newButton = orderToggle.lastChild;
+    if (currentValue === 'chrono') {
+      chronoButton.click();
+    } else if (currentValue === 'new') {
+      newButton.click();
+    }
+  }
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  defaultSortOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
