@@ -85,6 +85,9 @@ const removeNagsOptions = {
     addStyle(this.key);
     setStyleEnabled(this.key, currentValue);
   },
+  onValueChange: function(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
 };
 
 // All options should be added here.
