@@ -102,9 +102,19 @@ a:focus {
   flex: 1;
 }
 
+.ext-comments .comment {
+  /* Override margin applied by Substack */
+  margin-top: 0px !important;
+
+  padding: 4px;
+  margin-left: 4px;
+  margin-right: 2px;  /* space for border on focus; see below */
+}
+
 .ext-comments .comment:focus {
   background-color: rgba(0, 0, 0, 4%);
   border-right: 2px solid #0002;
+  margin-right: 0px;
 }
 
 .ext-comments .comment:focus p {
@@ -148,14 +158,6 @@ a:focus {
 
 .ext-comments .comment .missing {
   font-style: italic;
-}
-
-.ext-comments .comment {
-  /* Override margin applied by Substack */
-  margin-top: 0px !important;
-
-  padding: 4px;
-  margin-left: 4px;
 }
 
 /* Dates */
