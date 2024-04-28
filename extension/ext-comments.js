@@ -86,7 +86,7 @@ const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/
 // support Cloudinary transformation parameters:
 // https://cloudinary.com/documentation/transformation_reference
 const USER_ICON_BASE_URL = (() => {
-  const pixelRatio = window.devicePixelRatio || 1;
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
   const size = Math.round(32 * pixelRatio);
   return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
 })();
