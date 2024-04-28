@@ -19,5 +19,5 @@ zip -9 "${output}" LICENSE.txt
 output_firefox=astral-codex-eleven-${version}-firefox.zip
 cp "${output}" "${output_firefox}"
 patch extension/manifest.json firefox-manifest.patch  # patch the manifest
-(cd extension && zip -9 ../"${output-firefox}" manifest.json)
+(cd extension && zip -9 ../"${output_firefox}" manifest.json)
 patch -R extension/manifest.json firefox-manifest.patch  # undo patch
