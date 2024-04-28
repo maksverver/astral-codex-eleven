@@ -1,0 +1,35 @@
+Nice-to-haves:
+
+  - Cosmetic: hide reply/delete/edit links after deleting a comment
+
+  - Cosmetic: currently it's possible to collapse a comment and edit it or
+        reply to it, which looks a little strange. Maybe I should disable
+        edit/reply on a collapsed comment, and cancel the active edit/reply
+        when the comment (or one of its ancestors!) is collapsed?
+
+  - Smooth scrolling when changing focus with keyboard navigation?
+        I experimented a bit with using scrollIntoView({behavior:'smooth'})
+        but I didn't like the way it felt.
+
+  - Also enable extension on comment pages?
+        Kind of tricky because the full comment page for a post already contains
+        the comments JSON baked in, so there doesn't seem to be a way to prevent
+        the Substack code from running
+
+Deferred to later/never:
+
+  - Refresh button (incremental/full refresh?)
+  - Highlight new comments (requires storing state)
+  - Change tests to use node:test and node:assert (not much benefit)
+  - Toggle to show/hide replies on a comment, without collapsing the comment itself
+  - Compatibility with Firefox for Android
+    https://extensionworkshop.com/documentation/develop/developing-extensions-for-firefox-for-android/
+  - Extension options:
+      - Date/time format (either short "May 5", full "May 5, 2024 at 11:45:12", or "x minutes ago"?)
+      - Setting to collapse comments initially.
+  - Render other metadata from the JSON:
+    - "user_banned": true
+    - "user_banned_for_comment": true
+    - "author_on_other_pub": {}
+    - "is_author": true
+  - Collapse long comments (max-height: 600px), like Substack does.
