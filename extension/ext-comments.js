@@ -494,37 +494,44 @@ class ExtCommentComponent {
     if (ev.target !== this.commentDiv) return;
     // Don't handle key events when one of these modifiers is held:
     if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
-    switch (ev.key) {
+    switch (ev.code) {
       case 'Enter':
+      case 'NumpadEnter':
         this.toggleExpanded();
         break;
 
-      case 'H':  // Move to top-level comment
-        let root = this;
-        while (root.parent) root = root.parent;
-        root.focus();
+      case 'KeyH':
+        if (ev.shiftKey) {
+          // Move to top-level comment
+          let root = this;
+          while (root.parent) root = root.parent;
+          root.focus();
+        } else {
+          // Move to parent
+          if (this.parent) this.parent.focus();
+        }
         break;
 
-      case 'J': // Move to next sibling
-        if (this.nextSibling) this.nextSibling.focus();
+      case 'KeyJ':
+        if (ev.shiftKey) {
+          // Move to next sibling
+          if (this.nextSibling) this.nextSibling.focus();
+        } else {
+          // Move to next comment
+          const next = this.findNext();
+          if (next) next.focus();
+        }
         break;
 
-      case 'K': // Move to previous sibling
-        if (this.prevSibling) this.prevSibling.focus();
-        break;
-
-      case 'h':  // Move to parent
-        if (this.parent) this.parent.focus();
-        break;
-
-      case 'j': // Move to next comment
-        const next = this.findNext();
-        if (next) next.focus();
-        break;
-
-      case 'k':  // Move to previous comment
-        const prev = this.findPrevious();
-        if (prev) prev.focus();
+      case 'KeyK':
+        if (ev.shiftKey) {
+          // Move to previous sibling
+          if (this.prevSibling) this.prevSibling.focus();
+        } else {
+          // Move to previous comment
+          const prev = this.findPrevious();
+          if (prev) prev.focus();
+        }
         break;
 
       default:
