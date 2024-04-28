@@ -321,7 +321,7 @@ class ExtCommentComponent {
     createDate(postDateLink, comment.date);
 
     if (typeof comment.edited_at === 'string') {
-      createTextNode(commentHeader, '·');
+      createElement(commentHeader, 'span', 'edited-sep', '·');
       const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator', 'edited ');
       createDate(editedIndicator, comment.edited_at);
     }
@@ -348,7 +348,7 @@ class ExtCommentComponent {
 
     // If replyHolder is created above, then enable replying to this comment:
     if (replyHolder) {
-      const replySeparator = createElement(commentHeader, 'span', undefined, '·');
+      const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
       const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
       replyLink.href = '#';
 

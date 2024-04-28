@@ -112,10 +112,36 @@ const showUserAvatarsOption = {
   }
 };
 
+const useOldStylingOption = {
+  key: 'useOldStyling',
+  default: false,
+  onLoad: function(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange: function(newValue) {
+    setStyleEnabled(this.key, newValue);
+    if (newValue) {
+      reprocessComments(this.key);
+    } else {
+      // This is slow compared to just hiding with styling, but is only done
+      // when the option value changes
+      document.querySelectorAll('.comment-footer').forEach((e) => e.remove());
+    }
+  },
+  processComment: function(commentData, commentElem) {
+    const singleComment = commentElem.querySelector(':scope > .content > .comment');
+    const footer = createElement(singleComment, 'div', 'comment-footer');
+    const reply = createElement(footer, 'a', 'reply', 'Reply');
+    reply.href = '#';
+  }
+}
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
   showUserAvatarsOption,
+  useOldStylingOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';

@@ -30,7 +30,8 @@
       ],
       "resources": [
         "filtered-comments.json",
-        "main-script.js"
+        "main-script.js",
+        "images/mochaGrunge.png"
       ]
     }
   ],

@@ -243,7 +243,7 @@ a:focus {
 
 /* Why does substack remove focus indicators from everything?! */
 .ext-comments .comment-editor textarea:focus {
-  border: 2px solid var(--background_pop) !important;
+  outline: 2px solid var(--background_pop) !important;
 }
 
 .ext-comments .comment-editor button {
