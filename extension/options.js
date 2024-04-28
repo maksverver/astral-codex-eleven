@@ -78,9 +78,19 @@ const templateOption = {
   processComment: function(commentData, commentElem) {}
 };
 
+const removeNagsOptions = {
+  key: 'removeNags',
+  default: false,
+  onStart: function(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  removeNagsOptions,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
