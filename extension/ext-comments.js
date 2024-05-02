@@ -443,9 +443,17 @@ class ExtCommentComponent {
 
   setExpanded(expanded) {
     expanded = Boolean(expanded);
+    if (expanded === this.expanded) return;
     this.expanded = expanded;
     this.threadDiv.classList.toggle('collapsed', !expanded);
     this.threadDiv.classList.toggle('expanded', expanded);
+
+    // Ensure the comment is in view, to avoid scrolling past comments below a
+    // collapsed thread. (This also applies to expanding, for consistency.)
+    // See: https://github.com/maksverver/astral-codex-eleven/issues/3
+    if (this.commentDiv.getBoundingClientRect().top < 0) {
+      this.commentDiv.scrollIntoView();
+    }
   }
 
   toggleExpanded() {
