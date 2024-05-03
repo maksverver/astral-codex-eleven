@@ -9,7 +9,8 @@ if [ -z "$version" ]; then
 fi
 
 output=astral-codex-eleven-${version}.zip
-rm -f "${output}"
+echo "Creating ${output}"
+rm -f -- "${output}"
 (cd extension && zip -9 ../"${output}" *.* images/*)
 zip -9 "${output}" LICENSE.txt
 
@@ -17,7 +18,8 @@ zip -9 "${output}" LICENSE.txt
 # a separate zip file just for Firefox here, with a patched manifest. See:
 # https://extensionworkshop.com/documentation/develop/extensions-and-the-add-on-id/
 output_firefox=astral-codex-eleven-${version}-firefox.zip
-cp "${output}" "${output_firefox}"
+echo "Creating ${output_firefox}"
+cp -- "${output}" "${output_firefox}"
 patch extension/manifest.json firefox-manifest.patch  # patch the manifest
 (cd extension && zip -9 ../"${output_firefox}" manifest.json)
 patch -R extension/manifest.json firefox-manifest.patch  # undo patch
