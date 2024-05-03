@@ -24,10 +24,10 @@ To release a new version:
 
  7. Commit the changes to CHANGELOG.txt and manifest.json
 
- 8. Create a git tag (make sure manifest.json )
+ 8. Create a git tag
 
     % git tag v0.1     # replace v0.1 with the current version
-    % git push --all
+    % git push --follow-tags
 
 
 Things to test before release:
