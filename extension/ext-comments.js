@@ -84,8 +84,37 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
+// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
+// to request an image with corresponding resolution. The image URL seems to
+// support Cloudinary transformation parameters:
+// https://cloudinary.com/documentation/transformation_reference
+const USER_ICON_BASE_URL = (() => {
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+  const size = Math.round(32 * pixelRatio);
+  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+})();
+
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
+}
+
+// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
+// `now` and `now` minus 24 hours, or returns undefined otherwise.
+function formatRecentDate(now, date) {
+  const minuteMillis = 60 * 1000;
+  const hourMillis = 60 * minuteMillis;
+  const dayMillis = 24 * hourMillis;
+  const timeAgoMillis = now - date;
+  if (timeAgoMillis < 0) return undefined;  // date is in the future?!
+  if (timeAgoMillis < hourMillis) {
+    const mins = Math.floor(timeAgoMillis / minuteMillis);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
+  }
+  if (timeAgoMillis < dayMillis) {
+    const hrs = Math.floor(timeAgoMillis / hourMillis);
+    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
+  }
+  return undefined;  // date is more than a day ago.
 }
 
 function createElement(parent, tag, className, textContent) {
@@ -279,11 +308,13 @@ class ExtCommentComponent {
       return `https://substack.com/profile/${id}-${suffix}`;
     }
 
+    const dateNow = Date.now();
+
     function createDate(parentElem, dateString) {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'short', formatRecentDate(dateNow, date) || dateFormatShort.format(date));
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
@@ -293,10 +324,19 @@ class ExtCommentComponent {
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
     threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
+    // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
-    createElement(borderDiv, 'div', 'line');
-    // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = this.toggleExpanded.bind(this);
+    // Add profile picture to the top of the border. Some comments don't have
+    // photo_url defined. Substack renders these with some default image, but
+    // it's not entirely clear to me how these get assigned, so I decided to
+    // just omit them.
+    if (comment.photo_url) {
+      createElement(borderDiv, 'img', 'user-icon').src =
+          USER_ICON_BASE_URL + encodeURIComponent(comment.photo_url);
+    }
+    // Finally, add a vertical line that covers the remaining space.
+    createElement(borderDiv, 'div', 'line');
 
     const contentDiv = createElement(threadDiv, 'div', 'content');
     const commentDiv = createElement(contentDiv, 'div', 'comment');;
@@ -437,9 +477,17 @@ class ExtCommentComponent {
 
   setExpanded(expanded) {
     expanded = Boolean(expanded);
+    if (expanded === this.expanded) return;
     this.expanded = expanded;
     this.threadDiv.classList.toggle('collapsed', !expanded);
     this.threadDiv.classList.toggle('expanded', expanded);
+
+    // Ensure the comment is in view, to avoid scrolling past comments below a
+    // collapsed thread. (This also applies to expanding, for consistency.)
+    // See: https://github.com/maksverver/astral-codex-eleven/issues/3
+    if (this.commentDiv.getBoundingClientRect().top < 0) {
+      this.commentDiv.scrollIntoView();
+    }
   }
 
   toggleExpanded() {
@@ -488,37 +536,44 @@ class ExtCommentComponent {
     if (ev.target !== this.commentDiv) return;
     // Don't handle key events when one of these modifiers is held:
     if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
-    switch (ev.key) {
+    switch (ev.code) {
       case 'Enter':
+      case 'NumpadEnter':
         this.toggleExpanded();
         break;
 
-      case 'H':  // Move to top-level comment
-        let root = this;
-        while (root.parent) root = root.parent;
-        root.focus();
+      case 'KeyH':
+        if (ev.shiftKey) {
+          // Move to top-level comment
+          let root = this;
+          while (root.parent) root = root.parent;
+          root.focus();
+        } else {
+          // Move to parent
+          if (this.parent) this.parent.focus();
+        }
         break;
 
-      case 'J': // Move to next sibling
-        if (this.nextSibling) this.nextSibling.focus();
+      case 'KeyJ':
+        if (ev.shiftKey) {
+          // Move to next sibling
+          if (this.nextSibling) this.nextSibling.focus();
+        } else {
+          // Move to next comment
+          const next = this.findNext();
+          if (next) next.focus();
+        }
         break;
 
-      case 'K': // Move to previous sibling
-        if (this.prevSibling) this.prevSibling.focus();
-        break;
-
-      case 'h':  // Move to parent
-        if (this.parent) this.parent.focus();
-        break;
-
-      case 'j': // Move to next comment
-        const next = this.findNext();
-        if (next) next.focus();
-        break;
-
-      case 'k':  // Move to previous comment
-        const prev = this.findPrevious();
-        if (prev) prev.focus();
+      case 'KeyK':
+        if (ev.shiftKey) {
+          // Move to previous sibling
+          if (this.prevSibling) this.prevSibling.focus();
+        } else {
+          // Move to previous comment
+          const prev = this.findPrevious();
+          if (prev) prev.focus();
+        }
         break;
 
       default:
