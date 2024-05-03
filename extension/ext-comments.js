@@ -303,7 +303,7 @@ class ExtCommentComponent {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', formatRecentDate(date, dateNow) || dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'short', formatRecentDate(dateNow, date) || dateFormatShort.format(date));
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
