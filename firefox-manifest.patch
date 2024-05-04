@@ -1,0 +1,16 @@
+diff --git a/extension/manifest.json b/extension/manifest.json
+index e9c07bd..872ef6b 100644
+--- a/extension/manifest.json
++++ b/extension/manifest.json
+@@ -51,5 +51,10 @@
+       ],
+       "run_at": "document_end"
+     }
+-  ]
++  ],
++  "browser_specific_settings": {
++    "gecko": {
++      "id": "astral-codex-eleven@verver.ch"
++    }
++  }
+ }

@@ -44,9 +44,31 @@ class CommentApi {
   }
 }
 
-(async function(){
+async function loadOptions() {
+  await loadSavedOptions();
+  initializeOptionValues();
+  chrome.storage.onChanged.addListener(storageChangeHandler);
+}
+
+async function onLoad() {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
+
+  // Hack to keep the displayed number of comments correct. As all of substack's
+  // API requests are redirected, it thinks there's only 1 comment. If we just
+  // change the content of the element, then substack overwrites our changes, so
+  // we clone the element and hide the original.
+  function makeSubstackProofClone(element) {
+    const cloned = element.cloneNode(true);
+    element.style.display = 'none';
+    element.after(cloned);
+  }
+
+  for (const commentButton of document.querySelectorAll(`
+      .post-header .post-ufi-comment-button,
+      .post-footer .post-ufi-comment-button`)) {
+    makeSubstackProofClone(commentButton);
+  }
 
   // Exfiltrate the _preloads.post.id global variable from the real page, using
   // a custom script append to the document body after the DOM is complete. This
@@ -59,10 +81,6 @@ class CommentApi {
     scriptElem.src = chrome.runtime.getURL('main-script.js');
     document.body.appendChild(scriptElem);
   });
-
-  await loadSavedOptions();
-  initializeOptionValues();
-  chrome.storage.onChanged.addListener(storageChangeHandler);
 
   if (!postId) {
     console.warn(LOG_TAG, "postId not defined! Can't continue.");
@@ -116,15 +134,23 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
-  const commentModifiers = Object.values(OPTIONS).filter((e) => e.processComment);
-
-  const headerModifiers = Object.values(OPTIONS).filter((e) => e.processHeader);
+  const options = Object.values(OPTIONS);
+  const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+  const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
+  const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
 
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, commentModifiers, headerModifiers});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, optionApiFuncs});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
+
+  runOptionsOnLoad();
+};
+
+(async function() {
+  document.addEventListener('DOMContentLoaded', onLoad);
+  await loadOptions();
 })();
