@@ -54,6 +54,22 @@ async function onLoad() {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
 
+  // Hack to keep the displayed number of comments correct. As all of substack's
+  // API requests are redirected, it thinks there's only 1 comment. If we just
+  // change the content of the element, then substack overwrites our changes, so
+  // we clone the element and hide the original.
+  function makeSubstackProofClone(element) {
+    const cloned = element.cloneNode(true);
+    element.style.display = 'none';
+    element.after(cloned);
+  }
+
+  for (const commentButton of document.querySelectorAll(`
+      .post-header .post-ufi-comment-button,
+      .post-footer .post-ufi-comment-button`)) {
+    makeSubstackProofClone(commentButton);
+  }
+
   // Exfiltrate the _preloads.post.id global variable from the real page, using
   // a custom script append to the document body after the DOM is complete. This
   // is necessary because in the ISOLATED world we don't have direct access to
@@ -119,8 +135,8 @@ async function onLoad() {
   const commentApi = new CommentApi(postId);
 
   const options = Object.values(OPTIONS);
-  const headerFuncs = options.filter((e) => e.processHeader);
-  const commentFuncs = options.filter((e) => e.processComment);
+  const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+  const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
   const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
 
   {

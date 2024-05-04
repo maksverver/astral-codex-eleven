@@ -1,8 +1,31 @@
+Version 0.2.4
+-------------
+
+  - Show relative times for recent comments (e.g., “x mins ago”, or ”y hrs ago”)
+  - Change keyboard navigation to use physical key locations.
+  - Don't scroll past comments when collapsing a large thread (bug #3)
+
+
+Version 0.2.3
+-------------
+
+  - Show user icons.
+  - Fix the comment count (bug #2; thanks Pycea!)
+
+
+Version 0.2.2
+-------------
+
+  - Fixed bug where replies to a thread with "New First" comment order would
+    incorrectly appear at the bottom instead of the top of the thread.
+
+
 Version 0.2.1
 -------------
 
   - Respect default comment ordering.
   - Minor cosmetic improvements.
+
 
 Version 0.2.0
 -------------

@@ -27,6 +27,16 @@ function createChangeHandler(optionElement) {
   }
 }
 
+// Looks for structures in popup.html of the form:
+//
+// <div id="templateKey" class="option">
+//   <input type="checkbox" id="templateKeyCheck" class="trigger check">
+//   <label for="templateKeyCheck">Option description</label>
+// </div>
+//
+// Option wrappers have the class `option`, and the input element has the class
+// `trigger` plus one of `check` or `text` depending on if the value is a bool
+// or a string. The label is optionally used for checkbox inputs.
 window.addEventListener('DOMContentLoaded', async () => {
   await loadSavedOptions();
 
