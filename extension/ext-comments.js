@@ -463,14 +463,14 @@ class ExtCommentComponent {
     for (const option of this.optionFuncs.headerFuncs) {
       if (keys && !keys.includes(option.key)) continue;
       if (optionShadow[option.key]) {
-        option.processHeader.bind(this)(this.commentData, this.headerDiv);
+        option.processHeader(this.commentData, this.headerDiv);
       }
     }
 
     for (const option of this.optionFuncs.commentFuncs) {
       if (keys && !keys.includes(option.key)) continue;
       if (optionShadow[option.key]) {
-        option.processComment.bind(this)(this.commentData, this.threadDiv);
+        option.processComment(this.commentData, this.threadDiv);
       }
     }
   }

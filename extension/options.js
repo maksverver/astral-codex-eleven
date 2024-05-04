@@ -6,8 +6,9 @@
  * new option, create an object with the following fields and add it to
  * optionArray.
  *
- * The value of `this` is set to the calling ExtCommentComponent object. As
- * such, API functions should not use arrow function expressions.
+ * The value of `this` in each function will refer to the option object itself
+ * as long as arrow function expressions are not used. For this reason, arrow
+ * expressions are discouraged when defining options.
  *
  * The value of the option must be truthy in order for processHeader and
  * processComment to be run. onLoad is called for every option when the page is
@@ -39,7 +40,7 @@ const templateOption = {
    * This will be called any time the option changes value.
    * @param {*} newValue - the new value of the option
    */
-  onValueChange: function(newValue) {},
+  onValueChange(newValue) {},
 
   /**
    * (Optional)
@@ -47,35 +48,35 @@ const templateOption = {
    * option is falsy. Useful for applying custom CSS styling.
    * @param {*} currentValue - the current value of the option
    */
-  onStart: function(currentValue) {},
+  onStart(currentValue) {},
 
   /**
    * (Optional)
-   * Runs when a page is fully loaded, after DOM creation and the rest of the
-   * extension changes, even if the value of the option is falsy.
+   * Runs when a page is fully loaded, after the DOM is created and the rest of
+   * the extension changes are made, even if the value of the option is falsy.
    * @param {*} currentValue - the current value of the option
    */
-  onLoad: function(currentValue) {},
+  onLoad(currentValue) {},
 
   /**
    * (Optional)
-   * Applied to the header DOM element of each comment. The element itself
-   * should be modified directly, as any return value is discarded. This only
-   * runs if the current value of the option is truthy.
+   * Applied to the header DOM element of each comment (`.comment-meta`). The
+   * element itself should be modified directly, as any return value is
+   * discarded. This only runs if the current value of the option is truthy.
    * @param commentData - the current comment data as JSON
    * @param {Element} headerElem - the DOM element of the header
    */
-  processHeader: function(commentData, headerElem) {},
+  processHeader(commentData, headerElem) {},
 
   /**
    * (Optional)
-   * Applied to the comment DOM element of each comment. The element itself
-   * should be modified directly, as any return value is discarded. This only
-   * runs if the current value of the option is truthy.
+   * Applied to the comment DOM element of each comment (`.comment-thread`). The
+   * element itself should be modified directly, as any return value is
+   * discarded. This only runs if the current value of the option is truthy.
    * @param commentData - the current comment data as JSON
    * @param {Element} commentElem - the DOM element of the comment
    */
-  processComment: function(commentData, commentElem) {}
+  processComment(commentData, commentElem) {}
 };
 
 // All options should be added here.
