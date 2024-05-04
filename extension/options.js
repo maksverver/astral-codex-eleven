@@ -11,13 +11,13 @@
  * expressions are discouraged when defining options.
  *
  * The value of the option must be truthy in order for processHeader and
- * processComment to be run. onLoad is called for every option when the page is
- * first loaded, and is passed the current value, so checking that the option is
- * set is required.
+ * processComment to be run. onStart and onLoad are called for every option when
+ * the page is first loaded, and are passed the current value, so checking the
+ * current value of the option is required.
  *
  * The order when processing a comment is:
- *   - processHeader
- *   - processComment
+ *   1 processHeader
+ *   2 processComment
  */
 
 const templateOption = {
@@ -26,7 +26,7 @@ const templateOption = {
    * The key for this option. Must be unique, and will be how the option is
    * stored in local storage and accessed from the popup.
    */
-  key: "template-key",
+  key: "templateKey",
 
   /**
    * (Required)
@@ -87,6 +87,7 @@ const optionArray = [
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = "acxi-options";
 
+// Holder class for enabled header and comment functions
 class OptionApiFuncs {
   constructor(headerFuncs, commentFuncs) {
     this.headerFuncs = headerFuncs ?? [];
@@ -119,7 +120,7 @@ async function saveOptions() {
 
 async function setOption(key, value) {
   optionShadow[key] = value;
-  return await saveOptions();
+  await saveOptions();
 }
 
 function initializeOptionValues() {
@@ -128,7 +129,7 @@ function initializeOptionValues() {
       optionShadow[key] = option.default;
     }
 
-    if (typeof option.onStart === 'function') {
+    if (option.onStart instanceof Function) {
       option.onStart(optionShadow[key]);
     }
   }
@@ -137,7 +138,7 @@ function initializeOptionValues() {
 
 function runOptionsOnLoad() {
   for (const [key, option] of Object.entries(OPTIONS)) {
-    if (typeof option.onLoad === 'function') {
+    if (option.onLoad instanceof Function) {
       option.onLoad(optionShadow[key]);
     }
   }
@@ -171,23 +172,23 @@ function isValidOption(option) {
     return [false, 'must contain a default value'];
   }
 
-  if (option.hasOwnProperty('onValueChange') && typeof option.onValueChange !== 'function') {
+  if (option.hasOwnProperty('onValueChange') && !(option.onValueChange instanceof Function)) {
     return [false, 'onValueChange must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onStart') && typeof option.onStart !== 'function') {
+  if (option.hasOwnProperty('onStart') && !(option.onStart instanceof Function)) {
     return [false, 'onStart must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onLoad') && typeof option.onLoad !== 'function') {
+  if (option.hasOwnProperty('onLoad') && !(option.onLoad instanceof Function)) {
     return [false, 'onLoad must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processComment') && typeof option.processComment !== 'function') {
+  if (option.hasOwnProperty('processComment') && !(option.processComment instanceof Function)) {
     return [false, 'processComment must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processHeader') && typeof option.processHeader !== 'function') {
+  if (option.hasOwnProperty('processHeader') && !(option.processHeader instanceof Function)) {
     return [false, 'processHeader must be a function if defined'];
   }
 

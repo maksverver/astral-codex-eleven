@@ -184,6 +184,8 @@ class ExtCommentListComponent {
   // If given, keys is an array of keys to call API functions on. Otherwise, all
   // keys are processed.
   processAllChildren(keys) {
+    if (Array.isArray(keys) && keys.length === 0) return;
+
     for (let child of this.children) {
       child.processSelfAndChildren(keys);
     }

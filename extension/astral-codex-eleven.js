@@ -135,8 +135,8 @@ async function onLoad() {
   const commentApi = new CommentApi(postId);
 
   const options = Object.values(OPTIONS);
-  const headerFuncs = options.filter((e) => e.processHeader);
-  const commentFuncs = options.filter((e) => e.processComment);
+  const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+  const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
   const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
 
   {
