@@ -1,5 +1,43 @@
 'use strict';
 
+function addHovertext(optionElement) {
+  const id = optionElement.id;
+  const iconUri = chrome.runtime.getURL('icons/questionmark.svg');
+  const icon = document.createElement('img');
+  icon.src = iconUri;
+  icon.className = 'help-icon';
+  const tooltip = document.createElement('span');
+  tooltip.id = `${id}-tooltip`;
+  tooltip.className = 'tooltip';
+  tooltip.textContent = OPTIONS[id]?.hovertext;
+  tooltip.style.display = 'none';
+  optionElement.appendChild(icon);
+  document.getElementById('tooltips').appendChild(tooltip);
+
+  icon.addEventListener('mouseover', function() {
+    tooltip.style.display = 'inline';
+
+    const windowHeight = window.innerHeight;
+    const tooltipHeight = tooltip.offsetHeight;
+    const iconTop = this.getBoundingClientRect().top;
+    const iconBottom = this.getBoundingClientRect().bottom;
+    const topSpace = iconTop - tooltipHeight;
+    const bottomSpace = windowHeight - iconBottom - tooltipHeight;
+
+    if (topSpace >= 8) {
+      tooltip.style.top = `${iconTop - tooltipHeight - 4}px`;
+    } else if (bottomSpace >= 8) {
+      tooltip.style.top = `${iconBottom + 4}px`;
+    } else {
+      tooltip.style.top = '4px';
+    }
+  });
+
+  icon.addEventListener('mouseout', () => {
+    tooltip.style.display = 'none';
+  });
+}
+
 async function setInitialState(optionElement) {
   let id = optionElement.id;
   let input = optionElement.querySelector('.trigger');
@@ -41,6 +79,7 @@ window.addEventListener('DOMContentLoaded', async () => {
   await loadSavedOptions();
 
   for (const optionElement of document.querySelectorAll('.option')) {
+    addHovertext(optionElement);
     setInitialState(optionElement);
     createChangeHandler(optionElement);
   }

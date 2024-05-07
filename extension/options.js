@@ -36,6 +36,13 @@ const templateOption = {
   default: true,
 
   /**
+   * (Required)
+   * Hovertext that describes what the option does in more detail. This will be
+   * shown in the option panel when the user hovers over the question mark.
+   */
+  hovertext: 'a template for other options to follow',
+
+  /**
    * (Optional)
    * This will be called any time the option changes value.
    * @param {*} newValue - the new value of the option
@@ -170,6 +177,10 @@ function isValidOption(option) {
 
   if (!option.hasOwnProperty('default')) {
     return [false, 'must contain a default value'];
+  }
+
+  if (typeof option.hovertext !== 'string' || option.hovertext.length === 0) {
+    return [false, 'hovertext is required'];
   }
 
   if (option.hasOwnProperty('onValueChange') && !(option.onValueChange instanceof Function)) {
