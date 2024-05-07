@@ -120,6 +120,5 @@ function setUserId(value) {
   repopulate();
 }
 
-(function() {
-  setUpCommentOptions();
-}())
+// Initialization.
+setUpCommentOptions();
