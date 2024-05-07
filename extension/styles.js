@@ -6,7 +6,7 @@ const STYLES = {
     button[data-testid='noncontributor-cta-button'],
     .end-of-post-recommend-cta-container,
     .post-end-cta-full {
-      display: none;
+      display: none !important;
     }
   `,
 };
