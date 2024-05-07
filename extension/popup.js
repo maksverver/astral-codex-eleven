@@ -1,9 +1,9 @@
 'use strict';
 
 async function setInitialState(optionElement) {
-  let id = optionElement.id;
-  let input = optionElement.querySelector('.trigger');
-  let setValue = optionShadow[id];
+  const id = optionElement.id;
+  const input = optionElement.querySelector('.trigger');
+  const setValue = optionShadow[id];
 
   if (input.classList.contains('check')) {
     input.checked = setValue;
@@ -13,8 +13,8 @@ async function setInitialState(optionElement) {
 }
 
 function createChangeHandler(optionElement) {
-  let id = optionElement.id;
-  let input = optionElement.querySelector('.trigger');
+  const id = optionElement.id;
+  const input = optionElement.querySelector('.trigger');
 
   if (input.classList.contains('check')) {
     input.addEventListener('change', () => {
