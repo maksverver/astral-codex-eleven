@@ -1,6 +1,6 @@
 'use strict';
 
-async function setInitialState(optionElement) {
+function setInitialState(optionElement) {
   const id = optionElement.id;
   const input = optionElement.querySelector('.trigger');
   const setValue = optionShadow[id];
