@@ -82,11 +82,11 @@ const templateOption = {
 const useOldStylingOption = {
   key: 'useOldStyling',
   default: false,
-  onLoad: function(currentValue) {
+  onStart(currentValue) {
     addStyle(this.key);
     setStyleEnabled(this.key, currentValue);
   },
-  onValueChange: function(newValue) {
+  onValueChange(newValue) {
     setStyleEnabled(this.key, newValue);
     if (newValue) {
       reprocessComments(this.key);
@@ -96,7 +96,7 @@ const useOldStylingOption = {
       document.querySelectorAll('.comment-footer').forEach((e) => e.remove());
     }
   },
-  processComment: function(commentData, commentElem) {
+  processComment(commentData, commentElem) {
     const singleComment = commentElem.querySelector(':scope > .content > .comment');
     const footer = createElement(singleComment, 'div', 'comment-footer');
     const reply = createElement(footer, 'a', 'reply', 'Reply');

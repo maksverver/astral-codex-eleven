@@ -271,7 +271,7 @@ const STYLES = {
       border: 1px solid var(--background_pop) !important;
     }
 
-    .ext-comments .avatar {
+    .ext-comments .border img.user-icon {
       display: block;
       border-radius: 0px;
       height: 41px;
@@ -282,19 +282,28 @@ const STYLES = {
       padding: 0;
     }
 
-    .ext-comments .comment-thread > .comment-head {
+    .ext-comments .comment-thread > .border {
       margin-right: 8px !important;
-    }
-
-    .ext-comments .comment-thread > .comment-head > .border {
       margin-top: 4px;
-      height: calc(100% - 41px - 4px);
       width: 41px;
     }
 
-    .ext-comments .comment-thread > .comment-head > .border:hover > .line {
+    .ext-comments .comment-thread > .border:hover > .line {
       width: 2px;
       background: #ddd;
+    }
+
+    .ext-comments .comment-thread > .border:hover > img.user-icon {
+      height: initial !important;
+      margin-bottom: 8px !important;
+    }
+
+    .ext-comments .comment-thread.collapsed > .border .line {
+      display: none;
+    }
+
+    .ext-comments .comment-thread.collapsed > .border .user-icon {
+      display: initial !important;
     }
 
 
