@@ -9,10 +9,19 @@
 
 <body class="dark">
     <div id="wrapper">
-        <div class="heading">General</div>
+        <div class="heading">General Options</div>
         <div id="zenMode" class="option">
             <input type="checkbox" id="zenModeCheck" class="trigger check">
             <label for="zenModeCheck">Zen mode</label>
+        </div>
+        <div class="heading">Comment Options</div>
+        <div id="defaultSort" class="option">
+            <select id="defaultSortSelect" class="trigger text">
+                <option value="auto">Auto</option>
+                <option value="chrono">Chronological</option>
+                <option value="new">New First</option>
+            </select>
+            <label>Default comment sorting</label>
         </div>
     </div>
 </body>

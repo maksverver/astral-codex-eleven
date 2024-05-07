@@ -79,6 +79,18 @@ const templateOption = {
   processComment(commentData, commentElem) {}
 };
 
+const defaultSortOption = {
+  key: 'defaultSort',
+  default: 'auto',
+  onLoad(currentValue) {
+    if (currentValue === 'chrono') {
+      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
+    } else if (currentValue === 'new') {
+      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
+    }
+  }
+};
+
 const zenModeOption = {
   key: 'zenMode',
   default: false,
@@ -94,6 +106,7 @@ const zenModeOption = {
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  defaultSortOption,
   zenModeOption,
 ];
 
