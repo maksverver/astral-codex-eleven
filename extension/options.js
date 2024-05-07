@@ -82,12 +82,21 @@ const templateOption = {
 const hideUsersOption = {
   key: 'hideUsers',
   default: '',
-  onLoad(currentValue) {
-    this.cachedSet = new Set(currentValue.split(',').map((e) => e.trim()).filter((x) => x));
+  createCachedSet(userString) {
+    this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
+  },
+  onValueChange(newValue) {
+    this.createCachedSet(newValue);
+    reprocessComments(this.key);
+  },
+  onStart(currentValue) {
+    this.createCachedSet(currentValue);
   },
   processComment(commentData, commentElem) {
     if (this.cachedSet.has(commentData.name)) {
       commentElem.classList.add('hidden');
+    } else {
+      commentElem.classList.remove('hidden');
     }
   }
 };
