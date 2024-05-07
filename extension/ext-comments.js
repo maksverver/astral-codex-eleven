@@ -320,6 +320,21 @@ class ExtCommentComponent {
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
+    function createAvatarElement(parentElem, commentData) {
+      function getDefaultAvatar(userId) {
+        const colors = ['purple', 'yellow', 'orange', 'green', 'black'];
+        const color = userId ? colors[userId % colors.length] : 'logged-out';
+        return `https://substack.com/img/avatars/${color}.png`;
+      }
+      function getAvatarUrl() {
+        const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
+        const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill/';
+        return baseUrl + encodeURIComponent(photoUrl);
+      }
+      const avatar = createElement(parentElem, 'img', 'user-icon');
+      avatar.src = getAvatarUrl();
+    }
+
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
     const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
 
@@ -329,14 +344,8 @@ class ExtCommentComponent {
     // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
     borderDiv.onclick = this.toggleExpanded.bind(this);
-    // Add profile picture to the top of the border. Some comments don't have
-    // photo_url defined. Substack renders these with some default image, but
-    // it's not entirely clear to me how these get assigned, so I decided to
-    // just omit them.
-    if (comment.photo_url) {
-      createElement(borderDiv, 'img', 'user-icon').src =
-          USER_ICON_BASE_URL + encodeURIComponent(comment.photo_url);
-    }
+    // Add profile picture to the top of the border.
+    createAvatarElement(borderDiv, comment);
     // Finally, add a vertical line that covers the remaining space.
     createElement(borderDiv, 'div', 'line');
 
