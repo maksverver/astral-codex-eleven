@@ -194,6 +194,12 @@ function initializeOptionValues() {
   saveOptions();
 }
 
+async function loadOptions() {
+  await loadSavedOptions();
+  initializeOptionValues();
+  chrome.storage.onChanged.addListener(storageChangeHandler);
+}
+
 function runOptionsOnLoad() {
   for (const [key, option] of Object.entries(OPTIONS)) {
     if (option.onLoad instanceof Function) {
