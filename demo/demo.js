@@ -4,6 +4,28 @@ const fileInput = document.getElementById('file-input');;
 const rootDiv = document.getElementById('ext-comments');
 let comments = undefined;
 
+function setUpCommentOptions() {
+  const optionContainer = document.getElementById('comment-options');
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    optionShadow[key] = option.default;
+    const input = document.createElement('input');
+    if (typeof option.default === 'boolean') {
+      input.type = 'checkbox';
+    } else {
+      input.type = 'text';
+    }
+    input.id = `${key}-input`;
+    input.addEventListener('change', (event) => {
+      optionShadow[key] = event.target.value;
+      option?.onValueChange(event.target.value);
+    });
+    const label = document.createElement('label');
+    label.textContent = key;
+    label.htmlFor = `${key}-input`;
+    optionContainer.append(input, label);
+  }
+}
+
 function isCommentApiEnabled() {
   return document.getElementById('comment-api-enabled').checked;
 }
@@ -93,3 +115,7 @@ function setUserId(value) {
   replaceCommentOptions.userId = value;
   repopulate();
 }
+
+(function() {
+  setUpCommentOptions();
+}())
