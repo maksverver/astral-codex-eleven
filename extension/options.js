@@ -83,13 +83,10 @@ const defaultSortOption = {
   key: 'defaultSort',
   default: 'auto',
   onLoad(currentValue) {
-    const orderToggle = document.querySelector('#comments-for-scroll .comment-order .radio-buttons');
-    const chronoButton = orderToggle.firstChild;
-    const newButton = orderToggle.lastChild;
     if (currentValue === 'chrono') {
-      chronoButton.click();
+      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
     } else if (currentValue === 'new') {
-      newButton.click();
+      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
     }
   }
 };

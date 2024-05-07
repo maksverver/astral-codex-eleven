@@ -16,7 +16,7 @@ let replaceCommentOptions = {
   ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
   collapseDepth: 3,
   dateFormatShort: longerDateFormat,
-  newFirst: false,
+  commentOrder: CommentOrder.CHRONOLOGICAL,
   commentApi: {
     async createComment(parentId, body) {
       if (!isCommentApiEnabled()) {
@@ -73,7 +73,8 @@ function setDateFormat(value) {
 }
 
 function setCommentOrder(value) {
-  replaceCommentOptions.newFirst = value === 'most_recent_first';
+  replaceCommentOptions.commentOrder =
+      value === 'most_recent_first' ? CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
   repopulate();
 }
 
