@@ -8,7 +8,8 @@
     "128": "images/icon-128x128.png"
   },
   "permissions": [
-    "declarativeNetRequestWithHostAccess"
+    "declarativeNetRequestWithHostAccess",
+    "storage"
   ],
   "host_permissions": [
     "*://www.astralcodexten.com/p/*"
@@ -46,10 +47,16 @@
         "ext-comments.css"
       ],
       "js": [
+        "styles.js",
+        "options.js",
         "ext-comments.js",
         "astral-codex-eleven.js"
       ],
-      "run_at": "document_end"
+      "run_at": "document_start"
     }
-  ]
+  ],
+  "action": {
+    "default_popup": "popup.html",
+    "default_title": "ACXI"
+  }
 }

@@ -44,7 +44,13 @@ class CommentApi {
   }
 }
 
-(async function(){
+async function loadOptions() {
+  await loadSavedOptions();
+  initializeOptionValues();
+  chrome.storage.onChanged.addListener(storageChangeHandler);
+}
+
+async function onLoad() {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
 
@@ -128,11 +134,23 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
+  const options = Object.values(OPTIONS);
+  const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+  const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
+  const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
+
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, optionApiFuncs});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
+
+  runOptionsOnLoad();
+};
+
+(async function() {
+  document.addEventListener('DOMContentLoaded', onLoad);
+  await loadOptions();
 })();

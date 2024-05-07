@@ -16,6 +16,9 @@ function countCommentsInArray(comments) {
   return n;
 }
 
+// Holds the root ExtCommentListComponent.
+let commentListRoot;
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -177,6 +180,16 @@ class ExtCommentListComponent {
     this.reverseSelfOnly();
     for (const child of this.children) child.reverse();
   }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processAllChildren(keys) {
+    if (Array.isArray(keys) && keys.length === 0) return;
+
+    for (let child of this.children) {
+      child.processSelfAndChildren(keys);
+    }
+  }
 }
 
 const EMPTY_STRING_PROVIDER = () => '';
@@ -227,7 +240,7 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {collapseDepth, dateFormatShort, dateFormatLong} = options;
+    const {collapseDepth, dateFormatShort, dateFormatLong, optionApiFuncs} = options;
 
     // Creates DOM nodes for the given comment text, and appends them to the
     // given parent element. This tries to mirror how Substack seems to process
@@ -431,7 +444,10 @@ class ExtCommentComponent {
       };
     }
 
+    this.commentData = comment;
+    this.optionFuncs = optionApiFuncs;
     this.threadDiv   = threadDiv;
+    this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
@@ -439,6 +455,26 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = childCommentList;
+
+    this.doOptionApiFunctions();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  doOptionApiFunctions(keys) {
+    for (const option of this.optionFuncs.headerFuncs) {
+      if (keys && !keys.includes(option.key)) continue;
+      if (optionShadow[option.key]) {
+        option.processHeader(this.commentData, this.headerDiv);
+      }
+    }
+
+    for (const option of this.optionFuncs.commentFuncs) {
+      if (keys && !keys.includes(option.key)) continue;
+      if (optionShadow[option.key]) {
+        option.processComment(this.commentData, this.threadDiv);
+      }
+    }
   }
 
   setExpanded(expanded) {
@@ -552,6 +588,13 @@ class ExtCommentComponent {
 
   reverse() {
     this.childList.reverse();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processSelfAndChildren(keys) {
+    this.doOptionApiFunctions(keys);
+    this.childList.processAllChildren(keys);
   }
 }
 
@@ -688,6 +731,9 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
+  // Holder for all option API functions
+  optionApiFuncs: new OptionApiFuncs(),
+
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED
 });
@@ -713,7 +759,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     let currentOrder = options.newFirst ? 1 : 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {
-        commentList.reverse();
+        commentListRoot.reverse();
         currentOrder = i;
       }
     }).change(currentOrder);
@@ -722,11 +768,11 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');
 
   // Add the top-level comments list.
-  const commentList = new ExtCommentListComponent(rootElem, comments, undefined, options);
+  commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
 
   if (addCommentLink) {
     enableCommentReply(
           addCommentLink, replyHolder, [addCommentLink],
-          commentList, undefined, undefined, options);
+          commentListRoot, undefined, undefined, options);
   }
 }

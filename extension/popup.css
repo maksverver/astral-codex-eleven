@@ -1,0 +1,44 @@
+body {
+    font-family: sans-serif;
+    font-size: .75em;
+    user-select: none;
+    width: 325px;
+    overflow-x: hidden;
+    scrollbar-width: none;
+}
+
+body::-webkit-scrollbar {
+    width: 0;
+    height: 0;
+}
+
+#wrapper div {
+    white-space: nowrap;
+}
+
+.heading {
+    margin-left: 4px;
+    font-weight: bold;
+}
+
+label,
+button {
+    display: inline-block;
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+input {
+    vertical-align: middle;
+    cursor: pointer;
+}
+
+input[type="text"],
+input[type="number"] {
+    width: 120px;
+    padding: 2px 3px;
+    border-width: 1px;
+    border-style: solid;
+    border-radius: 2px;
+    cursor: text;
+}
