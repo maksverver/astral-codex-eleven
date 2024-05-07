@@ -49,7 +49,14 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (comments) replaceComments(rootDiv, comments, replaceCommentOptions);
+  if (comments) {
+    const options = Object.values(OPTIONS);
+    const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+    const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
+    const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
+    replaceCommentOptions.optionApiFuncs = optionApiFuncs;
+    replaceComments(rootDiv, comments, replaceCommentOptions);
+  }
 }
 
 function handleFileChange() {
