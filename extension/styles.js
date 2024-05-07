@@ -5,7 +5,8 @@ const STYLES = {
   removeNags: `
     button[data-testid='noncontributor-cta-button'],
     .end-of-post-recommend-cta-container,
-    .post-end-cta-full {
+    .post-end-cta-full,
+    .subscribe-footer {
       display: none !important;
     }
   `,
