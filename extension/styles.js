@@ -5,6 +5,7 @@ const STYLES = {
   'zenMode': `
     .end-of-post-recommend-cta-container,
     .post-end-cta-full,
+    .subscribe-footer,
     .post-header .post-ufi,
     .post-footer,
     #comments-for-scroll,
