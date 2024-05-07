@@ -755,8 +755,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       addCommentLink.href = '#';
     }
 
-    const orderDiv = createElement(holderDiv, 'div', undefined, 'Order: ');
-    orderDiv.id = 'comment-order';
+    const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
     let currentOrder = options.newFirst ? 1 : 0;
     new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
       if (i === 1 - currentOrder) {

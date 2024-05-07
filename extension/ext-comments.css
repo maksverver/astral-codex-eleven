@@ -178,7 +178,7 @@ a:focus {
   column-gap: 1em;
 }
 
-.ext-comments .comments-heading-holder #comment-order {
+.ext-comments .comments-heading-holder .comment-order {
   margin-left: auto;  /* right-aligns this item in the flex container */
 }
 

@@ -83,7 +83,7 @@ const defaultSortOption = {
   key: 'defaultSort',
   default: 'auto',
   onLoad(currentValue) {
-    const orderToggle = document.querySelector('#comment-order .radio-buttons');
+    const orderToggle = document.querySelector('#comments-for-scroll .comment-order .radio-buttons');
     const chronoButton = orderToggle.firstChild;
     const newButton = orderToggle.lastChild;
     if (currentValue === 'chrono') {
