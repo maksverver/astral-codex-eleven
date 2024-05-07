@@ -91,6 +91,18 @@ const removeNagsOptions = {
   }
 };
 
+const defaultSortOption = {
+  key: 'defaultSort',
+  default: 'auto',
+  onLoad(currentValue) {
+    if (currentValue === 'chrono') {
+      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
+    } else if (currentValue === 'new') {
+      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
+    }
+  }
+};
+
 const zenModeOption = {
   key: 'zenMode',
   default: false,
@@ -107,6 +119,7 @@ const zenModeOption = {
 const optionArray = [
   // templateOption,
   removeNagsOptions,
+  defaultSortOption,
   zenModeOption,
 ];
 
