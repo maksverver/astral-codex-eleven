@@ -105,11 +105,7 @@ const hideUsersOption = {
     this.createCachedSet(currentValue);
   },
   processComment(commentData, commentElem) {
-    if (this.cachedSet.has(commentData.name)) {
-      commentElem.classList.add('hidden');
-    } else {
-      commentElem.classList.remove('hidden');
-    }
+    commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
   }
 };
 
