@@ -94,10 +94,23 @@ const defaultSortOption = {
   }
 };
 
+const zenModeOption = {
+  key: 'zenMode',
+  default: false,
+  onStart(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
+}
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
   defaultSortOption,
+  zenModeOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
