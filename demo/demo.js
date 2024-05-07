@@ -7,6 +7,9 @@ let comments = undefined;
 function setUpCommentOptions() {
   const optionContainer = document.getElementById('comment-options');
   for (const [key, option] of Object.entries(OPTIONS)) {
+    // only add options that modify comments
+    if (!option.processHeader && !option.processComment) return;
+
     optionShadow[key] = option.default;
     const input = document.createElement('input');
     if (typeof option.default === 'boolean') {
@@ -17,7 +20,8 @@ function setUpCommentOptions() {
     input.id = `${key}-input`;
     input.addEventListener('change', (event) => {
       optionShadow[key] = event.target.value;
-      option?.onValueChange(event.target.value);
+      // slight hack to not run handlers if no comments have been loaded
+      if (commentListRoot) option?.onValueChange(event.target.value);
     });
     const label = document.createElement('label');
     label.textContent = key;
