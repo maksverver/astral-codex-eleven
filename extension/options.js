@@ -6,17 +6,18 @@
  * new option, create an object with the following fields and add it to
  * optionArray.
  *
- * The value of `this` is set to the calling ExtCommentComponent object. As
- * such, API functions should not use arrow function expressions.
+ * The value of `this` in each function will refer to the option object itself
+ * as long as arrow function expressions are not used. For this reason, arrow
+ * expressions are discouraged when defining options.
  *
  * The value of the option must be truthy in order for processHeader and
- * processComment to be run. onLoad is called for every option when the page is
- * first loaded, and is passed the current value, so checking that the option is
- * set is required.
+ * processComment to be run. onStart and onLoad are called for every option when
+ * the page is first loaded, and are passed the current value, so checking the
+ * current value of the option is required.
  *
  * The order when processing a comment is:
- *   - processHeader
- *   - processComment
+ *   1 processHeader
+ *   2 processComment
  */
 
 const templateOption = {
@@ -25,7 +26,7 @@ const templateOption = {
    * The key for this option. Must be unique, and will be how the option is
    * stored in local storage and accessed from the popup.
    */
-  key: "template-key",
+  key: "templateKey",
 
   /**
    * (Required)
@@ -39,77 +40,43 @@ const templateOption = {
    * This will be called any time the option changes value.
    * @param {*} newValue - the new value of the option
    */
-  onValueChange: function(newValue) {},
+  onValueChange(newValue) {},
 
   /**
    * (Optional)
-   * Runs whenever a page is first loaded, even if the value of the option is
-   * falsy. Useful for applying custom CSS styling.
+   * Runs immediately when a page is first opened, even if the value of the
+   * option is falsy. Useful for applying custom CSS styling.
    * @param {*} currentValue - the current value of the option
    */
-  onLoad: function(currentValue) {},
+  onStart(currentValue) {},
 
   /**
    * (Optional)
-   * Applied to the header DOM element of each comment. The element itself
-   * should be modified directly, as any return value is discarded. This only
-   * runs if the current value of the option is truthy.
+   * Runs when a page is fully loaded, after the DOM is created and the rest of
+   * the extension changes are made, even if the value of the option is falsy.
+   * @param {*} currentValue - the current value of the option
+   */
+  onLoad(currentValue) {},
+
+  /**
+   * (Optional)
+   * Applied to the header DOM element of each comment (`.comment-meta`). The
+   * element itself should be modified directly, as any return value is
+   * discarded. This only runs if the current value of the option is truthy.
    * @param commentData - the current comment data as JSON
    * @param {Element} headerElem - the DOM element of the header
    */
-  processHeader: function(commentData, headerElem) {},
+  processHeader(commentData, headerElem) {},
 
   /**
    * (Optional)
-   * Applied to the comment DOM element of each comment. The element itself
-   * should be modified directly, as any return value is discarded. This only
-   * runs if the current value of the option is truthy.
+   * Applied to the comment DOM element of each comment (`.comment-thread`). The
+   * element itself should be modified directly, as any return value is
+   * discarded. This only runs if the current value of the option is truthy.
    * @param commentData - the current comment data as JSON
    * @param {Element} commentElem - the DOM element of the comment
    */
-  processComment: function(commentData, commentElem) {}
-};
-
-const showUserAvatarsOption = {
-  key: 'showUserAvatars',
-  default: true,
-  onLoad: function(currentValue) {
-    addStyle(this.key);
-    setStyleEnabled(this.key, currentValue);
-  },
-  onValueChange: function(newValue) {
-    setStyleEnabled(this.key, newValue);
-    if (newValue) {
-      reprocessComments(this.key);
-    } else {
-      // This is slow compared to just hiding with styling, but is only done
-      // when the option value changes
-      document.querySelectorAll('.avatar').forEach((e) => e.remove());
-      document.querySelectorAll('.comment-collapse-toggle').forEach((e) => e.remove());
-    }
-  },
-  processComment: function(commentData, commentElem) {
-    function getDefaultAvatar(userId) {
-      const colors = ['purple', 'yellow', 'orange', 'green', 'black'];
-      const color = userId ? colors[userId % colors.length] : 'logged-out';
-      return `https://substack.com/img/avatars/${color}.png`;
-    }
-
-    function getAvatarUrl() {
-      const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
-      const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill,f_auto,q_auto:good,fl_progressive:steep/';
-      return baseUrl + encodeURIComponent(photoUrl);
-    }
-
-    const commentHead = commentElem.querySelector(':scope > .comment-head');
-    const avatar = createElement(undefined, 'img', 'avatar');
-    avatar.src = getAvatarUrl();
-    commentHead.prepend(avatar);
-
-    const content = commentElem.querySelector(':scope > .content');
-    const button = createElement(content, 'button', 'button outline comment-collapse-toggle', 'Expand comment');
-    button.onclick = this.toggleExpanded.bind(this);
-  }
+  processComment(commentData, commentElem) {}
 };
 
 const useOldStylingOption = {
@@ -140,13 +107,13 @@ const useOldStylingOption = {
 // All options should be added here.
 const optionArray = [
   // templateOption,
-  showUserAvatarsOption,
   useOldStylingOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = "acxi-options";
 
+// Holder class for enabled header and comment functions
 class OptionApiFuncs {
   constructor(headerFuncs, commentFuncs) {
     this.headerFuncs = headerFuncs ?? [];
@@ -179,7 +146,7 @@ async function saveOptions() {
 
 async function setOption(key, value) {
   optionShadow[key] = value;
-  return await saveOptions();
+  await saveOptions();
 }
 
 function initializeOptionValues() {
@@ -188,16 +155,24 @@ function initializeOptionValues() {
       optionShadow[key] = option.default;
     }
 
-    if (typeof(option.onLoad) === 'function') {
-      option.onLoad(optionShadow[key]);
+    if (option.onStart instanceof Function) {
+      option.onStart(optionShadow[key]);
     }
   }
   saveOptions();
 }
 
+function runOptionsOnLoad() {
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (option.onLoad instanceof Function) {
+      option.onLoad(optionShadow[key]);
+    }
+  }
+}
+
 function storageChangeHandler(changes, namespace) {
   if (namespace !== 'local' || !changes[OPTION_KEY]
-      || typeof(changes[OPTION_KEY].newValue) !== 'object') {
+      || typeof changes[OPTION_KEY].newValue !== 'object') {
     return;
   }
 
@@ -215,7 +190,7 @@ function storageChangeHandler(changes, namespace) {
 }
 
 function isValidOption(option) {
-  if (typeof(option.key) !== 'string') {
+  if (typeof option.key !== 'string') {
     return [false, 'must contain property "key" as a string'];
   }
 
@@ -223,19 +198,23 @@ function isValidOption(option) {
     return [false, 'must contain a default value'];
   }
 
-  if (option.hasOwnProperty('onValueChange') && typeof(option.onValueChange) !== 'function') {
+  if (option.hasOwnProperty('onValueChange') && !(option.onValueChange instanceof Function)) {
     return [false, 'onValueChange must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onLoad') && typeof(option.onLoad) !== 'function') {
+  if (option.hasOwnProperty('onStart') && !(option.onStart instanceof Function)) {
+    return [false, 'onStart must be a function if defined'];
+  }
+
+  if (option.hasOwnProperty('onLoad') && !(option.onLoad instanceof Function)) {
     return [false, 'onLoad must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processComment') && typeof(option.processComment) !== 'function') {
+  if (option.hasOwnProperty('processComment') && !(option.processComment instanceof Function)) {
     return [false, 'processComment must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processHeader') && typeof(option.processHeader) !== 'function') {
+  if (option.hasOwnProperty('processHeader') && !(option.processHeader instanceof Function)) {
     return [false, 'processHeader must be a function if defined'];
   }
 

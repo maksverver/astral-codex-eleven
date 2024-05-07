@@ -84,8 +84,37 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
+// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
+// to request an image with corresponding resolution. The image URL seems to
+// support Cloudinary transformation parameters:
+// https://cloudinary.com/documentation/transformation_reference
+const USER_ICON_BASE_URL = (() => {
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+  const size = Math.round(32 * pixelRatio);
+  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+})();
+
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
+}
+
+// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
+// `now` and `now` minus 24 hours, or returns undefined otherwise.
+function formatRecentDate(now, date) {
+  const minuteMillis = 60 * 1000;
+  const hourMillis = 60 * minuteMillis;
+  const dayMillis = 24 * hourMillis;
+  const timeAgoMillis = now - date;
+  if (timeAgoMillis < 0) return undefined;  // date is in the future?!
+  if (timeAgoMillis < hourMillis) {
+    const mins = Math.floor(timeAgoMillis / minuteMillis);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
+  }
+  if (timeAgoMillis < dayMillis) {
+    const hrs = Math.floor(timeAgoMillis / hourMillis);
+    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
+  }
+  return undefined;  // date is more than a day ago.
 }
 
 function createElement(parent, tag, className, textContent) {
@@ -155,6 +184,8 @@ class ExtCommentListComponent {
   // If given, keys is an array of keys to call API functions on. Otherwise, all
   // keys are processed.
   processAllChildren(keys) {
+    if (Array.isArray(keys) && keys.length === 0) return;
+
     for (let child of this.children) {
       child.processSelfAndChildren(keys);
     }
@@ -279,12 +310,29 @@ class ExtCommentComponent {
       return `https://substack.com/profile/${id}-${suffix}`;
     }
 
+    const dateNow = Date.now();
+
     function createDate(parentElem, dateString) {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'short', formatRecentDate(dateNow, date) || dateFormatShort.format(date));
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
+    }
+
+    function createAvatarElement(parentElem, commentData) {
+      function getDefaultAvatar(userId) {
+        const colors = ['purple', 'yellow', 'orange', 'green', 'black'];
+        const color = userId ? colors[userId % colors.length] : 'logged-out';
+        return `https://substack.com/img/avatars/${color}.png`;
+      }
+      function getAvatarUrl() {
+        const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
+        const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill/';
+        return baseUrl + encodeURIComponent(photoUrl);
+      }
+      const avatar = createElement(parentElem, 'img', 'user-icon');
+      avatar.src = getAvatarUrl();
     }
 
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
@@ -293,11 +341,13 @@ class ExtCommentComponent {
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
     threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
-    const commentHead = createElement(threadDiv, 'div', 'comment-head');
-    const borderDiv = createElement(commentHead, 'div', 'border');
-    createElement(borderDiv, 'div', 'line');
-    // Collapse/expand comment by clicking on the left border line.
+    // Create div for the border. This can be clicked to collapse/expand comments.
+    const borderDiv = createElement(threadDiv, 'div', 'border');
     borderDiv.onclick = this.toggleExpanded.bind(this);
+    // Add profile picture to the top of the border.
+    createAvatarElement(borderDiv, comment);
+    // Finally, add a vertical line that covers the remaining space.
+    createElement(borderDiv, 'div', 'line');
 
     const contentDiv = createElement(threadDiv, 'div', 'content');
     const commentDiv = createElement(contentDiv, 'div', 'comment');;
@@ -424,23 +474,31 @@ class ExtCommentComponent {
     for (const option of this.optionFuncs.headerFuncs) {
       if (keys && !keys.includes(option.key)) continue;
       if (optionShadow[option.key]) {
-        option.processHeader.bind(this)(this.commentData, this.headerDiv);
+        option.processHeader(this.commentData, this.headerDiv);
       }
     }
 
     for (const option of this.optionFuncs.commentFuncs) {
       if (keys && !keys.includes(option.key)) continue;
       if (optionShadow[option.key]) {
-        option.processComment.bind(this)(this.commentData, this.threadDiv);
+        option.processComment(this.commentData, this.threadDiv);
       }
     }
   }
 
   setExpanded(expanded) {
     expanded = Boolean(expanded);
+    if (expanded === this.expanded) return;
     this.expanded = expanded;
     this.threadDiv.classList.toggle('collapsed', !expanded);
     this.threadDiv.classList.toggle('expanded', expanded);
+
+    // Ensure the comment is in view, to avoid scrolling past comments below a
+    // collapsed thread. (This also applies to expanding, for consistency.)
+    // See: https://github.com/maksverver/astral-codex-eleven/issues/3
+    if (this.commentDiv.getBoundingClientRect().top < 0) {
+      this.commentDiv.scrollIntoView();
+    }
   }
 
   toggleExpanded() {
@@ -489,37 +547,44 @@ class ExtCommentComponent {
     if (ev.target !== this.commentDiv) return;
     // Don't handle key events when one of these modifiers is held:
     if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
-    switch (ev.key) {
+    switch (ev.code) {
       case 'Enter':
+      case 'NumpadEnter':
         this.toggleExpanded();
         break;
 
-      case 'H':  // Move to top-level comment
-        let root = this;
-        while (root.parent) root = root.parent;
-        root.focus();
+      case 'KeyH':
+        if (ev.shiftKey) {
+          // Move to top-level comment
+          let root = this;
+          while (root.parent) root = root.parent;
+          root.focus();
+        } else {
+          // Move to parent
+          if (this.parent) this.parent.focus();
+        }
         break;
 
-      case 'J': // Move to next sibling
-        if (this.nextSibling) this.nextSibling.focus();
+      case 'KeyJ':
+        if (ev.shiftKey) {
+          // Move to next sibling
+          if (this.nextSibling) this.nextSibling.focus();
+        } else {
+          // Move to next comment
+          const next = this.findNext();
+          if (next) next.focus();
+        }
         break;
 
-      case 'K': // Move to previous sibling
-        if (this.prevSibling) this.prevSibling.focus();
-        break;
-
-      case 'h':  // Move to parent
-        if (this.parent) this.parent.focus();
-        break;
-
-      case 'j': // Move to next comment
-        const next = this.findNext();
-        if (next) next.focus();
-        break;
-
-      case 'k':  // Move to previous comment
-        const prev = this.findPrevious();
-        if (prev) prev.focus();
+      case 'KeyK':
+        if (ev.shiftKey) {
+          // Move to previous sibling
+          if (this.prevSibling) this.prevSibling.focus();
+        } else {
+          // Move to previous comment
+          const prev = this.findPrevious();
+          if (prev) prev.focus();
+        }
         break;
 
       default:

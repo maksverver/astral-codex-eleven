@@ -196,9 +196,25 @@ function test_splitByEmail() {
       ['foo\\ ', 'bar@baz.com', '']);
 }
 
+function test_formatRecentDate() {
+  const now = new Date('2024-04-28T13:14:15.600Z');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:14:15.601Z')), undefined);
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:14:15.600Z')), '0 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:13:15.600Z')), '1 min ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:12:15.600Z')), '2 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:07:10.000Z')), '7 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T12:14:15.601Z')), '59 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T12:14:15.600Z')), '1 hr ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T11:14:15.600Z')), '2 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T01:55:00.000Z')), '11 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-27T13:14:15.601Z')), '23 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-27T13:14:15.600Z')), undefined);
+}
+
 test_splitByUrl();
 test_unescapeUrl();
 test_splitByEmail();
+test_formatRecentDate();
 
 console.info(`Ran ${successes + failures} tests; ${successes} passed, ${failures} failed.`);
 if (failures) {
