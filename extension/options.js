@@ -26,7 +26,7 @@ const templateOption = {
    * The key for this option. Must be unique, and will be how the option is
    * stored in local storage and accessed from the popup.
    */
-  key: "templateKey",
+  key: 'templateKey',
 
   /**
    * (Required)
@@ -85,7 +85,7 @@ const optionArray = [
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
-const OPTION_KEY = "acxi-options";
+const OPTION_KEY = 'acxi-options';
 
 // Holder class for enabled header and comment functions
 class OptionApiFuncs {
@@ -164,31 +164,31 @@ function storageChangeHandler(changes, namespace) {
 }
 
 function isValidOption(option) {
-  if (typeof option.key !== 'string') {
+  if (typeof option.key !== 'string' || option.key.length === 0) {
     return [false, 'must contain property "key" as a string'];
   }
 
-  if (!option.hasOwnProperty('default')) {
+  if (!Object.hasOwn(option, 'default')) {
     return [false, 'must contain a default value'];
   }
 
-  if (option.hasOwnProperty('onValueChange') && !(option.onValueChange instanceof Function)) {
+  if (Object.hasOwn(option, 'onValueChange') && !(option.onValueChange instanceof Function)) {
     return [false, 'onValueChange must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onStart') && !(option.onStart instanceof Function)) {
+  if (Object.hasOwn(option, 'onStart') && !(option.onStart instanceof Function)) {
     return [false, 'onStart must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onLoad') && !(option.onLoad instanceof Function)) {
+  if (Object.hasOwn(option, 'onLoad') && !(option.onLoad instanceof Function)) {
     return [false, 'onLoad must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processComment') && !(option.processComment instanceof Function)) {
+  if (Object.hasOwn(option, 'processComment') && !(option.processComment instanceof Function)) {
     return [false, 'processComment must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processHeader') && !(option.processHeader instanceof Function)) {
+  if (Object.hasOwn(option, 'processHeader') && !(option.processHeader instanceof Function)) {
     return [false, 'processHeader must be a function if defined'];
   }
 
