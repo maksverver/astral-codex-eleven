@@ -45,6 +45,11 @@ a:focus {
   --user-icon-size: 32px;
 }
 
+/* Used for hiding comments or other features. */
+.ext-comments .hidden {
+  display: none !important;
+}
+
 .ext-comments .comment-thread {
   padding: 4px;
 }

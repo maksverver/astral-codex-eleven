@@ -91,18 +91,6 @@ const removeNagsOptions = {
   }
 };
 
-const defaultSortOption = {
-  key: 'defaultSort',
-  default: 'auto',
-  onLoad(currentValue) {
-    if (currentValue === 'chrono') {
-      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
-    } else if (currentValue === 'new') {
-      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
-    }
-  }
-};
-
 const zenModeOption = {
   key: 'zenMode',
   default: false,
@@ -115,12 +103,43 @@ const zenModeOption = {
   }
 };
 
+const defaultSortOption = {
+  key: 'defaultSort',
+  default: 'auto',
+  onLoad(currentValue) {
+    if (currentValue === 'chrono') {
+      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
+    } else if (currentValue === 'new') {
+      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
+    }
+  }
+};
+
+const hideUsersOption = {
+  key: 'hideUsers',
+  default: '',
+  createCachedSet(userString) {
+    this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
+  },
+  onValueChange(newValue) {
+    this.createCachedSet(newValue);
+    reprocessComments(this.key);
+  },
+  onStart(currentValue) {
+    this.createCachedSet(currentValue);
+  },
+  processComment(commentData, commentElem) {
+    commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
+  }
+};
+
 // All options should be added here.
 const optionArray = [
   // templateOption,
   removeNagsOptions,
-  defaultSortOption,
   zenModeOption,
+  defaultSortOption,
+  hideUsersOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
