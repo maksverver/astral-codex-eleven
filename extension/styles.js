@@ -2,7 +2,15 @@
 
 // Holds dynamically enabled styling for use in options.
 const STYLES = {
-  'zenMode': `
+  removeNags: `
+    button[data-testid='noncontributor-cta-button'],
+    .end-of-post-recommend-cta-container,
+    .post-end-cta-full,
+    .subscribe-footer {
+      display: none !important;
+    }
+  `,
+  zenMode: `
     .end-of-post-recommend-cta-container,
     .post-end-cta-full,
     .subscribe-footer,

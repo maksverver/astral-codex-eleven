@@ -637,7 +637,7 @@ class RadioButtonsComponent {
   change(index) {
     if (this.activeIndex === index) return;
     this.activate(index);
-    if (typeof this.onChange === 'function') this.onChange(index);
+    if (this.onChange instanceof Function) this.onChange(index);
   }
 }
 

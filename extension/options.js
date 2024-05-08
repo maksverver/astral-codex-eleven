@@ -79,6 +79,18 @@ const templateOption = {
   processComment(commentData, commentElem) {}
 };
 
+const removeNagsOptions = {
+  key: 'removeNags',
+  default: false,
+  onStart(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
+};
+
 const zenModeOption = {
   key: 'zenMode',
   default: false,
@@ -124,6 +136,7 @@ const hideUsersOption = {
 // All options should be added here.
 const optionArray = [
   // templateOption,
+  removeNagsOptions,
   zenModeOption,
   defaultSortOption,
   hideUsersOption,
