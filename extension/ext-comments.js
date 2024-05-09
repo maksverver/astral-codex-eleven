@@ -488,17 +488,10 @@ class ExtCommentComponent {
   // keys are processed. Set force to true to call the functions even if the
   // option value is falsy.
   doOptionApiFunctions(keys, force=false) {
-    for (const option of this.optionFuncs.headerFuncs) {
+    for (const option of this.optionFuncs) {
       if (keys && !keys.includes(option.key)) continue;
       if (optionShadow[option.key] || force) {
-        option.processHeader(this.commentData, this.headerDiv);
-      }
-    }
-
-    for (const option of this.optionFuncs.commentFuncs) {
-      if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key] || force) {
-        option.processComment(this.commentData, this.threadDiv);
+        option.processComment(this);
       }
     }
   }
@@ -783,7 +776,7 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
   userId: undefined,
 
   // Holder for all option API functions
-  optionApiFuncs: new OptionApiFuncs(),
+  optionApiFuncs: [],
 
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED
