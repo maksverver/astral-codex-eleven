@@ -87,19 +87,46 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
-// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
-// to request an image with corresponding resolution. The image URL seems to
-// support Cloudinary transformation parameters:
-// https://cloudinary.com/documentation/transformation_reference
-const USER_ICON_BASE_URL = (() => {
-  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
-  const size = Math.round(32 * pixelRatio);
-  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
-})();
-
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
+
+// getUserIconUrl({photo_url, user_id}) generates an image URL to be used as
+// a user icon, based on either `photo_url` (if defined), or a default picture
+// based on `user_id` instead.
+const getUserIconUrl = (() => {
+  const colorUrls = Object.freeze([
+    'https://substack.com/img/avatars/purple.png',
+    'https://substack.com/img/avatars/yellow.png',
+    'https://substack.com/img/avatars/orange.png',
+    'https://substack.com/img/avatars/green.png',
+    'https://substack.com/img/avatars/black.png',
+  ]);
+  const loggedOutUrl =
+    'https://substack.com/img/avatars/logged-out.png';
+
+  // Generate a default user icon from a user id, in the same way that Substack
+  // does. (Thanks Pycea for figuring out the userId % 5 logic.)
+  function getDefaultUserIcon(userId) {
+    return userId ? colorUrls[userId % colorUrls.length] : loggedOutUrl;
+  }
+
+  // Device pixel ratio. In theory, this can change during the lifetime of the
+  // window, but in practice it's probably rare enough not to care about it.
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+
+  // Base URL for user icons. The stylesheet scales these to 32x32 px, so we
+  // need to request an image with corresponding resolution. The image URL
+  // seems to support Cloudinary transformation parameters:
+  // https://cloudinary.com/documentation/transformation_reference
+  const size = Math.round(32 * pixelRatio);
+  const baseUrl = `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+
+  return (commentData) => {
+    const photoUrl = commentData.photo_url ?? getDefaultUserIcon(commentData.user_id);
+    return baseUrl + encodeURIComponent(photoUrl);
+  };
+})();
 
 // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
 // `now` and `now` minus 24 hours, or returns undefined otherwise.
@@ -323,21 +350,6 @@ class ExtCommentComponent {
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
-    function createAvatarElement(parentElem, commentData) {
-      function getDefaultAvatar(userId) {
-        const colors = ['purple', 'yellow', 'orange', 'green', 'black'];
-        const color = userId ? colors[userId % colors.length] : 'logged-out';
-        return `https://substack.com/img/avatars/${color}.png`;
-      }
-      function getAvatarUrl() {
-        const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
-        const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill/';
-        return baseUrl + encodeURIComponent(photoUrl);
-      }
-      const avatar = createElement(parentElem, 'img', 'user-icon');
-      avatar.src = getAvatarUrl();
-    }
-
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
     const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
 
@@ -348,7 +360,8 @@ class ExtCommentComponent {
     const borderDiv = createElement(threadDiv, 'div', 'border');
     borderDiv.onclick = this.toggleExpanded.bind(this);
     // Add profile picture to the top of the border.
-    createAvatarElement(borderDiv, comment);
+    createElement(borderDiv, 'img', 'user-icon')
+        .src = getUserIconUrl(comment);
     // Finally, add a vertical line that covers the remaining space.
     createElement(borderDiv, 'div', 'line');
 
