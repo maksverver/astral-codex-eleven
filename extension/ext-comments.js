@@ -19,6 +19,9 @@ function countCommentsInArray(comments) {
 // Holds the root ExtCommentListComponent.
 let commentListRoot;
 
+// Holds the CommentOrderComponent.
+let commentOrderComponent;
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -148,7 +151,7 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
-    this.newFirst = options.newFirst;
+    this.commentOrder = options.commentOrder;
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
@@ -156,7 +159,7 @@ class ExtCommentListComponent {
     // This is a bit of a hack to ensure that comments are added at the top in
     // the new-first ordering. It's kinda slow for large threads, but I don't
     // know if it's worth it to try to make it faster.
-    const reverse = this.newFirst;
+    const reverse = this.commentOrder === CommentOrder.NEW_FIRST;
     if (reverse) this.reverseSelfOnly();
     const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
     if (this.children.length > 0) {
@@ -170,7 +173,7 @@ class ExtCommentListComponent {
   }
 
   reverseSelfOnly() {
-    this.newFirst = !this.newFirst;
+    this.commentOrder = 1 - this.commentOrder;
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
@@ -469,18 +472,19 @@ class ExtCommentComponent {
   }
 
   // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed.
-  doOptionApiFunctions(keys) {
+  // keys are processed. Set force to true to call the functions even if the
+  // option value is falsy.
+  doOptionApiFunctions(keys, force=false) {
     for (const option of this.optionFuncs.headerFuncs) {
       if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
+      if (optionShadow[option.key] || force) {
         option.processHeader(this.commentData, this.headerDiv);
       }
     }
 
     for (const option of this.optionFuncs.commentFuncs) {
       if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
+      if (optionShadow[option.key] || force) {
         option.processComment(this.commentData, this.threadDiv);
       }
     }
@@ -602,7 +606,7 @@ class ExtCommentComponent {
   // If given, keys is an array of keys to call API functions on. Otherwise, all
   // keys are processed.
   processSelfAndChildren(keys) {
-    this.doOptionApiFunctions(keys);
+    this.doOptionApiFunctions(keys, true);
     this.childList.processAllChildren(keys);
   }
 }
@@ -642,7 +646,32 @@ class RadioButtonsComponent {
   change(index) {
     if (this.activeIndex === index) return;
     this.activate(index);
-    if (typeof this.onChange === 'function') this.onChange(index);
+    if (this.onChange instanceof Function) this.onChange(index);
+  }
+}
+
+class CommentOrder {
+  static CHRONOLOGICAL = 0;
+  static NEW_FIRST = 1;
+};
+
+class CommentOrderComponent {
+  constructor(parentElem, initialOrder) {
+    let currentOrder = initialOrder;
+    this.buttons = new RadioButtonsComponent(
+      createElement(parentElem, 'div', 'comment-order', 'Order: '),
+      ['Chronological', 'New First'],
+      (i) => {
+        if (i === 1 - currentOrder) {
+          commentListRoot.reverse();
+          currentOrder = i;
+        }
+      });
+    this.setOrder(initialOrder);
+  }
+
+  setOrder(newOrder) {
+    this.buttons.change(newOrder);
   }
 }
 
@@ -734,8 +763,8 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZoneName: 'short'}),
 
-  // Set to true when comments are provided in reverse chronological order.
-  newFirst: false,
+  // Set to NEW_FIRST when comments are provided in reverse chronological order.
+  commentOrder: CommentOrder.CHRONOLOGICAL,
 
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
@@ -764,14 +793,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       addCommentLink.href = '#';
     }
 
-    const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
-    let currentOrder = options.newFirst ? 1 : 0;
-    new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
-      if (i === 1 - currentOrder) {
-        commentListRoot.reverse();
-        currentOrder = i;
-      }
-    }).change(currentOrder);
+    commentOrderComponent = new CommentOrderComponent(holderDiv, options.commentOrder);
   }
 
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');

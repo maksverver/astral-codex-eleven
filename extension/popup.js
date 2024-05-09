@@ -1,9 +1,9 @@
 'use strict';
 
-async function setInitialState(optionElement) {
-  let id = optionElement.id;
-  let input = optionElement.querySelector('.trigger');
-  let setValue = optionShadow[id];
+function setInitialState(optionElement) {
+  const id = optionElement.id;
+  const input = optionElement.querySelector('.trigger');
+  const setValue = optionShadow[id];
 
   if (input.classList.contains('check')) {
     input.checked = setValue;
@@ -13,8 +13,8 @@ async function setInitialState(optionElement) {
 }
 
 function createChangeHandler(optionElement) {
-  let id = optionElement.id;
-  let input = optionElement.querySelector('.trigger');
+  const id = optionElement.id;
+  const input = optionElement.querySelector('.trigger');
 
   if (input.classList.contains('check')) {
     input.addEventListener('change', () => {
@@ -37,11 +37,16 @@ function createChangeHandler(optionElement) {
 // Option wrappers have the class `option`, and the input element has the class
 // `trigger` plus one of `check` or `text` depending on if the value is a bool
 // or a string. The label is optionally used for checkbox inputs.
-window.addEventListener('DOMContentLoaded', async () => {
+(async function() {
   await loadSavedOptions();
+
+  // Wait for the DOM to load fully before continuing.
+  if (document.readyState === 'loading') {
+    await new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve));
+  }
 
   for (const optionElement of document.querySelectorAll('.option')) {
     setInitialState(optionElement);
     createChangeHandler(optionElement);
   }
-});
+})();

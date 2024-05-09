@@ -26,7 +26,7 @@ const templateOption = {
    * The key for this option. Must be unique, and will be how the option is
    * stored in local storage and accessed from the popup.
    */
-  key: "templateKey",
+  key: 'templateKey',
 
   /**
    * (Required)
@@ -102,16 +102,74 @@ const useOldStylingOption = {
     const reply = createElement(footer, 'a', 'reply', 'Reply');
     reply.href = '#';
   }
-}
+};
+
+const removeNagsOptions = {
+  key: 'removeNags',
+  default: false,
+  onStart(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
+};
+
+const zenModeOption = {
+  key: 'zenMode',
+  default: false,
+  onStart(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
+};
+
+const defaultSortOption = {
+  key: 'defaultSort',
+  default: 'auto',
+  onLoad(currentValue) {
+    if (currentValue === 'chrono') {
+      commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
+    } else if (currentValue === 'new') {
+      commentOrderComponent.setOrder(CommentOrder.NEW_FIRST);
+    }
+  }
+};
+
+const hideUsersOption = {
+  key: 'hideUsers',
+  default: '',
+  createCachedSet(userString) {
+    this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
+  },
+  onValueChange(newValue) {
+    this.createCachedSet(newValue);
+    reprocessComments(this.key);
+  },
+  onStart(currentValue) {
+    this.createCachedSet(currentValue);
+  },
+  processComment(commentData, commentElem) {
+    commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
+  }
+};
 
 // All options should be added here.
 const optionArray = [
   // templateOption,
   useOldStylingOption,
+  removeNagsOptions,
+  zenModeOption,
+  defaultSortOption,
+  hideUsersOption,
 ];
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
-const OPTION_KEY = "acxi-options";
+const OPTION_KEY = 'acxi-options';
 
 // Holder class for enabled header and comment functions
 class OptionApiFuncs {
@@ -162,6 +220,12 @@ function initializeOptionValues() {
   saveOptions();
 }
 
+async function loadOptions() {
+  await loadSavedOptions();
+  initializeOptionValues();
+  chrome.storage.onChanged.addListener(storageChangeHandler);
+}
+
 function runOptionsOnLoad() {
   for (const [key, option] of Object.entries(OPTIONS)) {
     if (option.onLoad instanceof Function) {
@@ -190,31 +254,31 @@ function storageChangeHandler(changes, namespace) {
 }
 
 function isValidOption(option) {
-  if (typeof option.key !== 'string') {
+  if (typeof option.key !== 'string' || option.key.length === 0) {
     return [false, 'must contain property "key" as a string'];
   }
 
-  if (!option.hasOwnProperty('default')) {
+  if (!Object.hasOwn(option, 'default')) {
     return [false, 'must contain a default value'];
   }
 
-  if (option.hasOwnProperty('onValueChange') && !(option.onValueChange instanceof Function)) {
+  if (Object.hasOwn(option, 'onValueChange') && !(option.onValueChange instanceof Function)) {
     return [false, 'onValueChange must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onStart') && !(option.onStart instanceof Function)) {
+  if (Object.hasOwn(option, 'onStart') && !(option.onStart instanceof Function)) {
     return [false, 'onStart must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('onLoad') && !(option.onLoad instanceof Function)) {
+  if (Object.hasOwn(option, 'onLoad') && !(option.onLoad instanceof Function)) {
     return [false, 'onLoad must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processComment') && !(option.processComment instanceof Function)) {
+  if (Object.hasOwn(option, 'processComment') && !(option.processComment instanceof Function)) {
     return [false, 'processComment must be a function if defined'];
   }
 
-  if (option.hasOwnProperty('processHeader') && !(option.processHeader instanceof Function)) {
+  if (Object.hasOwn(option, 'processHeader') && !(option.processHeader instanceof Function)) {
     return [false, 'processHeader must be a function if defined'];
   }
 
