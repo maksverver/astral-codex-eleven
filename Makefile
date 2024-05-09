@@ -1,4 +1,3 @@
-
 all:
 	@echo 'This project does need to be compiled. (You can run `make test` or `make dist`, though!)'
 
@@ -6,6 +5,6 @@ dist:
 	./build-dist.sh
 
 test:
-	cat extension/ext-comments.js tests/ext-comments-tests.js | node
+	cat extension/styles.js extension/options.js extension/ext-comments.js tests/ext-comments-tests.js | node
 
-.PHONY: all dist tests
+.PHONY: all dist test
