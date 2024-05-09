@@ -87,16 +87,6 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
-// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
-// to request an image with corresponding resolution. The image URL seems to
-// support Cloudinary transformation parameters:
-// https://cloudinary.com/documentation/transformation_reference
-const USER_ICON_BASE_URL = (() => {
-  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
-  const size = Math.round(32 * pixelRatio);
-  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
-})();
-
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
@@ -329,9 +319,15 @@ class ExtCommentComponent {
         const color = userId ? colors[userId % colors.length] : 'logged-out';
         return `https://substack.com/img/avatars/${color}.png`;
       }
+      // Base URL for user icons. The stylesheet scales these to 32x32 px, so we
+      // need to request an image with corresponding resolution. The image URL
+      // seems to support Cloudinary transformation parameters:
+      // https://cloudinary.com/documentation/transformation_reference
       function getAvatarUrl() {
+        const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+        const size = Math.round(32 * pixelRatio);
         const photoUrl = commentData.photo_url ?? getDefaultAvatar(commentData.user_id);
-        const baseUrl = 'https://substackcdn.com/image/fetch/w_66,h_66,c_fill/';
+        const baseUrl = `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
         return baseUrl + encodeURIComponent(photoUrl);
       }
       const avatar = createElement(parentElem, 'img', 'user-icon');
