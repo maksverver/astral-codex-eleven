@@ -10,14 +10,10 @@
  * as long as arrow function expressions are not used. For this reason, arrow
  * expressions are discouraged when defining options.
  *
- * The value of the option must be truthy in order for processHeader and
- * processComment to be run. onStart and onLoad are called for every option when
- * the page is first loaded, and are passed the current value, so checking the
- * current value of the option is required.
- *
- * The order when processing a comment is:
- *   1 processHeader
- *   2 processComment
+ * The value of the option must be truthy in order for processComment to be run.
+ * onStart and onLoad are called for every option when the page is first loaded,
+ * and are passed the current value, so checking the current value of the option
+ * is required.
  */
 
 const templateOption = {
@@ -60,23 +56,13 @@ const templateOption = {
 
   /**
    * (Optional)
-   * Applied to the header DOM element of each comment (`.comment-meta`). The
-   * element itself should be modified directly, as any return value is
+   * Applied to each ExtCommentComponent. From that, the comment element itself
+   * can be accessed and modified, as well as other state. Any return value is
    * discarded. This only runs if the current value of the option is truthy.
-   * @param commentData - the current comment data as JSON
-   * @param {Element} headerElem - the DOM element of the header
+   * @param commentComponent - the ExtCommentComponent that represents the given
+   * comment
    */
-  processHeader(commentData, headerElem) {},
-
-  /**
-   * (Optional)
-   * Applied to the comment DOM element of each comment (`.comment-thread`). The
-   * element itself should be modified directly, as any return value is
-   * discarded. This only runs if the current value of the option is truthy.
-   * @param commentData - the current comment data as JSON
-   * @param {Element} commentElem - the DOM element of the comment
-   */
-  processComment(commentData, commentElem) {}
+  processComment(commentComponent) {}
 };
 
 const useOldStylingOption = {
@@ -153,7 +139,9 @@ const hideUsersOption = {
   onStart(currentValue) {
     this.createCachedSet(currentValue);
   },
-  processComment(commentData, commentElem) {
+  processComment(commentComponent) {
+    const commentData = commentComponent.commentData;
+    const commentElem = commentComponent.threadDiv;
     commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
   }
 };
@@ -170,14 +158,6 @@ const optionArray = [
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = 'acxi-options';
-
-// Holder class for enabled header and comment functions
-class OptionApiFuncs {
-  constructor(headerFuncs, commentFuncs) {
-    this.headerFuncs = headerFuncs ?? [];
-    this.commentFuncs = commentFuncs ?? [];
-  }
-}
 
 // Reprocess all comments with the given option key.
 function reprocessComments(key) {
@@ -276,10 +256,6 @@ function isValidOption(option) {
 
   if (Object.hasOwn(option, 'processComment') && !(option.processComment instanceof Function)) {
     return [false, 'processComment must be a function if defined'];
-  }
-
-  if (Object.hasOwn(option, 'processHeader') && !(option.processHeader instanceof Function)) {
-    return [false, 'processHeader must be a function if defined'];
   }
 
   return [true, undefined];
