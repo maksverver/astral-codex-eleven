@@ -472,18 +472,19 @@ class ExtCommentComponent {
   }
 
   // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed.
-  doOptionApiFunctions(keys) {
+  // keys are processed. Set force to true to call the functions even if the
+  // option value is falsy.
+  doOptionApiFunctions(keys, force=false) {
     for (const option of this.optionFuncs.headerFuncs) {
       if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
+      if (optionShadow[option.key] || force) {
         option.processHeader(this.commentData, this.headerDiv);
       }
     }
 
     for (const option of this.optionFuncs.commentFuncs) {
       if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
+      if (optionShadow[option.key] || force) {
         option.processComment(this.commentData, this.threadDiv);
       }
     }
@@ -605,7 +606,7 @@ class ExtCommentComponent {
   // If given, keys is an array of keys to call API functions on. Otherwise, all
   // keys are processed.
   processSelfAndChildren(keys) {
-    this.doOptionApiFunctions(keys);
+    this.doOptionApiFunctions(keys, true);
     this.childList.processAllChildren(keys);
   }
 }

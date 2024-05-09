@@ -1,6 +1,6 @@
 'use strict';
 
-async function setInitialState(optionElement) {
+function setInitialState(optionElement) {
   const id = optionElement.id;
   const input = optionElement.querySelector('.trigger');
   const setValue = optionShadow[id];
@@ -37,11 +37,16 @@ function createChangeHandler(optionElement) {
 // Option wrappers have the class `option`, and the input element has the class
 // `trigger` plus one of `check` or `text` depending on if the value is a bool
 // or a string. The label is optionally used for checkbox inputs.
-window.addEventListener('DOMContentLoaded', async () => {
+(async function() {
   await loadSavedOptions();
+
+  // Wait for the DOM to load fully before continuing.
+  if (document.readyState === 'loading') {
+    await new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve));
+  }
 
   for (const optionElement of document.querySelectorAll('.option')) {
     setInitialState(optionElement);
     createChangeHandler(optionElement);
   }
-});
+})();

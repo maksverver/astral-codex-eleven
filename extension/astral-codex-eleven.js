@@ -44,15 +44,17 @@ class CommentApi {
   }
 }
 
-async function loadOptions() {
-  await loadSavedOptions();
-  initializeOptionValues();
-  chrome.storage.onChanged.addListener(storageChangeHandler);
-}
-
-async function onLoad() {
+(async function() {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
+
+  // Start loading options asynchronously (this doesn't depend on the DOM).
+  const loadOptionsResult = loadOptions();
+
+  // Wait for the DOM to load fully before continuing.
+  if (document.readyState === 'loading') {
+    await new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve));
+  }
 
   // Hack to keep the displayed number of comments correct. As all of substack's
   // API requests are redirected, it thinks there's only 1 comment. If we just
@@ -147,10 +149,7 @@ async function onLoad() {
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
 
+  // Wait for options to finish loading.
+  await loadOptionsResult;
   runOptionsOnLoad();
-};
-
-(async function() {
-  document.addEventListener('DOMContentLoaded', onLoad);
-  await loadOptions();
 })();
