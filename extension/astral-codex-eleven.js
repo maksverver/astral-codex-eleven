@@ -97,7 +97,8 @@ class CommentApi {
     console.info(LOG_TAG, 'Invalid value for commentSort! Will default to oldest_first.');
     commentSort = 'oldest_first';
   }
-  const newFirst = commentSort === 'most_recent_first';
+  const commentOrder = commentSort === 'most_recent_first' ?
+    CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
 
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
@@ -144,7 +145,7 @@ class CommentApi {
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, optionApiFuncs});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, commentOrder, optionApiFuncs});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
