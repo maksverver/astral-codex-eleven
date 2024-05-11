@@ -1,12 +1,14 @@
 To release a new version:
 
- 1. Ensure the version number in manifest.json has been bumped!
+ 1. Summarize the changes in CHANGELOG.txt
 
- 2. Summarize the changes in CHANGELOG.txt (and commit)
+ 2. Bump the version in manifest.json
 
  3. Run tests with `make test` (limited coverage)
 
- 4. Smoke test on Chrome and Firefox (see below for details)
+ 4. Create a .zip file with ./build.sh (or equivalently, `make dist`).
+
+ 5. Smoke test on Chrome and Firefox (see below for details)
 
     To load for testing/development:
 
@@ -15,32 +17,17 @@ To release a new version:
 
     Make sure only ONE version of the extension is installed!
 
- 5. Create a .zip file with ./build.sh (or equivalently, `make dist`).
-
  6. Upload new version.
 
       - Chrome Web Store: https://chrome.google.com/webstore/devconsole/
       - Firefox: https://addons.mozilla.org/en-US/developers/addons
 
- 7. Create a git tag:
+ 7. Commit the changes to CHANGELOG.txt and manifest.json
+
+ 8. Create a git tag
 
     % git tag v0.1     # replace v0.1 with the current version
-    % git push --all
-
-
-Extra notes for uploading the Firefox Add-on:
-
-To publish a new addon, Firefox requires adding the following snippet to be
-added to extension/manifest.json:
-
-  "browser_specific_settings": {
-    "gecko": {
-      "id": "astral-codex-eleven@verver.ch"
-    }
-  }
-
-It shouldn't be necessary to include this in subsequent updates. More info:
-https://extensionworkshop.com/documentation/develop/extensions-and-the-add-on-id/
+    % git push --follow-tags
 
 
 Things to test before release:

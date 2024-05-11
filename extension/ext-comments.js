@@ -16,6 +16,12 @@ function countCommentsInArray(comments) {
   return n;
 }
 
+// Holds the root ExtCommentListComponent.
+let commentListRoot;
+
+// Holds the CommentOrderComponent.
+let commentOrderComponent;
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -85,6 +91,62 @@ function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
 
+// getUserIconUrl({photo_url, user_id}) generates an image URL to be used as
+// a user icon, based on either `photo_url` (if defined), or a default picture
+// based on `user_id` instead.
+const getUserIconUrl = (() => {
+  const colorUrls = Object.freeze([
+    'https://substack.com/img/avatars/purple.png',
+    'https://substack.com/img/avatars/yellow.png',
+    'https://substack.com/img/avatars/orange.png',
+    'https://substack.com/img/avatars/green.png',
+    'https://substack.com/img/avatars/black.png',
+  ]);
+  const loggedOutUrl =
+    'https://substack.com/img/avatars/logged-out.png';
+
+  // Generate a default user icon from a user id, in the same way that Substack
+  // does. (Thanks Pycea for figuring out the userId % 5 logic.)
+  function getDefaultUserIcon(userId) {
+    return userId ? colorUrls[userId % colorUrls.length] : loggedOutUrl;
+  }
+
+  // Device pixel ratio. In theory, this can change during the lifetime of the
+  // window, but in practice it's probably rare enough not to care about it.
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+
+  // Base URL for user icons. The stylesheet scales these to 32x32 px, so we
+  // need to request an image with corresponding resolution. The image URL
+  // seems to support Cloudinary transformation parameters:
+  // https://cloudinary.com/documentation/transformation_reference
+  const size = Math.round(32 * pixelRatio);
+  const baseUrl = `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+
+  return (commentData) => {
+    const photoUrl = commentData.photo_url ?? getDefaultUserIcon(commentData.user_id);
+    return baseUrl + encodeURIComponent(photoUrl);
+  };
+})();
+
+// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
+// `now` and `now` minus 24 hours, or returns undefined otherwise.
+function formatRecentDate(now, date) {
+  const minuteMillis = 60 * 1000;
+  const hourMillis = 60 * minuteMillis;
+  const dayMillis = 24 * hourMillis;
+  const timeAgoMillis = now - date;
+  if (timeAgoMillis < 0) return undefined;  // date is in the future?!
+  if (timeAgoMillis < hourMillis) {
+    const mins = Math.floor(timeAgoMillis / minuteMillis);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
+  }
+  if (timeAgoMillis < dayMillis) {
+    const hrs = Math.floor(timeAgoMillis / hourMillis);
+    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
+  }
+  return undefined;  // date is more than a day ago.
+}
+
 function createElement(parent, tag, className, textContent) {
   const elem = document.createElement(tag);
   if (parent) parent.appendChild(elem);
@@ -116,7 +178,7 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
-    this.newFirst = options.newFirst;
+    this.commentOrder = options.commentOrder;
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
@@ -124,7 +186,7 @@ class ExtCommentListComponent {
     // This is a bit of a hack to ensure that comments are added at the top in
     // the new-first ordering. It's kinda slow for large threads, but I don't
     // know if it's worth it to try to make it faster.
-    const reverse = this.newFirst;
+    const reverse = this.commentOrder === CommentOrder.NEW_FIRST;
     if (reverse) this.reverseSelfOnly();
     const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
     if (this.children.length > 0) {
@@ -138,7 +200,7 @@ class ExtCommentListComponent {
   }
 
   reverseSelfOnly() {
-    this.newFirst = !this.newFirst;
+    this.commentOrder = 1 - this.commentOrder;
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
@@ -147,6 +209,16 @@ class ExtCommentListComponent {
   reverse() {
     this.reverseSelfOnly();
     for (const child of this.children) child.reverse();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processAllChildren(keys) {
+    if (Array.isArray(keys) && keys.length === 0) return;
+
+    for (let child of this.children) {
+      child.processSelfAndChildren(keys);
+    }
   }
 }
 
@@ -198,7 +270,7 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {collapseDepth, dateFormatShort, dateFormatLong, commentModifiers, headerModifiers} = options;
+    const {collapseDepth, dateFormatShort, dateFormatLong, optionApiFuncs} = options;
 
     // Creates DOM nodes for the given comment text, and appends them to the
     // given parent element. This tries to mirror how Substack seems to process
@@ -268,11 +340,13 @@ class ExtCommentComponent {
       return `https://substack.com/profile/${id}-${suffix}`;
     }
 
+    const dateNow = Date.now();
+
     function createDate(parentElem, dateString) {
       parentElem.classList.add('date');
       parentElem.tabIndex = 0;
       const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', dateFormatShort.format(date));
+      createElement(parentElem, 'span', 'short', formatRecentDate(dateNow, date) || dateFormatShort.format(date));
       createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
     }
 
@@ -282,10 +356,14 @@ class ExtCommentComponent {
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
     threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
+    // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
-    createElement(borderDiv, 'div', 'line');
-    // Collapse/expand comment by clicking on the left border line.
     borderDiv.onclick = this.toggleExpanded.bind(this);
+    // Add profile picture to the top of the border.
+    createElement(borderDiv, 'img', 'user-icon')
+        .src = getUserIconUrl(comment);
+    // Finally, add a vertical line that covers the remaining space.
+    createElement(borderDiv, 'div', 'line');
 
     const contentDiv = createElement(threadDiv, 'div', 'content');
     const commentDiv = createElement(contentDiv, 'div', 'comment');;
@@ -391,19 +469,10 @@ class ExtCommentComponent {
       };
     }
 
-    for (const option of commentModifiers) {
-      if (optionShadow[option.key]) {
-        option.processComment(comment, threadDiv);
-      }
-    }
-
-    for (const option of headerModifiers) {
-      if (optionShadow[option.key]) {
-        option.processHeader(comment, commentHeader);
-      }
-    }
-
+    this.commentData = comment;
+    this.optionFuncs = optionApiFuncs;
     this.threadDiv   = threadDiv;
+    this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
@@ -411,13 +480,35 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = childCommentList;
+
+    this.doOptionApiFunctions();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed. Set force to true to call the functions even if the
+  // option value is falsy.
+  doOptionApiFunctions(keys, force=false) {
+    for (const option of this.optionFuncs) {
+      if (keys && !keys.includes(option.key)) continue;
+      if (optionShadow[option.key] || force) {
+        option.processComment(this);
+      }
+    }
   }
 
   setExpanded(expanded) {
     expanded = Boolean(expanded);
+    if (expanded === this.expanded) return;
     this.expanded = expanded;
     this.threadDiv.classList.toggle('collapsed', !expanded);
     this.threadDiv.classList.toggle('expanded', expanded);
+
+    // Ensure the comment is in view, to avoid scrolling past comments below a
+    // collapsed thread. (This also applies to expanding, for consistency.)
+    // See: https://github.com/maksverver/astral-codex-eleven/issues/3
+    if (this.commentDiv.getBoundingClientRect().top < 0) {
+      this.commentDiv.scrollIntoView();
+    }
   }
 
   toggleExpanded() {
@@ -466,37 +557,44 @@ class ExtCommentComponent {
     if (ev.target !== this.commentDiv) return;
     // Don't handle key events when one of these modifiers is held:
     if (ev.altKey || ev.ctrlKey || ev.isComposing || ev.metaKey) return;
-    switch (ev.key) {
+    switch (ev.code) {
       case 'Enter':
+      case 'NumpadEnter':
         this.toggleExpanded();
         break;
 
-      case 'H':  // Move to top-level comment
-        let root = this;
-        while (root.parent) root = root.parent;
-        root.focus();
+      case 'KeyH':
+        if (ev.shiftKey) {
+          // Move to top-level comment
+          let root = this;
+          while (root.parent) root = root.parent;
+          root.focus();
+        } else {
+          // Move to parent
+          if (this.parent) this.parent.focus();
+        }
         break;
 
-      case 'J': // Move to next sibling
-        if (this.nextSibling) this.nextSibling.focus();
+      case 'KeyJ':
+        if (ev.shiftKey) {
+          // Move to next sibling
+          if (this.nextSibling) this.nextSibling.focus();
+        } else {
+          // Move to next comment
+          const next = this.findNext();
+          if (next) next.focus();
+        }
         break;
 
-      case 'K': // Move to previous sibling
-        if (this.prevSibling) this.prevSibling.focus();
-        break;
-
-      case 'h':  // Move to parent
-        if (this.parent) this.parent.focus();
-        break;
-
-      case 'j': // Move to next comment
-        const next = this.findNext();
-        if (next) next.focus();
-        break;
-
-      case 'k':  // Move to previous comment
-        const prev = this.findPrevious();
-        if (prev) prev.focus();
+      case 'KeyK':
+        if (ev.shiftKey) {
+          // Move to previous sibling
+          if (this.prevSibling) this.prevSibling.focus();
+        } else {
+          // Move to previous comment
+          const prev = this.findPrevious();
+          if (prev) prev.focus();
+        }
         break;
 
       default:
@@ -509,6 +607,13 @@ class ExtCommentComponent {
 
   reverse() {
     this.childList.reverse();
+  }
+
+  // If given, keys is an array of keys to call API functions on. Otherwise, all
+  // keys are processed.
+  processSelfAndChildren(keys) {
+    this.doOptionApiFunctions(keys, true);
+    this.childList.processAllChildren(keys);
   }
 }
 
@@ -547,7 +652,32 @@ class RadioButtonsComponent {
   change(index) {
     if (this.activeIndex === index) return;
     this.activate(index);
-    if (typeof this.onChange === 'function') this.onChange(index);
+    if (this.onChange instanceof Function) this.onChange(index);
+  }
+}
+
+class CommentOrder {
+  static CHRONOLOGICAL = 0;
+  static NEW_FIRST = 1;
+};
+
+class CommentOrderComponent {
+  constructor(parentElem, initialOrder) {
+    let currentOrder = initialOrder;
+    this.buttons = new RadioButtonsComponent(
+      createElement(parentElem, 'div', 'comment-order', 'Order: '),
+      ['Chronological', 'New First'],
+      (i) => {
+        if (i === 1 - currentOrder) {
+          commentListRoot.reverse();
+          currentOrder = i;
+        }
+      });
+    this.setOrder(initialOrder);
+  }
+
+  setOrder(newOrder) {
+    this.buttons.change(newOrder);
   }
 }
 
@@ -639,17 +769,14 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZoneName: 'short'}),
 
-  // Set to true when comments are provided in reverse chronological order.
-  newFirst: false,
+  // Set to NEW_FIRST when comments are provided in reverse chronological order.
+  commentOrder: CommentOrder.CHRONOLOGICAL,
 
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
-  // Option objects that run on each generated comment element.
-  commentModifiers: [],
-
-  // Option objects that run on each generated comment header element.
-  headerModifiers: [],
+  // Holder for all option API functions
+  optionApiFuncs: [],
 
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED
@@ -672,24 +799,17 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       addCommentLink.href = '#';
     }
 
-    const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
-    let currentOrder = options.newFirst ? 1 : 0;
-    new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
-      if (i === 1 - currentOrder) {
-        commentList.reverse();
-        currentOrder = i;
-      }
-    }).change(currentOrder);
+    commentOrderComponent = new CommentOrderComponent(holderDiv, options.commentOrder);
   }
 
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');
 
   // Add the top-level comments list.
-  const commentList = new ExtCommentListComponent(rootElem, comments, undefined, options);
+  commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
 
   if (addCommentLink) {
     enableCommentReply(
           addCommentLink, replyHolder, [addCommentLink],
-          commentList, undefined, undefined, options);
+          commentListRoot, undefined, undefined, options);
   }
 }

@@ -4,6 +4,32 @@ const fileInput = document.getElementById('file-input');;
 const rootDiv = document.getElementById('ext-comments');
 let comments = undefined;
 
+function setUpCommentOptions() {
+  const optionContainer = document.getElementById('comment-options');
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    // only add options that modify comments
+    if (!option.processHeader && !option.processComment) return;
+
+    optionShadow[key] = option.default;
+    const input = document.createElement('input');
+    if (typeof option.default === 'boolean') {
+      input.type = 'checkbox';
+    } else {
+      input.type = 'text';
+    }
+    input.id = `${key}-input`;
+    input.addEventListener('change', (event) => {
+      optionShadow[key] = event.target.value;
+      // slight hack to not run handlers if no comments have been loaded
+      if (commentListRoot) option?.onValueChange(event.target.value);
+    });
+    const label = document.createElement('label');
+    label.textContent = key;
+    label.htmlFor = `${key}-input`;
+    optionContainer.append(input, label);
+  }
+}
+
 function isCommentApiEnabled() {
   return document.getElementById('comment-api-enabled').checked;
 }
@@ -16,7 +42,7 @@ let replaceCommentOptions = {
   ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
   collapseDepth: 3,
   dateFormatShort: longerDateFormat,
-  newFirst: false,
+  commentOrder: CommentOrder.CHRONOLOGICAL,
   commentApi: {
     async createComment(parentId, body) {
       if (!isCommentApiEnabled()) {
@@ -49,7 +75,14 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (comments) replaceComments(rootDiv, comments, replaceCommentOptions);
+  if (comments) {
+    const options = Object.values(OPTIONS);
+    const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
+    const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
+    const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
+    replaceCommentOptions.optionApiFuncs = optionApiFuncs;
+    replaceComments(rootDiv, comments, replaceCommentOptions);
+  }
 }
 
 function handleFileChange() {
@@ -73,7 +106,8 @@ function setDateFormat(value) {
 }
 
 function setCommentOrder(value) {
-  replaceCommentOptions.newFirst = value === 'most_recent_first';
+  replaceCommentOptions.commentOrder =
+      value === 'most_recent_first' ? CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
   repopulate();
 }
 
@@ -86,3 +120,6 @@ function setUserId(value) {
   replaceCommentOptions.userId = value;
   repopulate();
 }
+
+// Initialization.
+setUpCommentOptions();

@@ -196,9 +196,65 @@ function test_splitByEmail() {
       ['foo\\ ', 'bar@baz.com', '']);
 }
 
+function test_formatRecentDate() {
+  const now = new Date('2024-04-28T13:14:15.600Z');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:14:15.601Z')), undefined);
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:14:15.600Z')), '0 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:13:15.600Z')), '1 min ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:12:15.600Z')), '2 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T13:07:10.000Z')), '7 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T12:14:15.601Z')), '59 mins ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T12:14:15.600Z')), '1 hr ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T11:14:15.600Z')), '2 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-28T01:55:00.000Z')), '11 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-27T13:14:15.601Z')), '23 hrs ago');
+  assertEqual(formatRecentDate(now, new Date('2024-04-27T13:14:15.600Z')), undefined);
+}
+
+function test_getUserIconUrl() {
+  assertEqual(
+    getUserIconUrl({
+      "user_id": 123,
+      "photo_url": "https://bucketeer-blabla.s3.amazonaws.com/public/images/blabla.png",
+    }),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fbucketeer-blabla.s3.amazonaws.com%2Fpublic%2Fimages%2Fblabla.png'
+  );
+
+  assertEqual(
+    getUserIconUrl({"user_id": 10}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Fpurple.png');
+
+  assertEqual(
+    getUserIconUrl({"user_id": 11}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Fyellow.png');
+
+  assertEqual(
+    getUserIconUrl({"user_id": 12}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Forange.png');
+
+  assertEqual(
+    getUserIconUrl({"user_id": 13}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Fgreen.png');
+
+  assertEqual(
+    getUserIconUrl({"user_id": 14}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Fblack.png');
+
+  assertEqual(
+    getUserIconUrl({"user_id": 15}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Fpurple.png');
+
+  // Missing both photo_url and user_id; this happens for deleted comments:
+  assertEqual(
+    getUserIconUrl({}),
+    'https://substackcdn.com/image/fetch/w_32,h_32,c_fill/https%3A%2F%2Fsubstack.com%2Fimg%2Favatars%2Flogged-out.png');
+}
+
 test_splitByUrl();
 test_unescapeUrl();
 test_splitByEmail();
+test_formatRecentDate();
+test_getUserIconUrl();
 
 console.info(`Ran ${successes + failures} tests; ${successes} passed, ${failures} failed.`);
 if (failures) {
