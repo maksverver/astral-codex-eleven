@@ -44,15 +44,17 @@ class CommentApi {
   }
 }
 
-async function loadOptions() {
-  await loadSavedOptions();
-  initializeOptionValues();
-  chrome.storage.onChanged.addListener(storageChangeHandler);
-}
-
-async function onLoad() {
+(async function() {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
+
+  // Start loading options asynchronously (this doesn't depend on the DOM).
+  const loadOptionsResult = loadOptions();
+
+  // Wait for the DOM to load fully before continuing.
+  if (document.readyState === 'loading') {
+    await new Promise((resolve) => document.addEventListener("DOMContentLoaded", resolve));
+  }
 
   // Hack to keep the displayed number of comments correct. As all of substack's
   // API requests are redirected, it thinks there's only 1 comment. If we just
@@ -95,7 +97,8 @@ async function onLoad() {
     console.info(LOG_TAG, 'Invalid value for commentSort! Will default to oldest_first.');
     commentSort = 'oldest_first';
   }
-  const newFirst = commentSort === 'most_recent_first';
+  const commentOrder = commentSort === 'most_recent_first' ?
+    CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
 
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
@@ -135,22 +138,17 @@ async function onLoad() {
   const commentApi = new CommentApi(postId);
 
   const options = Object.values(OPTIONS);
-  const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
-  const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
-  const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
+  const optionApiFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
 
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, newFirst, optionApiFuncs});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, commentOrder, optionApiFuncs});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
 
+  // Wait for options to finish loading.
+  await loadOptionsResult;
   runOptionsOnLoad();
-};
-
-(async function() {
-  document.addEventListener('DOMContentLoaded', onLoad);
-  await loadOptions();
 })();

@@ -19,6 +19,9 @@ function countCommentsInArray(comments) {
 // Holds the root ExtCommentListComponent.
 let commentListRoot;
 
+// Holds the CommentOrderComponent.
+let commentOrderComponent;
+
 // Below is a beautiful regex to match URLs that may occur in text. It's tricky
 // because we want to allow characters that occur in URLs that are technically
 // reserved, while excluding characters that are likely intended as punctuation.
@@ -84,19 +87,46 @@ function unescapeUrl(s) {
 // hosts, quoted usernames, non-Latin usernames, and so on.
 const EMAIL_REGEX = /([A-Z0-9!#$%&'*+\-/=?^_`{|}~.]+@[^\s]+\.[A-Z0-9\-]*[A-Z]+)/i;
 
-// Base URL for user icons. The stylesheet scales these to 32x32 px, so we need
-// to request an image with corresponding resolution. The image URL seems to
-// support Cloudinary transformation parameters:
-// https://cloudinary.com/documentation/transformation_reference
-const USER_ICON_BASE_URL = (() => {
-  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
-  const size = Math.round(32 * pixelRatio);
-  return `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
-})();
-
 function splitByEmail(s) {
   return s.split(EMAIL_REGEX);
 }
+
+// getUserIconUrl({photo_url, user_id}) generates an image URL to be used as
+// a user icon, based on either `photo_url` (if defined), or a default picture
+// based on `user_id` instead.
+const getUserIconUrl = (() => {
+  const colorUrls = Object.freeze([
+    'https://substack.com/img/avatars/purple.png',
+    'https://substack.com/img/avatars/yellow.png',
+    'https://substack.com/img/avatars/orange.png',
+    'https://substack.com/img/avatars/green.png',
+    'https://substack.com/img/avatars/black.png',
+  ]);
+  const loggedOutUrl =
+    'https://substack.com/img/avatars/logged-out.png';
+
+  // Generate a default user icon from a user id, in the same way that Substack
+  // does. (Thanks Pycea for figuring out the userId % 5 logic.)
+  function getDefaultUserIcon(userId) {
+    return userId ? colorUrls[userId % colorUrls.length] : loggedOutUrl;
+  }
+
+  // Device pixel ratio. In theory, this can change during the lifetime of the
+  // window, but in practice it's probably rare enough not to care about it.
+  const pixelRatio = typeof window === 'object' && window.devicePixelRatio || 1;
+
+  // Base URL for user icons. The stylesheet scales these to 32x32 px, so we
+  // need to request an image with corresponding resolution. The image URL
+  // seems to support Cloudinary transformation parameters:
+  // https://cloudinary.com/documentation/transformation_reference
+  const size = Math.round(32 * pixelRatio);
+  const baseUrl = `https://substackcdn.com/image/fetch/w_${size},h_${size},c_fill/`;
+
+  return (commentData) => {
+    const photoUrl = commentData.photo_url ?? getDefaultUserIcon(commentData.user_id);
+    return baseUrl + encodeURIComponent(photoUrl);
+  };
+})();
 
 // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
 // `now` and `now` minus 24 hours, or returns undefined otherwise.
@@ -148,7 +178,7 @@ class ExtCommentListComponent {
         (comment) => new ExtCommentComponent(div, comment, parentCommentComponent, options));
     this.commentsHolder = div;
     this.children = childComponents;
-    this.newFirst = options.newFirst;
+    this.commentOrder = options.commentOrder;
     ExtCommentListComponent.assignSiblings(this.children);
   }
 
@@ -156,7 +186,7 @@ class ExtCommentListComponent {
     // This is a bit of a hack to ensure that comments are added at the top in
     // the new-first ordering. It's kinda slow for large threads, but I don't
     // know if it's worth it to try to make it faster.
-    const reverse = this.newFirst;
+    const reverse = this.commentOrder === CommentOrder.NEW_FIRST;
     if (reverse) this.reverseSelfOnly();
     const commentComponent = new ExtCommentComponent(this.commentsHolder, comment, parentCommentComponent, options);
     if (this.children.length > 0) {
@@ -170,7 +200,7 @@ class ExtCommentListComponent {
   }
 
   reverseSelfOnly() {
-    this.newFirst = !this.newFirst;
+    this.commentOrder = 1 - this.commentOrder;
     this.commentsHolder.replaceChildren(
         ...Array.from(this.commentsHolder.childNodes).reverse());
     ExtCommentListComponent.assignSiblings(this.children.reverse());
@@ -329,14 +359,9 @@ class ExtCommentComponent {
     // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
     borderDiv.onclick = this.toggleExpanded.bind(this);
-    // Add profile picture to the top of the border. Some comments don't have
-    // photo_url defined. Substack renders these with some default image, but
-    // it's not entirely clear to me how these get assigned, so I decided to
-    // just omit them.
-    if (comment.photo_url) {
-      createElement(borderDiv, 'img', 'user-icon').src =
-          USER_ICON_BASE_URL + encodeURIComponent(comment.photo_url);
-    }
+    // Add profile picture to the top of the border.
+    createElement(borderDiv, 'img', 'user-icon')
+        .src = getUserIconUrl(comment);
     // Finally, add a vertical line that covers the remaining space.
     createElement(borderDiv, 'div', 'line');
 
@@ -460,19 +485,13 @@ class ExtCommentComponent {
   }
 
   // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed.
-  doOptionApiFunctions(keys) {
-    for (const option of this.optionFuncs.headerFuncs) {
+  // keys are processed. Set force to true to call the functions even if the
+  // option value is falsy.
+  doOptionApiFunctions(keys, force=false) {
+    for (const option of this.optionFuncs) {
       if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
-        option.processHeader(this.commentData, this.headerDiv);
-      }
-    }
-
-    for (const option of this.optionFuncs.commentFuncs) {
-      if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key]) {
-        option.processComment(this.commentData, this.threadDiv);
+      if (optionShadow[option.key] || force) {
+        option.processComment(this);
       }
     }
   }
@@ -593,7 +612,7 @@ class ExtCommentComponent {
   // If given, keys is an array of keys to call API functions on. Otherwise, all
   // keys are processed.
   processSelfAndChildren(keys) {
-    this.doOptionApiFunctions(keys);
+    this.doOptionApiFunctions(keys, true);
     this.childList.processAllChildren(keys);
   }
 }
@@ -633,7 +652,32 @@ class RadioButtonsComponent {
   change(index) {
     if (this.activeIndex === index) return;
     this.activate(index);
-    if (typeof this.onChange === 'function') this.onChange(index);
+    if (this.onChange instanceof Function) this.onChange(index);
+  }
+}
+
+class CommentOrder {
+  static CHRONOLOGICAL = 0;
+  static NEW_FIRST = 1;
+};
+
+class CommentOrderComponent {
+  constructor(parentElem, initialOrder) {
+    let currentOrder = initialOrder;
+    this.buttons = new RadioButtonsComponent(
+      createElement(parentElem, 'div', 'comment-order', 'Order: '),
+      ['Chronological', 'New First'],
+      (i) => {
+        if (i === 1 - currentOrder) {
+          commentListRoot.reverse();
+          currentOrder = i;
+        }
+      });
+    this.setOrder(initialOrder);
+  }
+
+  setOrder(newOrder) {
+    this.buttons.change(newOrder);
   }
 }
 
@@ -725,14 +769,14 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
       hour: '2-digit', minute: '2-digit', second: '2-digit',
       timeZoneName: 'short'}),
 
-  // Set to true when comments are provided in reverse chronological order.
-  newFirst: false,
+  // Set to NEW_FIRST when comments are provided in reverse chronological order.
+  commentOrder: CommentOrder.CHRONOLOGICAL,
 
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
   // Holder for all option API functions
-  optionApiFuncs: new OptionApiFuncs(),
+  optionApiFuncs: [],
 
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED
@@ -755,14 +799,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       addCommentLink.href = '#';
     }
 
-    const orderDiv = createElement(holderDiv, 'div', 'comment-order', 'Order: ');
-    let currentOrder = options.newFirst ? 1 : 0;
-    new RadioButtonsComponent(orderDiv, ['Chronological', 'New First'], (i) => {
-      if (i === 1 - currentOrder) {
-        commentListRoot.reverse();
-        currentOrder = i;
-      }
-    }).change(currentOrder);
+    commentOrderComponent = new CommentOrderComponent(holderDiv, options.commentOrder);
   }
 
   const replyHolder = createElement(rootElem, 'div', 'top-level-reply-holder');
