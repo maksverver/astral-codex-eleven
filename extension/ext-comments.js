@@ -426,7 +426,7 @@ class ExtCommentComponent {
     // If editHolder is created above, then enabled editing/deleting this comment:
     if (editHolder) {
       // Add support for editing the comment.
-      const editSeparator = createElement(commentHeader, 'span', undefined, '·');
+      const editSeparator = createElement(commentHeader, 'span', 'edit-sep', '·');
       const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
       editLink.href = '#';
       connectCommentEditor(
@@ -450,7 +450,7 @@ class ExtCommentComponent {
           });
 
       // Add support for deleting the comment.
-      const deleteSeparator = createTextNode(commentHeader, '·');
+      createElement(commentHeader, 'span', 'delete-sep', '·');
       const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
       deleteLink.href = '#';
       deleteLink.onclick = async (ev) => {
@@ -470,6 +470,7 @@ class ExtCommentComponent {
     }
 
     this.commentData = comment;
+    this.options     = options;
     this.optionFuncs = optionApiFuncs;
     this.threadDiv   = threadDiv;
     this.headerDiv   = commentHeader;
@@ -482,6 +483,23 @@ class ExtCommentComponent {
     this.childList   = childCommentList;
 
     this.doOptionApiFunctions();
+  }
+
+  createDeleteFunction(commentBody) {
+    return async (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      if (confirm('Are you sure you want to delete this comment?')) {
+        try {
+          await this.options.commentApi.deleteComment(this.commentData.id);
+          commentBody.innerText = 'deleted';
+          commentBody.classList.add('missing');
+        } catch (e) {
+          console.warn(e);
+          alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
+        }
+      }
+    }
   }
 
   // If given, keys is an array of keys to call API functions on. Otherwise, all

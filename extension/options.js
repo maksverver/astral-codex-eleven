@@ -82,11 +82,14 @@ const useOldStylingOption = {
       document.querySelectorAll('.comment-footer').forEach((e) => e.remove());
     }
   },
-  processComment(commentData, commentElem) {
-    const singleComment = commentElem.querySelector(':scope > .content > .comment');
-    const footer = createElement(singleComment, 'div', 'comment-footer');
+  processComment(commentComponent) {
+    const footer = createElement(commentComponent.commentDiv, 'div', 'comment-footer');
     const reply = createElement(footer, 'a', 'reply', 'Reply');
     reply.href = '#';
+
+    const replyHolder = commentComponent.threadDiv.querySelector(':scope > .content > .reply-holder');
+    enableCommentReply(reply, replyHolder, [reply], commentComponent.childList,
+      commentComponent, commentComponent.commentData.id, commentComponent.options);
   }
 };
 
