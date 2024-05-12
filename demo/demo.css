@@ -60,4 +60,5 @@ a:hover {
 .options th {
   text-align: left;
   padding-right: 16px;
+  vertical-align: top;
 }

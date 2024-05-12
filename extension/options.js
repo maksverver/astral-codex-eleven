@@ -109,7 +109,7 @@ const hideUsersOption = {
   },
   onValueChange(newValue) {
     this.createCachedSet(newValue);
-    reprocessComments(this.key);
+    reprocessComments(this);
   },
   onStart(currentValue) {
     this.createCachedSet(currentValue);
@@ -121,26 +121,51 @@ const hideUsersOption = {
   }
 };
 
-// All options should be added here.
-const optionArray = [
-  // templateOption,
-  removeNagsOptions,
-  zenModeOption,
-  defaultSortOption,
-  hideUsersOption,
-];
+function getValidOptions() {
+  // All options should be added here.
+  const optionArray = [
+    // templateOption,
+    removeNagsOptions,
+    zenModeOption,
+    defaultSortOption,
+    hideUsersOption,
+  ];
+
+  return Object.fromEntries(optionArray.filter((e) => {
+    const [valid, reason] = isValidOption(e);
+    if (!valid) console.error(LOG_OPTION_TAG, 'Invalid option:', reason, e);
+    return valid;
+  }).map((e) => [e.key, e]));
+}
 
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = 'acxi-options';
-
-// Reprocess all comments with the given option key.
-function reprocessComments(key) {
-  commentListRoot.processAllChildren([key]);
-}
+const OPTIONS = getValidOptions();
 
 // Stores a local copy of the current option values. It should not be modified
 // directly, instead setOption below should be used.
 let optionShadow = {};
+
+// Returns the list of options that are applied to the initial comment list.
+//
+// This includes all valid options that:
+//
+//  - have a processComment() implementation
+//  - are enabled (i.e., the current value is truthy)
+//
+function getOptionsToProcessInitially() {
+  return Object.entries(OPTIONS)
+      .filter(
+          ([key, option]) =>
+            option.hasOwnProperty('processComment') &&
+            Boolean(optionShadow[key]))
+      .map(([key, option]) => option);
+}
+
+// Reprocess all comments with the given option key.
+function reprocessComments(option) {
+  commentListRoot.applyOptions([option]);
+}
 
 async function loadSavedOptions() {
   const v = await chrome.storage.local.get(OPTION_KEY).catch((e) => {
@@ -234,12 +259,3 @@ function isValidOption(option) {
 
   return [true, undefined];
 }
-
-// OPTIONS maps option keys to option objects.
-const OPTIONS = Object.fromEntries(optionArray.filter((e) => {
-  const [valid, reason] = isValidOption(e);
-  if (!valid) {
-    console.error(LOG_OPTION_TAG, 'Invalid option:', reason, e);
-  }
-  return valid;
-}).map((e) => [e.key, e]));
