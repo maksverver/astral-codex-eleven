@@ -29,6 +29,15 @@ const STYLES = {
       padding-top: 20px;
     }
   `,
+  showFullDate: `
+    .date > .short {
+      display: none;
+    }
+
+    .date > .long {
+      display: initial;
+    }
+  `,
 };
 
 // Adds a style tag with values from the given key in the STYLES dict.

@@ -103,7 +103,14 @@ const defaultSortOption = {
 
 const showFullDateOption = {
   key: 'showFullDate',
-  default: false
+  default: false,
+  onStart(currentValue) {
+    addStyle(this.key);
+    setStyleEnabled(this.key, currentValue);
+  },
+  onValueChange(newValue) {
+    setStyleEnabled(this.key, newValue);
+  }
 };
 
 const use24HourOption = {
