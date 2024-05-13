@@ -164,7 +164,7 @@ function getOptionsToProcessInitially() {
 
 // Reprocess all comments with the given option key.
 function reprocessComments(option) {
-  commentListRoot.applyOptions([option]);
+  if (commentListRoot) commentListRoot.applyOptions([option]);
 }
 
 async function loadSavedOptions() {
