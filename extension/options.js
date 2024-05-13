@@ -181,34 +181,29 @@ async function saveOptions() {
   });
 }
 
+function getOption(key) {
+  return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
+}
+
 async function setOption(key, value) {
   optionShadow[key] = value;
   await saveOptions();
 }
 
-function initializeOptionValues() {
-  for (const [key, option] of Object.entries(OPTIONS)) {
-    if (!optionShadow.hasOwnProperty(key)) {
-      optionShadow[key] = option.default;
-    }
-
-    if (option.onStart instanceof Function) {
-      option.onStart(optionShadow[key]);
-    }
-  }
-  saveOptions();
-}
-
 async function loadOptions() {
   await loadSavedOptions();
-  initializeOptionValues();
   chrome.storage.onChanged.addListener(storageChangeHandler);
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (option.onStart instanceof Function) {
+      option.onStart(getOption(key));
+    }
+  }
 }
 
 function runOptionsOnLoad() {
   for (const [key, option] of Object.entries(OPTIONS)) {
     if (option.onLoad instanceof Function) {
-      option.onLoad(optionShadow[key]);
+      option.onLoad(getOption(key));
     }
   }
 }
@@ -223,7 +218,7 @@ function storageChangeHandler(changes, namespace) {
     // stringify is a simple way to compare values that may be dicts, and
     // performance isn't a concern here since the function doesn't run often.
     const newValueString = JSON.stringify(newValue);
-    const oldValueString = JSON.stringify(optionShadow[key]);
+    const oldValueString = JSON.stringify(getOption('key'));
 
     if (newValueString !== oldValueString) {
       optionShadow[key] = newValue;
