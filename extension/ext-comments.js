@@ -768,7 +768,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
   // Add the top-level comments list.
   commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
-  processCommentsInitial();
+  processAllComments();
 
   if (addCommentLink) {
     addCommentLink.onclick = (ev) => {

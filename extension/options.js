@@ -122,6 +122,8 @@ const hideUsersOption = {
   }
 };
 
+
+
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = 'acxi-options';
 const OPTIONS = getValidOptions();
@@ -143,7 +145,7 @@ function getValidOptions() {
   }).map((e) => [e.key, e]));
 }
 
-// Process all comments with the given option key.
+// Apply `processComment` from the given key to all ExtCommentComponents
 function processComments(key) {
   const option = OPTIONS[key]
   if (!option) {
@@ -156,23 +158,24 @@ function processComments(key) {
     return;
   }
 
-  const value = optionShadow[key];
+  const value = getOption(key);
   for (let child of commentListRoot.allChildren()) {
     option.processComment(value, child);
   }
 }
 
-// Process all keys for a single comment
+// Apply `processComment` from all keys to the given ExtCommentComponent
 function processSingleComment(comment) {
   for (const option of Object.values(OPTIONS)) {
     if (Object.hasOwn(option, 'processComment')) {
-      const value = optionShadow[option.key];
+      const value = getOption(option.key);
       option.processComment(value, comment);
     }
   }
 }
 
-function processCommentsInitial() {
+// Apply `processComment` from all keys to all ExtCommentComponents
+function processAllComments() {
   for (const option of Object.values(OPTIONS)) {
     if (Object.hasOwn(option, 'processComment')) {
       processComments(option.key);
@@ -180,15 +183,11 @@ function processCommentsInitial() {
   }
 }
 
-// Stores a local copy of the current option values. It should not be modified
-// directly, instead setOption below should be used.
+
+
+// Stores a local copy of the current option values. It should not be used
+// directly, instead getOption and setOption below should be used.
 let optionShadow = {};
-
-
-// Reprocess all comments with the given option key.
-function reprocessComments(option) {
-  if (commentListRoot) commentListRoot.applyOptions([option]);
-}
 
 async function loadSavedOptions() {
   const v = await chrome.storage.local.get(OPTION_KEY).catch((e) => {
@@ -205,7 +204,7 @@ async function saveOptions() {
 }
 
 function getOption(key) {
-  return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
+  return Object.hasOwn(optionShadow, key) ? optionShadow[key] : OPTIONS[key]?.default;
 }
 
 async function setOption(key, value) {
@@ -241,7 +240,7 @@ function storageChangeHandler(changes, namespace) {
     // stringify is a simple way to compare values that may be dicts, and
     // performance isn't a concern here since the function doesn't run often.
     const newValueString = JSON.stringify(newValue);
-    const oldValueString = JSON.stringify(getOption('key'));
+    const oldValueString = JSON.stringify(getOption(key));
 
     if (newValueString !== oldValueString) {
       optionShadow[key] = newValue;
