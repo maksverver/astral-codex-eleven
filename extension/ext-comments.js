@@ -196,6 +196,7 @@ class ExtCommentListComponent {
     }
     this.children.push(commentComponent);
     if (reverse) this.reverseSelfOnly();
+    processSingleComment(commentComponent);
     return commentComponent;
   }
 
