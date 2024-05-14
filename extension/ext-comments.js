@@ -219,42 +219,6 @@ class ExtCommentListComponent {
   }
 }
 
-const EMPTY_STRING_PROVIDER = () => '';
-
-function connectCommentEditor(link, editorHolder, elementsToHide, textProvider, callback) {
-  link.onclick = (ev) => {
-    ev.stopPropagation();
-    ev.preventDefault();
-    for (const elem of elementsToHide) elem.style.setProperty('display', 'none');
-    const editor = new CommentEditorComponent(editorHolder, textProvider(), async (body) => {
-      if (await callback(body)) {
-        editor.close();
-        for (const elem of elementsToHide) elem.style.removeProperty('display');
-      }
-    });
-  };
-}
-
-function enableCommentReply(link, editorHolder, elementsToHide,
-      commentList, parentCommentComponent, parentCommentId, options) {
-  connectCommentEditor(
-      link, editorHolder, elementsToHide, EMPTY_STRING_PROVIDER,
-      async (body) => {
-        if (body == null) return true;  // Reply discarded.
-        try {
-          const comment = await options.commentApi.createComment(parentCommentId, body);
-          commentList.addComment(comment, parentCommentComponent, options).focus();
-          return true;
-        } catch (e) {
-          console.warn(e);
-          alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-          // Return false here so the editor is NOT removed, which allows the user
-          // to retry the submission or save his comment text.
-          return false;
-        }
-      });
-}
-
 class ExtCommentComponent {
   // Constructs the DOM elements to represent a single comment thread.
   //
@@ -268,42 +232,6 @@ class ExtCommentComponent {
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
     const {collapseDepth, dateFormatShort, dateFormatLong} = options;
-
-    // Creates DOM nodes for the given comment text, and appends them to the
-    // given parent element. This tries to mirror how Substack seems to process
-    // comments:
-    //
-    //  - Splits text into paragraphs based on newline sequences.
-    //  - Turns http/https URLs into clickable links.
-    //  - Turn email addresses into clickable mailto: links.
-    //
-    function appendCommentText(parentElem, text) {
-      function createLink(parentElem, text, href) {
-        const a = createElement(parentElem, 'a', 'linkified', text);
-        a.href = href;
-        a.target = '_blank';
-        a.rel = 'nofollow ugc noopener';
-        return a;
-      }
-
-      for (const paragraph of text.split(/\n+/)) {
-        if (!paragraph) continue;
-        const p = createElement(parentElem, 'p');
-        splitByUrl(paragraph).forEach((part, i) => {
-          if (i%2 === 0) {
-            splitByEmail(part).forEach((part, i) => {
-              if (i%2 === 0) {
-                if (part) createTextNode(p, part);
-              } else {
-                createLink(p, part, 'mailto:' + encodeURIComponent(part));
-              }
-            });
-          } else {
-            createLink(p, part, unescapeUrl(part));
-          }
-        });
-      }
-    }
 
     // Constructs a Substack profile link from a user id and name.
     //
@@ -395,77 +323,16 @@ class ExtCommentComponent {
       createTextNode(commentBody, comment.deleted ? "deleted" : "unavailable");
       commentBody.classList.add('missing');
     } else {
-      appendCommentText(commentBody, comment.body);
+      this.appendCommentText(commentBody, comment.body);
     }
 
-    // Check if replying to this comment is possible:
-    const replyHolder = !comment.deleted && options.userId ?
-        createElement(contentDiv, 'div', 'reply-holder') : undefined;
-
-    // Check if editing this comment is possible:
-    const editHolder = !comment.deleted && options.userId === comment.user_id ?
-        createElement(contentDiv, 'div', 'edit-holder') : undefined;
+    const replyHolder = createElement(contentDiv, 'div', 'reply-holder');
+    const editHolder = createElement(contentDiv, 'div', 'edit-holder');
 
     const childCommentList =
         new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
 
-    // If replyHolder is created above, then enable replying to this comment:
-    if (replyHolder) {
-      const replySeparator = createElement(commentHeader, 'span', undefined, '·');
-      const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
-      replyLink.href = '#';
-
-      enableCommentReply(
-        replyLink, replyHolder, [replySeparator, replyLink],
-        childCommentList, this, comment.id, options);
-    }
-
-    // If editHolder is created above, then enabled editing/deleting this comment:
-    if (editHolder) {
-      // Add support for editing the comment.
-      const editSeparator = createElement(commentHeader, 'span', undefined, '·');
-      const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
-      editLink.href = '#';
-      connectCommentEditor(
-          editLink, editHolder, [editSeparator, editLink, commentBody],
-          () => comment.body,
-          async (newText) => {
-            if (newText == null) return true;  // Edit discarded.
-            if (newText === comment.body) return true;  // No changes made.
-            try {
-              comment = await options.commentApi.editComment(comment.id, newText);
-              commentBody.replaceChildren();
-              appendCommentText(commentBody, comment.body);
-              return true;
-            } catch (e) {
-              console.warn(e);
-              alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
-              // Return false here so the editor is NOT removed, which allows the user
-              // to retry the submission or save his comment text.
-              return false;
-            }
-          });
-
-      // Add support for deleting the comment.
-      const deleteSeparator = createTextNode(commentHeader, '·');
-      const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
-      deleteLink.href = '#';
-      deleteLink.onclick = async (ev) => {
-        ev.stopPropagation();
-        ev.preventDefault();
-        if (confirm('Are you sure you want to delete this comment?')) {
-          try {
-            await options.commentApi.deleteComment(comment.id);
-            commentBody.innerText = 'deleted';
-            commentBody.classList.add('missing');
-          } catch (e) {
-            console.warn(e);
-            alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
-          }
-        }
-      };
-    }
-
+    this.options     = options;
     this.commentData = comment;
     this.threadDiv   = threadDiv;
     this.headerDiv   = commentHeader;
@@ -476,6 +343,128 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = childCommentList;
+
+    if (!comment.deleted && options.userId) {
+      const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
+      const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
+      replyLink.href = '#';
+      this.connectReplyButton(replyHolder, replyLink, [replySeparator, replyLink]);
+
+      if (options.userId === comment.user_id) {
+        const editSeparator = createElement(commentHeader, 'span', 'edit-sep', '·');
+        const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
+        editLink.href = '#';
+        this.connectEditButton(editHolder, editLink, commentBody,
+          [commentBody, editSeparator, editLink]);
+
+        const deleteSeparator = createElement(commentHeader, 'span', 'delete-sep', '·');
+        const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
+        deleteLink.href = '#';
+        this.connectDeleteButton(deleteLink, commentBody,
+          [replySeparator, replyLink, editSeparator, editLink, deleteSeparator, deleteLink]);
+      }
+    }
+  }
+
+  connectReplyButton(replyHolder, replyLink, toHide) {
+    replyLink.onclick = (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      for (const elem of toHide) elem.style.setProperty('display', 'none');
+      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+        if (body) {
+          try {
+            const comment = await this.options.commentApi.createComment(this.commentData.id, body);
+            this.childList.addComment(comment, this, this.options).focus();
+          } catch (e) {
+            console.warn(e);
+            alert('Failed to add comment!\n\nSee the JavaScript console for details.');
+            return;
+          }
+        }
+
+        editor.close();
+        for (const elem of toHide) elem.style.removeProperty('display');
+      });
+    };
+  }
+
+  connectEditButton(editHolder, editLink, commentBodyDiv, toHide) {
+    editLink.onclick = (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      for (const elem of toHide) elem.style.setProperty('display', 'none');
+      const editor = new CommentEditorComponent(editHolder, this.commentData.body, async (body) => {
+        if (body && body !== this.commentData.body) {
+          try {
+            const comment = await this.options.commentApi.editComment(this.commentData.id, body);
+            commentBodyDiv.replaceChildren();
+            this.appendCommentText(commentBodyDiv, comment.body);
+          } catch (e) {
+            console.warn(e);
+            alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
+            return;
+          }
+        }
+
+        editor.close();
+        for (const elem of toHide) elem.style.removeProperty('display');
+      });
+    };
+  }
+
+  connectDeleteButton(deleteLink, commentBodyDiv, toDelete) {
+    deleteLink.onclick = async (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      if (confirm('Are you sure you want to delete this comment?')) {
+        try {
+          await this.options.commentApi.deleteComment(this.commentData.id);
+          commentBodyDiv.innerText = 'deleted';
+          commentBodyDiv.classList.add('missing');
+          for (const elem of toDelete) elem.remove();
+        } catch (e) {
+          console.warn(e);
+          alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
+        }
+      }
+    };
+  }
+
+  // Creates DOM nodes for the given comment text, and appends them to the
+  // given parent element. This tries to mirror how Substack seems to process
+  // comments:
+  //
+  //  - Splits text into paragraphs based on newline sequences.
+  //  - Turns http/https URLs into clickable links.
+  //  - Turn email addresses into clickable mailto: links.
+  //
+  appendCommentText(parentElem, text) {
+    function createLink(parentElem, text, href) {
+      const a = createElement(parentElem, 'a', 'linkified', text);
+      a.href = href;
+      a.target = '_blank';
+      a.rel = 'nofollow ugc noopener';
+      return a;
+    }
+
+    for (const paragraph of text.split(/\n+/)) {
+      if (!paragraph) continue;
+      const p = createElement(parentElem, 'p');
+      splitByUrl(paragraph).forEach((part, i) => {
+        if (i % 2 === 0) {
+          splitByEmail(part).forEach((part, i) => {
+            if (i % 2 === 0) {
+              if (part) createTextNode(p, part);
+            } else {
+              createLink(p, part, 'mailto:' + encodeURIComponent(part));
+            }
+          });
+        } else {
+          createLink(p, part, unescapeUrl(part));
+        }
+      });
+    }
   }
 
   setExpanded(expanded) {
@@ -657,7 +646,7 @@ class CommentOrderComponent {
 }
 
 class CommentEditorComponent {
-  constructor(parentElem, initialText, callback) {
+  constructor(parentElem, initialText, finishCallback) {
     const rootDiv = createElement(parentElem, 'div', 'comment-editor');
     const textarea = createElement(rootDiv, 'textarea');
     textarea.value = initialText;
@@ -671,13 +660,13 @@ class CommentEditorComponent {
     this.rootDiv = rootDiv;
     this.textarea = textarea;
 
-    submitButton.onclick = () => callback(textarea.value);
+    submitButton.onclick = () => finishCallback(textarea.value);
 
     discardButton.onclick = () => {
       if (textarea.value === initialText ||
-          confirm("Are you sure you want to discard your comment?\n\n\
-Push OK to discard, or Cancel to keep editing.")) {
-        callback(undefined);
+          confirm('Are you sure you want to discard your comment?\n\n\
+Push OK to discard, or Cancel to keep editing.')) {
+        finishCallback(undefined);
       }
     };
 
@@ -781,8 +770,25 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
   processCommentsInitial();
 
   if (addCommentLink) {
-    enableCommentReply(
-          addCommentLink, replyHolder, [addCommentLink],
-          commentListRoot, undefined, undefined, options);
+    addCommentLink.onclick = (ev) => {
+      ev.stopPropagation();
+      ev.preventDefault();
+      addCommentLink.style.setProperty('display', 'none');
+      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+        if (body) {
+          try {
+            const comment = await options.commentApi.createComment(undefined, body);
+            commentListRoot.addComment(comment, undefined, options);
+          } catch (e) {
+            console.warn(e);
+            alert('Failed to add comment!\n\nSee the JavaScript console for details.');
+            return;
+          }
+        }
+
+        editor.close();
+        addCommentLink.style.removeProperty('display');
+      });
+    };
   }
 }
