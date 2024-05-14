@@ -183,6 +183,16 @@ function processComments(key) {
   }
 }
 
+// Process all keys for a single comment
+function processSingleComment(comment) {
+  for (const option of Object.values(OPTIONS)) {
+    if (Object.hasOwn(option, 'processComment')) {
+      const value = optionShadow[option.key];
+      option.processComment(value, comment);
+    }
+  }
+}
+
 function processCommentsInitial() {
   for (const option of Object.values(OPTIONS)) {
     if (Object.hasOwn(option, 'processComment')) {
