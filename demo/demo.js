@@ -8,7 +8,6 @@ function setUpCommentOptions() {
   const optionContainer = document.getElementById('comment-options');
   for (const [key, option] of Object.entries(OPTIONS)) {
     const optionDiv = document.createElement('div');
-    optionShadow[key] = option.default;
     const input = document.createElement('input');
     if (typeof option.default === 'boolean') {
       input.type = 'checkbox';
@@ -17,7 +16,7 @@ function setUpCommentOptions() {
     }
     input.id = `${key}-input`;
     input.addEventListener('change', (event) => {
-      optionShadow[key] = event.target.value;
+      setOption(key,  event.target.value);
       // slight hack to not run handlers if no comments have been loaded
       if (commentListRoot) option?.onValueChange?.(event.target.value);
     });
