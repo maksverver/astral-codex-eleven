@@ -373,7 +373,7 @@ class ExtCommentComponent {
     replyLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      const editor = new CommentEditorComponent(replyHolder, toHide, '', async (body) => {
+      new CommentEditorComponent(replyHolder, toHide, '', async (body) => {
         if (body) {
           try {
             const comment = await this.options.commentApi.createComment(this.commentData.id, body);
@@ -381,11 +381,11 @@ class ExtCommentComponent {
           } catch (e) {
             console.warn(e);
             alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -394,8 +394,8 @@ class ExtCommentComponent {
     editLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      const editor = new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
-        if (body && editor.dirty) {
+      new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
+        if (body && body !== this.commentData.body) {
           try {
             const comment = await this.options.commentApi.editComment(this.commentData.id, body);
             commentBodyDiv.replaceChildren();
@@ -403,11 +403,11 @@ class ExtCommentComponent {
           } catch (e) {
             console.warn(e);
             alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -645,7 +645,10 @@ class CommentOrderComponent {
 }
 
 class CommentEditorComponent {
-  constructor(parentElem, elemsToHide, initialText, finishCallback) {
+  static SUCCESS = 0;
+  static ERROR = 1;
+
+  constructor(parentElem, elemsToHide, initialText, exitCallback) {
     for (const elem of elemsToHide) elem.style.setProperty('display', 'none');
 
     const rootDiv = createElement(parentElem, 'div', 'comment-editor');
@@ -661,13 +664,14 @@ class CommentEditorComponent {
     this.initialText = initialText;
     this.rootDiv = rootDiv;
     this.textarea = textarea;
+    this.exitCallback = exitCallback;
 
-    submitButton.onclick = () => finishCallback(textarea.value);
+    submitButton.onclick = () => this.handleButtonClick(textarea.value);
 
     discardButton.onclick = () => {
       if (!this.dirty || confirm('Are you sure you want to discard your comment?\n\n\
 Push OK to discard, or Cancel to keep editing.')) {
-        finishCallback(undefined);
+        this.handleButtonClick(undefined);
       }
     };
 
@@ -678,6 +682,13 @@ Push OK to discard, or Cancel to keep editing.')) {
       }
     };
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  }
+
+  handleButtonClick(textValue) {
+    const status = this.exitCallback(textValue);
+    if (status !== CommentEditorComponent.ERROR) {
+      this.close();
+    }
   }
 
   get dirty() {
@@ -775,7 +786,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     addCommentLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      const editor = new CommentEditorComponent(replyHolder, [addCommentLink], '', async (body) => {
+      new CommentEditorComponent(replyHolder, [addCommentLink], '', async (body) => {
         if (body) {
           try {
             const comment = await options.commentApi.createComment(undefined, body);
@@ -783,11 +794,11 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
           } catch (e) {
             console.warn(e);
             alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
