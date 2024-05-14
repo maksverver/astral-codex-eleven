@@ -1,5 +1,11 @@
 'use strict';
 
+function addDescription(optionElement) {
+  const id = optionElement.id;
+  const label = optionElement.querySelector('label');
+  label.textContent = OPTIONS[id]?.descriptionShort;
+}
+
 function addHovertext(optionElement) {
   const id = optionElement.id;
   const iconUri = chrome.runtime.getURL('icons/questionmark.svg');
@@ -9,7 +15,7 @@ function addHovertext(optionElement) {
   const tooltip = document.createElement('span');
   tooltip.id = `${id}-tooltip`;
   tooltip.className = 'tooltip';
-  tooltip.textContent = OPTIONS[id]?.hovertext;
+  tooltip.textContent = OPTIONS[id]?.descriptionLong;
   tooltip.style.display = 'none';
   optionElement.appendChild(icon);
   document.getElementById('tooltips').appendChild(tooltip);
@@ -84,6 +90,7 @@ function createChangeHandler(optionElement) {
   }
 
   for (const optionElement of document.querySelectorAll('.option')) {
+    addDescription(optionElement);
     addHovertext(optionElement);
     setInitialState(optionElement);
     createChangeHandler(optionElement);

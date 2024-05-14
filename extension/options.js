@@ -33,10 +33,16 @@ const templateOption = {
 
   /**
    * (Required)
-   * Hovertext that describes what the option does in more detail. This will be
-   * shown in the option panel when the user hovers over the question mark.
+   * A short description of the option to identify it on the option popup.
    */
-  hovertext: 'a template for other options to follow',
+  descriptionShort: 'A short description',
+
+  /**
+   * (Required)
+   * Text that describes what the option does in more detail. This will be shown
+   * in the option panel when the user hovers over the help icon.
+   */
+  descriptionLong: 'A longer description of the option with more detail than the name alone.',
 
   /**
    * (Optional)
@@ -75,7 +81,8 @@ const templateOption = {
 const removeNagsOptions = {
   key: 'removeNags',
   default: false,
-  hovertext: 'Remove Substack prompts to subscribe or share posts.',
+  descriptionShort: 'Remove Substack nags',
+  descriptionLong: 'Remove Substack prompts to subscribe or share posts.',
   onStart(currentValue) {
     addStyle(this.key);
     setStyleEnabled(this.key, currentValue);
@@ -88,7 +95,8 @@ const removeNagsOptions = {
 const zenModeOption = {
   key: 'zenMode',
   default: false,
-  hovertext: 'Remove all like, share, and subscribe buttons in the post.',
+  descriptionShort: 'Zen Mode',
+  descriptionLong: 'Remove all like, share, and subscribe buttons in the post.',
   onStart(currentValue) {
     addStyle(this.key);
     setStyleEnabled(this.key, currentValue);
@@ -101,7 +109,8 @@ const zenModeOption = {
 const defaultSortOption = {
   key: 'defaultSort',
   default: 'auto',
-  hovertext: 'Force the comment sorting to always be the same. Leave on Auto to use the default Substack sorting.',
+  descriptionShort: 'Default comment sorting',
+  descriptionLong: 'Force the comment sorting to always be the same. Leave on Auto to use the default Substack sorting.',
   onLoad(currentValue) {
     if (currentValue === 'chrono') {
       commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
@@ -114,7 +123,8 @@ const defaultSortOption = {
 const hideUsersOption = {
   key: 'hideUsers',
   default: '',
-  hovertext: 'Hide comments from the listed users, in a comma separated list.',
+  descriptionShort: 'Hide user comments',
+  descriptionLong: 'Hide comments from the listed users, in a comma separated list.',
   createCachedSet(userString) {
     this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
   },
@@ -247,8 +257,12 @@ function isValidOption(option) {
     return [false, 'must contain a default value'];
   }
 
-  if (typeof option.hovertext !== 'string' || option.hovertext.length === 0) {
-    return [false, 'hovertext is required'];
+  if (typeof option.descriptionShort !== 'string' || option.descriptionShort.length === 0) {
+    return [false, 'short description is required'];
+  }
+
+  if (typeof option.descriptionLong !== 'string' || option.descriptionLong.length === 0) {
+    return [false, 'long description is required'];
   }
 
   if (Object.hasOwn(option, 'onValueChange') && !(option.onValueChange instanceof Function)) {
