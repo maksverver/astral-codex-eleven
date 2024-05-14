@@ -40,8 +40,8 @@ const templateOption = {
 
   /**
    * (Optional)
-   * Runs immediately when a page is first opened, even if the value of the
-   * option is falsy. Useful for applying custom CSS styling.
+   * Runs immediately when a page is first opened. Useful for applying custom
+   * CSS styling.
    * @param {*} currentValue - the current value of the option
    */
   onStart(currentValue) {},
@@ -49,7 +49,7 @@ const templateOption = {
   /**
    * (Optional)
    * Runs when a page is fully loaded, after the DOM is created and the rest of
-   * the extension changes are made, even if the value of the option is falsy.
+   * the extension changes are made.
    * @param {*} currentValue - the current value of the option
    */
   onLoad(currentValue) {},
@@ -58,11 +58,12 @@ const templateOption = {
    * (Optional)
    * Applied to each ExtCommentComponent. From that, the comment element itself
    * can be accessed and modified, as well as other state. Any return value is
-   * discarded. This only runs if the current value of the option is truthy.
+   * discarded.
+   * @param currentValue - the current value of the option
    * @param commentComponent - the ExtCommentComponent that represents the given
    * comment
    */
-  processComment(commentComponent) {}
+  processComment(currentValue, commentComponent) {}
 };
 
 const removeNagsOptions = {
@@ -131,7 +132,7 @@ const hideUsersOption = {
   onStart(currentValue) {
     this.createCachedSet(currentValue);
   },
-  processComment(commentComponent) {
+  processComment(currentValue, commentComponent) {
     const commentData = commentComponent.commentData;
     const commentElem = commentComponent.threadDiv;
     commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
@@ -165,14 +166,15 @@ function processComments(key) {
     return;
   }
   const boundCommentFunc = commentFunc.bind(option);
+  const value = optionShadow[key];
   for (let child of commentListRoot.allChildren()) {
-    boundCommentFunc(child);
+    boundCommentFunc(value, child);
   }
 }
 
 function processCommentsInitial() {
   for (const option of Object.values(OPTIONS)) {
-    if (Object.hasOwn(option, 'processComment') && optionShadow[option.key]) {
+    if (Object.hasOwn(option, 'processComment')) {
       processComments(option.key);
     }
   }
