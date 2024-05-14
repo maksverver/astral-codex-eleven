@@ -35,10 +35,17 @@ input {
 
 input[type="text"],
 input[type="number"] {
-    width: 120px;
     padding: 2px 3px;
     border-width: 1px;
     border-style: solid;
     border-radius: 2px;
     cursor: text;
+}
+
+input[type="text"] {
+    width: 120px;
+}
+
+input[type="number"] {
+    width: 30px;
 }
