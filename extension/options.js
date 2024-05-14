@@ -139,19 +139,28 @@ const hideUsersOption = {
   }
 };
 
-// All options should be added here.
-const optionArray = [
-  // templateOption,
-  removeNagsOptions,
-  zenModeOption,
-  defaultSortOption,
-  showFullDateOption,
-  use24HourOption,
-  hideUsersOption,
-];
-
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = 'acxi-options';
+const OPTIONS = getValidOptions();
+
+function getValidOptions() {
+  // All options should be added here.
+  const optionArray = [
+    // templateOption,
+    removeNagsOptions,
+    zenModeOption,
+    defaultSortOption,
+    showFullDateOption,
+    use24HourOption,
+    hideUsersOption,
+  ];
+
+  return Object.fromEntries(optionArray.filter((e) => {
+    const [valid, reason] = isValidOption(e);
+    if (!valid) console.error(LOG_OPTION_TAG, 'Invalid option:', reason, e);
+    return valid;
+  }).map((e) => [e.key, e]));
+}
 
 // Process all comments with the given option key.
 function processComments(key) {
@@ -160,15 +169,15 @@ function processComments(key) {
     console.warn(`No option key '${key}' found`);
     return;
   };
-  const commentFunc = option.processComment;
-  if (!(commentFunc instanceof Function)) {
+
+  if (!(option.processComment instanceof Function)) {
     console.warn(`No processComment function for key '${key}'`);
     return;
   }
-  const boundCommentFunc = commentFunc.bind(option);
+
   const value = optionShadow[key];
   for (let child of commentListRoot.allChildren()) {
-    boundCommentFunc(value, child);
+    option.processComment(value, child);
   }
 }
 
@@ -194,6 +203,12 @@ function processCommentsInitial() {
 // directly, instead setOption below should be used.
 let optionShadow = {};
 
+
+// Reprocess all comments with the given option key.
+function reprocessComments(option) {
+  if (commentListRoot) commentListRoot.applyOptions([option]);
+}
+
 async function loadSavedOptions() {
   const v = await chrome.storage.local.get(OPTION_KEY).catch((e) => {
     console.error(LOG_OPTION_TAG, e);
@@ -208,34 +223,29 @@ async function saveOptions() {
   });
 }
 
+function getOption(key) {
+  return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
+}
+
 async function setOption(key, value) {
   optionShadow[key] = value;
   await saveOptions();
 }
 
-function initializeOptionValues() {
-  for (const [key, option] of Object.entries(OPTIONS)) {
-    if (!Object.hasOwn(optionShadow, key)) {
-      optionShadow[key] = option.default;
-    }
-
-    if (option.onStart instanceof Function) {
-      option.onStart(optionShadow[key]);
-    }
-  }
-  saveOptions();
-}
-
 async function loadOptions() {
   await loadSavedOptions();
-  initializeOptionValues();
   chrome.storage.onChanged.addListener(storageChangeHandler);
+  for (const [key, option] of Object.entries(OPTIONS)) {
+    if (option.onStart instanceof Function) {
+      option.onStart(getOption(key));
+    }
+  }
 }
 
 function runOptionsOnLoad() {
   for (const [key, option] of Object.entries(OPTIONS)) {
     if (option.onLoad instanceof Function) {
-      option.onLoad(optionShadow[key]);
+      option.onLoad(getOption(key));
     }
   }
 }
@@ -250,7 +260,7 @@ function storageChangeHandler(changes, namespace) {
     // stringify is a simple way to compare values that may be dicts, and
     // performance isn't a concern here since the function doesn't run often.
     const newValueString = JSON.stringify(newValue);
-    const oldValueString = JSON.stringify(optionShadow[key]);
+    const oldValueString = JSON.stringify(getOption('key'));
 
     if (newValueString !== oldValueString) {
       optionShadow[key] = newValue;
@@ -286,12 +296,3 @@ function isValidOption(option) {
 
   return [true, undefined];
 }
-
-// OPTIONS maps option keys to option objects.
-const OPTIONS = Object.fromEntries(optionArray.filter((e) => {
-  const [valid, reason] = isValidOption(e);
-  if (!valid) {
-    console.error(LOG_OPTION_TAG, 'Invalid option:', reason, e);
-  }
-  return valid;
-}).map((e) => [e.key, e]));
