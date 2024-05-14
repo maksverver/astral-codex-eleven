@@ -231,7 +231,7 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {collapseDepth, dateFormatShort, dateFormatLong} = options;
+    const {dateFormatShort, dateFormatLong} = options;
 
     // Constructs a Substack profile link from a user id and name.
     //
@@ -276,10 +276,8 @@ class ExtCommentComponent {
     }
 
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
-    const expanded = depth === 0 || !collapseDepth || depth % collapseDepth !== 0;
 
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
-    threadDiv.classList.add(expanded ? 'expanded' : 'collapsed');
 
     // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
@@ -329,9 +327,6 @@ class ExtCommentComponent {
     const replyHolder = createElement(contentDiv, 'div', 'reply-holder');
     const editHolder = createElement(contentDiv, 'div', 'edit-holder');
 
-    const childCommentList =
-        new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
-
     this.options     = options;
     this.commentData = comment;
     this.threadDiv   = threadDiv;
@@ -339,10 +334,12 @@ class ExtCommentComponent {
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
-    this.expanded    = expanded;
+    this.expanded    = true;
     this.prevSibling = undefined;
     this.nextSibling = undefined;
-    this.childList   = childCommentList;
+    this.childList =
+        new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
+
 
     if (!comment.deleted && options.userId) {
       const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
@@ -721,10 +718,6 @@ const COMMENT_API_UNIMPLEMENTED = Object.freeze({
 // Default options for replaceComments(). Callers should override the fields
 // they want to customize.
 const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
-  // If greater than 0, comments at the given depth are collapsed (recursively).
-  // Recommend values are 0 or 3.
-  collapseDepth: 0,
-
   // Date formatting options, as accepted by Intl.DateTimeFormat().
   // Can also be set to null to use the default formatting.
   dateFormatShort: new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'}),

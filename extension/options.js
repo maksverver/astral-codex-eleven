@@ -102,6 +102,16 @@ const defaultSortOption = {
   }
 };
 
+const collapseDepthOption = {
+  key: 'collapseDepth',
+  default: 0,
+  processComment(currentValue, commentComponent) {
+    if (currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0) {
+      commentComponent.setExpanded(false);
+    }
+  }
+};
+
 const showFullDateOption = {
   key: 'showFullDate',
   default: false,
@@ -145,6 +155,7 @@ const optionArray = [
   removeNagsOptions,
   zenModeOption,
   defaultSortOption,
+  collapseDepthOption,
   showFullDateOption,
   use24HourOption,
   hideUsersOption,
@@ -155,7 +166,7 @@ const OPTION_KEY = 'acxi-options';
 
 // Process all comments with the given option key.
 function processComments(key) {
-  const option = OPTIONS[key]
+  const option = OPTIONS[key];
   if (!option) {
     console.warn(`No option key '${key}' found`);
     return;
