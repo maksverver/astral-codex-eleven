@@ -102,23 +102,6 @@ const defaultSortOption = {
   }
 };
 
-const showFullDateOption = {
-  key: 'showFullDate',
-  default: false,
-  onStart(currentValue) {
-    addStyle(this.key);
-    setStyleEnabled(this.key, currentValue);
-  },
-  onValueChange(newValue) {
-    setStyleEnabled(this.key, newValue);
-  }
-};
-
-const use24HourOption = {
-  key: 'use24Hour',
-  default: false
-};
-
 const hideUsersOption = {
   key: 'hideUsers',
   default: '',
@@ -150,8 +133,6 @@ function getValidOptions() {
     removeNagsOptions,
     zenModeOption,
     defaultSortOption,
-    showFullDateOption,
-    use24HourOption,
     hideUsersOption,
   ];
 
