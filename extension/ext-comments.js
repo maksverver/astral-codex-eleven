@@ -128,25 +128,6 @@ const getUserIconUrl = (() => {
   };
 })();
 
-// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
-// `now` and `now` minus 24 hours, or returns undefined otherwise.
-function formatRecentDate(now, date) {
-  const minuteMillis = 60 * 1000;
-  const hourMillis = 60 * minuteMillis;
-  const dayMillis = 24 * hourMillis;
-  const timeAgoMillis = now - date;
-  if (timeAgoMillis < 0) return undefined;  // date is in the future?!
-  if (timeAgoMillis < hourMillis) {
-    const mins = Math.floor(timeAgoMillis / minuteMillis);
-    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
-  }
-  if (timeAgoMillis < dayMillis) {
-    const hrs = Math.floor(timeAgoMillis / hourMillis);
-    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
-  }
-  return undefined;  // date is more than a day ago.
-}
-
 function createElement(parent, tag, className, textContent) {
   const elem = document.createElement(tag);
   if (parent) parent.appendChild(elem);
@@ -232,8 +213,6 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {dateFormatShort, dateFormatLong} = options;
-
     // Constructs a Substack profile link from a user id and name.
     //
     // I don't know the exact algorithm, but based on observation, I determined
@@ -266,16 +245,6 @@ class ExtCommentComponent {
       return `https://substack.com/profile/${id}-${suffix}`;
     }
 
-    const dateNow = Date.now();
-
-    function createDate(parentElem, dateString) {
-      parentElem.classList.add('date');
-      parentElem.tabIndex = 0;
-      const date = new Date(dateString);
-      createElement(parentElem, 'span', 'short', formatRecentDate(dateNow, date) || dateFormatShort.format(date));
-      createElement(parentElem, 'span', 'long', dateFormatLong.format(date));
-    }
-
     const depth = parentCommentComponent ? parentCommentComponent.depth + 1 : 0;
 
     const threadDiv = createElement(parentElem, 'div', 'comment-thread');
@@ -305,16 +274,8 @@ class ExtCommentComponent {
       createTextNode(authorSpan, comment.deleted ? 'deleted' : 'unavailable');
       authorSpan.classList.add('missing');
     }
-    const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
-    postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
-    postDateLink.rel = 'nofollow';
-    createDate(postDateLink, comment.date);
 
-    if (typeof comment.edited_at === 'string') {
-      createTextNode(commentHeader, '·');
-      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator', 'edited ');
-      createDate(editedIndicator, comment.edited_at);
-    }
+    createElement(commentHeader, 'span', 'comment-timestamps');
 
     // Substack assigns special rendering to class="comment-body"
     const commentBody = createElement(commentDiv, 'div', 'comment-body');
@@ -719,14 +680,6 @@ const COMMENT_API_UNIMPLEMENTED = Object.freeze({
 // Default options for replaceComments(). Callers should override the fields
 // they want to customize.
 const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
-  // Date formatting options, as accepted by Intl.DateTimeFormat().
-  // Can also be set to null to use the default formatting.
-  dateFormatShort: new Intl.DateTimeFormat('en-US', {month: 'short', day: 'numeric'}),
-  dateFormatLong: new Intl.DateTimeFormat('en-US', {
-      month: 'long', day: 'numeric', year: 'numeric',
-      hour: '2-digit', minute: '2-digit', second: '2-digit',
-      timeZoneName: 'short'}),
-
   // Set to NEW_FIRST when comments are provided in reverse chronological order.
   commentOrder: CommentOrder.CHRONOLOGICAL,
 
