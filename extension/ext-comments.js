@@ -349,20 +349,22 @@ class ExtCommentComponent {
       const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
       const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
       replyLink.href = '#';
-      this.connectReplyButton(replyHolder, replyLink, [replySeparator, replyLink]);
+
+      let headerButtons = [replySeparator, replyLink];
+      this.connectReplyButton(replyHolder, replyLink, headerButtons);
 
       if (options.userId === comment.user_id) {
         const editSeparator = createElement(commentHeader, 'span', 'edit-sep', '·');
         const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
         editLink.href = '#';
-        this.connectEditButton(editHolder, editLink, commentBody,
-          [commentBody, editSeparator, editLink]);
 
         const deleteSeparator = createElement(commentHeader, 'span', 'delete-sep', '·');
         const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
         deleteLink.href = '#';
-        this.connectDeleteButton(deleteLink, commentBody,
-          [replySeparator, replyLink, editSeparator, editLink, deleteSeparator, deleteLink]);
+
+        headerButtons.push(editSeparator, editLink, deleteSeparator, deleteLink);
+        this.connectEditButton(editHolder, editLink, commentBody, headerButtons);
+        this.connectDeleteButton(deleteLink, commentBody, headerButtons);
       }
     }
   }
@@ -371,8 +373,7 @@ class ExtCommentComponent {
     replyLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      for (const elem of toHide) elem.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+      const editor = new CommentEditorComponent(replyHolder, toHide, '', async (body) => {
         if (body) {
           try {
             const comment = await this.options.commentApi.createComment(this.commentData.id, body);
@@ -385,7 +386,6 @@ class ExtCommentComponent {
         }
 
         editor.close();
-        for (const elem of toHide) elem.style.removeProperty('display');
       });
     };
   }
@@ -394,9 +394,8 @@ class ExtCommentComponent {
     editLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      for (const elem of toHide) elem.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(editHolder, this.commentData.body, async (body) => {
-        if (body && body !== this.commentData.body) {
+      const editor = new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
+        if (body && editor.dirty) {
           try {
             const comment = await this.options.commentApi.editComment(this.commentData.id, body);
             commentBodyDiv.replaceChildren();
@@ -409,7 +408,6 @@ class ExtCommentComponent {
         }
 
         editor.close();
-        for (const elem of toHide) elem.style.removeProperty('display');
       });
     };
   }
@@ -647,7 +645,9 @@ class CommentOrderComponent {
 }
 
 class CommentEditorComponent {
-  constructor(parentElem, initialText, finishCallback) {
+  constructor(parentElem, elemsToHide, initialText, finishCallback) {
+    for (const elem of elemsToHide) elem.style.setProperty('display', 'none');
+
     const rootDiv = createElement(parentElem, 'div', 'comment-editor');
     const textarea = createElement(rootDiv, 'textarea');
     textarea.value = initialText;
@@ -657,6 +657,7 @@ class CommentEditorComponent {
     const submitButton = createElement(buttons, 'button', 'button primary', 'Post');
     const discardButton = createElement(buttons, 'button', 'button cancel', 'Cancel');
 
+    this.elemsToHide = elemsToHide;
     this.initialText = initialText;
     this.rootDiv = rootDiv;
     this.textarea = textarea;
@@ -664,15 +665,14 @@ class CommentEditorComponent {
     submitButton.onclick = () => finishCallback(textarea.value);
 
     discardButton.onclick = () => {
-      if (textarea.value === initialText ||
-          confirm('Are you sure you want to discard your comment?\n\n\
+      if (!this.dirty || confirm('Are you sure you want to discard your comment?\n\n\
 Push OK to discard, or Cancel to keep editing.')) {
         finishCallback(undefined);
       }
     };
 
     this.beforeUnloadHandler = (ev) => {
-      if (textarea.value !== initialText) {
+      if (this.dirty) {
         // This causes the browser to ask for confirmation before navigating away.
         ev.preventDefault();
       }
@@ -687,6 +687,7 @@ Push OK to discard, or Cancel to keep editing.')) {
   close() {
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     this.rootDiv.parentElement.removeChild(this.rootDiv);
+    for (const elem of this.elemsToHide) elem.style.removeProperty('display');
   }
 }
 
@@ -774,8 +775,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
     addCommentLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      addCommentLink.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+      const editor = new CommentEditorComponent(replyHolder, [addCommentLink], '', async (body) => {
         if (body) {
           try {
             const comment = await options.commentApi.createComment(undefined, body);
@@ -788,7 +788,6 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
         }
 
         editor.close();
-        addCommentLink.style.removeProperty('display');
       });
     };
   }
