@@ -307,20 +307,22 @@ class ExtCommentComponent {
       const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
       const replyLink = createElement(commentHeader, 'a', 'reply', 'reply');
       replyLink.href = '#';
-      this.connectReplyButton(replyHolder, replyLink, [replySeparator, replyLink]);
+
+      let headerButtons = [replySeparator, replyLink];
+      this.connectReplyButton(replyHolder, replyLink, headerButtons);
 
       if (options.userId === comment.user_id) {
         const editSeparator = createElement(commentHeader, 'span', 'edit-sep', '·');
         const editLink = createElement(commentHeader, 'a', 'edit', 'edit');
         editLink.href = '#';
-        this.connectEditButton(editHolder, editLink, commentBody,
-          [commentBody, editSeparator, editLink]);
 
         const deleteSeparator = createElement(commentHeader, 'span', 'delete-sep', '·');
         const deleteLink = createElement(commentHeader, 'a', 'delete', 'delete');
         deleteLink.href = '#';
-        this.connectDeleteButton(deleteLink, commentBody,
-          [replySeparator, replyLink, editSeparator, editLink, deleteSeparator, deleteLink]);
+
+        headerButtons.push(editSeparator, editLink, deleteSeparator, deleteLink);
+        this.connectEditButton(editHolder, editLink, commentBody, headerButtons);
+        this.connectDeleteButton(deleteLink, commentBody, headerButtons);
       }
     }
   }
@@ -329,8 +331,7 @@ class ExtCommentComponent {
     replyLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      for (const elem of toHide) elem.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+      new CommentEditorComponent(replyHolder, toHide, '', async (body) => {
         if (body) {
           try {
             const comment = await this.options.commentApi.createComment(this.commentData.id, body);
@@ -338,12 +339,11 @@ class ExtCommentComponent {
           } catch (e) {
             console.warn(e);
             alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
-        for (const elem of toHide) elem.style.removeProperty('display');
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -352,8 +352,7 @@ class ExtCommentComponent {
     editLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      for (const elem of toHide) elem.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(editHolder, this.commentData.body, async (body) => {
+      new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
         if (body && body !== this.commentData.body) {
           try {
             const comment = await this.options.commentApi.editComment(this.commentData.id, body);
@@ -362,12 +361,11 @@ class ExtCommentComponent {
           } catch (e) {
             console.warn(e);
             alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
-        for (const elem of toHide) elem.style.removeProperty('display');
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -605,7 +603,12 @@ class CommentOrderComponent {
 }
 
 class CommentEditorComponent {
-  constructor(parentElem, initialText, finishCallback) {
+  static SUCCESS = 0;
+  static ERROR = 1;
+
+  constructor(parentElem, elemsToHide, initialText, exitCallback) {
+    for (const elem of elemsToHide) elem.style.setProperty('display', 'none');
+
     const rootDiv = createElement(parentElem, 'div', 'comment-editor');
     const textarea = createElement(rootDiv, 'textarea');
     textarea.value = initialText;
@@ -615,27 +618,35 @@ class CommentEditorComponent {
     const submitButton = createElement(buttons, 'button', 'button primary', 'Post');
     const discardButton = createElement(buttons, 'button', 'button cancel', 'Cancel');
 
+    this.elemsToHide = elemsToHide;
     this.initialText = initialText;
     this.rootDiv = rootDiv;
     this.textarea = textarea;
+    this.exitCallback = exitCallback;
 
-    submitButton.onclick = () => finishCallback(textarea.value);
+    submitButton.onclick = () => this.handleButtonClick(textarea.value);
 
     discardButton.onclick = () => {
-      if (textarea.value === initialText ||
-          confirm('Are you sure you want to discard your comment?\n\n\
+      if (!this.dirty || confirm('Are you sure you want to discard your comment?\n\n\
 Push OK to discard, or Cancel to keep editing.')) {
-        finishCallback(undefined);
+        this.handleButtonClick(undefined);
       }
     };
 
     this.beforeUnloadHandler = (ev) => {
-      if (textarea.value !== initialText) {
+      if (this.dirty) {
         // This causes the browser to ask for confirmation before navigating away.
         ev.preventDefault();
       }
     };
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
+  }
+
+  handleButtonClick(textValue) {
+    const status = this.exitCallback(textValue);
+    if (status !== CommentEditorComponent.ERROR) {
+      this.close();
+    }
   }
 
   get dirty() {
@@ -645,6 +656,7 @@ Push OK to discard, or Cancel to keep editing.')) {
   close() {
     window.removeEventListener('beforeunload', this.beforeUnloadHandler);
     this.rootDiv.parentElement.removeChild(this.rootDiv);
+    for (const elem of this.elemsToHide) elem.style.removeProperty('display');
   }
 }
 
@@ -714,14 +726,13 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
   // Add the top-level comments list.
   commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
-  processCommentsInitial();
+  processAllComments();
 
   if (addCommentLink) {
     addCommentLink.onclick = (ev) => {
       ev.stopPropagation();
       ev.preventDefault();
-      addCommentLink.style.setProperty('display', 'none');
-      const editor = new CommentEditorComponent(replyHolder, '', async (body) => {
+      new CommentEditorComponent(replyHolder, [addCommentLink], '', async (body) => {
         if (body) {
           try {
             const comment = await options.commentApi.createComment(undefined, body);
@@ -729,12 +740,11 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
           } catch (e) {
             console.warn(e);
             alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return;
+            return CommentEditorComponent.ERROR;
           }
         }
 
-        editor.close();
-        addCommentLink.style.removeProperty('display');
+        return CommentEditorComponent.SUCCESS;
       });
     };
   }
