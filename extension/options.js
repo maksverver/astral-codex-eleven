@@ -126,7 +126,7 @@ const hideUsersOption = {
   },
   onValueChange(newValue) {
     this.createCachedSet(newValue);
-    reprocessComments(this.key);
+    processComments(this.key);
   },
   onStart(currentValue) {
     this.createCachedSet(currentValue);
@@ -152,9 +152,30 @@ const optionArray = [
 const LOG_OPTION_TAG = '[Astral Codex Eleven] [Option]';
 const OPTION_KEY = 'acxi-options';
 
-// Reprocess all comments with the given option key.
-function reprocessComments(key) {
-  commentListRoot.processAllChildren([key]);
+// Process all comments with the given option key.
+function processComments(key) {
+  const option = OPTIONS[key]
+  if (!option) {
+    console.warn(`No option key '${key}' found`);
+    return;
+  };
+  const commentFunc = option.processComment;
+  if (!(commentFunc instanceof Function)) {
+    console.warn(`No processComment function for key '${key}'`);
+    return;
+  }
+  const boundCommentFunc = commentFunc.bind(option);
+  for (let child of commentListRoot.allChildren()) {
+    boundCommentFunc(child);
+  }
+}
+
+function processCommentsInitial() {
+  for (const option of Object.values(OPTIONS)) {
+    if (Object.hasOwn(option, 'processComment') && optionShadow[option.key]) {
+      processComments(option.key);
+    }
+  }
 }
 
 // Stores a local copy of the current option values. It should not be modified
@@ -182,7 +203,7 @@ async function setOption(key, value) {
 
 function initializeOptionValues() {
   for (const [key, option] of Object.entries(OPTIONS)) {
-    if (!optionShadow.hasOwnProperty(key)) {
+    if (!Object.hasOwn(optionShadow, key)) {
       optionShadow[key] = option.default;
     }
 

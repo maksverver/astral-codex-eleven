@@ -137,18 +137,16 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
-  const options = Object.values(OPTIONS);
-  const optionApiFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
+  // Wait for options to finish loading.
+  await loadOptionsResult;
 
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
-        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, commentOrder, optionApiFuncs});
+        {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, commentOrder});
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
 
-  // Wait for options to finish loading.
-  await loadOptionsResult;
   runOptionsOnLoad();
 })();
