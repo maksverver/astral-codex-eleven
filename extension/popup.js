@@ -1,9 +1,53 @@
 'use strict';
 
+function addDescription(optionElement) {
+  const id = optionElement.id;
+  const label = optionElement.querySelector('label');
+  label.textContent = OPTIONS[id]?.descriptionShort;
+}
+
+function addHovertext(optionElement) {
+  const id = optionElement.id;
+  const iconUri = chrome.runtime.getURL('images/questionmark.svg');
+  const icon = document.createElement('img');
+  icon.src = iconUri;
+  icon.className = 'help-icon';
+  const tooltip = document.createElement('span');
+  tooltip.id = `${id}-tooltip`;
+  tooltip.className = 'tooltip';
+  tooltip.textContent = OPTIONS[id]?.descriptionLong;
+  tooltip.style.display = 'none';
+  optionElement.appendChild(icon);
+  document.getElementById('tooltips').appendChild(tooltip);
+
+  icon.addEventListener('mouseover', function() {
+    tooltip.style.display = 'inline';
+
+    const windowHeight = window.innerHeight;
+    const tooltipHeight = tooltip.offsetHeight;
+    const iconTop = this.getBoundingClientRect().top;
+    const iconBottom = this.getBoundingClientRect().bottom;
+    const topSpace = iconTop - tooltipHeight;
+    const bottomSpace = windowHeight - iconBottom - tooltipHeight;
+
+    if (topSpace >= 8) {
+      tooltip.style.top = `${iconTop - tooltipHeight - 4}px`;
+    } else if (bottomSpace >= 8) {
+      tooltip.style.top = `${iconBottom + 4}px`;
+    } else {
+      tooltip.style.top = '4px';
+    }
+  });
+
+  icon.addEventListener('mouseout', () => {
+    tooltip.style.display = 'none';
+  });
+}
+
 function setInitialState(optionElement) {
   const id = optionElement.id;
   const input = optionElement.querySelector('.trigger');
-  const setValue = optionShadow[id];
+  const setValue = getOption(id);
 
   if (input.classList.contains('check')) {
     input.checked = setValue;
@@ -46,6 +90,8 @@ function createChangeHandler(optionElement) {
   }
 
   for (const optionElement of document.querySelectorAll('.option')) {
+    addDescription(optionElement);
+    addHovertext(optionElement);
     setInitialState(optionElement);
     createChangeHandler(optionElement);
   }

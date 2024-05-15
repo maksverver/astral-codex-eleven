@@ -7,10 +7,7 @@ let comments = undefined;
 function setUpCommentOptions() {
   const optionContainer = document.getElementById('comment-options');
   for (const [key, option] of Object.entries(OPTIONS)) {
-    // only add options that modify comments
-    if (!option.processHeader && !option.processComment) return;
-
-    optionShadow[key] = option.default;
+    const optionDiv = document.createElement('div');
     const input = document.createElement('input');
     if (typeof option.default === 'boolean') {
       input.type = 'checkbox';
@@ -19,14 +16,15 @@ function setUpCommentOptions() {
     }
     input.id = `${key}-input`;
     input.addEventListener('change', (event) => {
-      optionShadow[key] = event.target.value;
+      setOption(key,  event.target.value);
       // slight hack to not run handlers if no comments have been loaded
-      if (commentListRoot) option?.onValueChange(event.target.value);
+      if (commentListRoot) option?.onValueChange?.(event.target.value);
     });
     const label = document.createElement('label');
     label.textContent = key;
     label.htmlFor = `${key}-input`;
-    optionContainer.append(input, label);
+    optionDiv.append(input, label);
+    optionContainer.append(optionDiv);
   }
 }
 
@@ -75,14 +73,7 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (comments) {
-    const options = Object.values(OPTIONS);
-    const headerFuncs = options.filter((e) => e.hasOwnProperty('processHeader'));
-    const commentFuncs = options.filter((e) => e.hasOwnProperty('processComment'));
-    const optionApiFuncs = new OptionApiFuncs(headerFuncs, commentFuncs);
-    replaceCommentOptions.optionApiFuncs = optionApiFuncs;
-    replaceComments(rootDiv, comments, replaceCommentOptions);
-  }
+  if (comments) replaceComments(rootDiv, comments);
 }
 
 function handleFileChange() {

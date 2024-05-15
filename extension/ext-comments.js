@@ -211,14 +211,10 @@ class ExtCommentListComponent {
     for (const child of this.children) child.reverse();
   }
 
-  // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed.
-  processAllChildren(keys) {
-    if (Array.isArray(keys) && keys.length === 0) return;
-
-    for (let child of this.children) {
-      child.processSelfAndChildren(keys);
-    }
+  // Applies the given list of options to all descendant comments.
+  applyOptions(options) {
+    if (options.length === 0) return;
+    for (const child of this.children) child.applyOptions(options);
   }
 }
 
@@ -270,7 +266,7 @@ class ExtCommentComponent {
   //  - options is the object passed to replaceComments().
   //
   constructor(parentElem, comment, parentCommentComponent, options) {
-    const {collapseDepth, dateFormatShort, dateFormatLong, optionApiFuncs} = options;
+    const {collapseDepth, dateFormatShort, dateFormatLong} = options;
 
     // Creates DOM nodes for the given comment text, and appends them to the
     // given parent element. This tries to mirror how Substack seems to process
@@ -470,8 +466,6 @@ class ExtCommentComponent {
     }
 
     this.commentData = comment;
-    this.options     = options;
-    this.optionFuncs = optionApiFuncs;
     this.threadDiv   = threadDiv;
     this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
@@ -481,37 +475,6 @@ class ExtCommentComponent {
     this.prevSibling = undefined;
     this.nextSibling = undefined;
     this.childList   = childCommentList;
-
-    this.doOptionApiFunctions();
-  }
-
-  createDeleteFunction(commentBody) {
-    return async (ev) => {
-      ev.stopPropagation();
-      ev.preventDefault();
-      if (confirm('Are you sure you want to delete this comment?')) {
-        try {
-          await this.options.commentApi.deleteComment(this.commentData.id);
-          commentBody.innerText = 'deleted';
-          commentBody.classList.add('missing');
-        } catch (e) {
-          console.warn(e);
-          alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
-        }
-      }
-    }
-  }
-
-  // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed. Set force to true to call the functions even if the
-  // option value is falsy.
-  doOptionApiFunctions(keys, force=false) {
-    for (const option of this.optionFuncs) {
-      if (keys && !keys.includes(option.key)) continue;
-      if (optionShadow[option.key] || force) {
-        option.processComment(this);
-      }
-    }
   }
 
   setExpanded(expanded) {
@@ -627,11 +590,11 @@ class ExtCommentComponent {
     this.childList.reverse();
   }
 
-  // If given, keys is an array of keys to call API functions on. Otherwise, all
-  // keys are processed.
-  processSelfAndChildren(keys) {
-    this.doOptionApiFunctions(keys, true);
-    this.childList.processAllChildren(keys);
+  // Applies the given list of options to this comment and all descendants.
+  applyOptions(options) {
+    if (options.length === 0) return;
+    for (const option of options) option.processComment(this);
+    this.childList.applyOptions(options);
   }
 }
 
@@ -793,9 +756,6 @@ const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
   // Set to the numeric id of the currently logged-in user, to enable commenting.
   userId: undefined,
 
-  // Holder for all option API functions
-  optionApiFuncs: [],
-
   // Interface used to created/update/delete comments.
   commentApi: COMMENT_API_UNIMPLEMENTED
 });
@@ -824,6 +784,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
 
   // Add the top-level comments list.
   commentListRoot = new ExtCommentListComponent(rootElem, comments, undefined, options);
+  commentListRoot.applyOptions(getOptionsToProcessInitially());
 
   if (addCommentLink) {
     enableCommentReply(
