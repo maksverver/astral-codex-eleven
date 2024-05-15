@@ -261,6 +261,7 @@ const STYLES = {
       border: 1px solid #ddd;
       padding: 10px;
       border-radius: 10px;
+      margin-left: 0;
       flex-grow: 1;
       background-color: #fafafa;
       box-sizing: border-box;
@@ -320,8 +321,12 @@ const STYLES = {
       width: 100%;
     }
 
+    .ext-comments .comment .comment-meta .reply-sep,
     .ext-comments .comment .comment-meta .reply,
-    .ext-comments .comment .comment-meta .reply-sep {
+    .ext-comments .comment .comment-meta .edit-sep,
+    .ext-comments .comment .comment-meta .edit,
+    .ext-comments .comment .comment-meta .delete-sep,
+    .ext-comments .comment .comment-meta .delete {
       display: none !important;
     }
 
@@ -355,7 +360,7 @@ const STYLES = {
       padding-top: 8px;
     }
 
-    .ext-comments .comment-body p {
+    .ext-comments .comment-body {
       font: 12px/20px Verdana, sans-serif;
       color: #333;
     }
@@ -365,6 +370,8 @@ const STYLES = {
     /* Comment actions */
 
     .ext-comments .comment .comment-footer {
+      display: flex;
+      column-gap: 12px;
       margin-top: 6px;
     }
 

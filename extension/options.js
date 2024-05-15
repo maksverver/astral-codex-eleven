@@ -138,13 +138,33 @@ const {
       }
     },
     processComment(currentValue, commentComponent) {
-      const footer = createElement(commentComponent.commentDiv, 'div', 'comment-footer');
-      const reply = createElement(footer, 'a', 'reply', 'Reply');
-      reply.href = '#';
+      if (!currentValue) return;
+      const comment = commentComponent.commentData;
+      if (!comment.deleted && commentComponent.options.userId) {
+        const footer = createElement(commentComponent.commentDiv, 'div', 'comment-footer');
 
-      const replyHolder = commentComponent.threadDiv.querySelector(':scope > .content > .reply-holder');
-      enableCommentReply(reply, replyHolder, [reply], commentComponent.childList,
-        commentComponent, commentComponent.commentData.id, commentComponent.options);
+        const replyHolder = commentComponent.threadDiv.querySelector(':scope > .content > .reply-holder');
+        const editHolder = commentComponent.threadDiv.querySelector(':scope > .content > .edit-holder');
+
+        const replyLink = createElement(footer, 'a', 'reply', 'Reply');
+        replyLink.href = '#';
+
+        let footerButtons = [replyLink];
+        commentComponent.connectReplyButton(replyHolder, replyLink, footerButtons);
+
+        if (commentComponent.options.userId === comment.user_id) {
+          const editLink = createElement(footer, 'a', 'edit', 'Edit');
+          editLink.href = '#';
+
+          const deleteLink = createElement(footer, 'a', 'delete', 'Delete');
+          deleteLink.href = '#';
+
+          const commentBody = commentComponent.commentDiv.querySelector(':scope > .comment-body');
+          footerButtons.push(editLink, deleteLink);
+          commentComponent.connectEditButton(editHolder, editLink, commentBody, footerButtons);
+          commentComponent.connectDeleteButton(deleteLink, commentBody, footerButtons);
+        }
+      }
     }
   };
 
