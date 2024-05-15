@@ -8,7 +8,7 @@ function addDescription(optionElement) {
 
 function addHovertext(optionElement) {
   const id = optionElement.id;
-  const iconUri = chrome.runtime.getURL('icons/questionmark.svg');
+  const iconUri = chrome.runtime.getURL('images/questionmark.svg');
   const icon = document.createElement('img');
   icon.src = iconUri;
   icon.className = 'help-icon';
