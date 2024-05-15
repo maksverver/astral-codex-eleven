@@ -131,7 +131,7 @@ const {
     },
     onValueChange(newValue) {
       this.createCachedSet(newValue);
-      reprocessComments(this);
+      processComments(this.key);
     },
     onStart(currentValue) {
       this.createCachedSet(currentValue);
