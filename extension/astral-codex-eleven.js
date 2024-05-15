@@ -137,6 +137,9 @@ class CommentApi {
 
   const commentApi = new CommentApi(postId);
 
+  // Wait for options to finish loading.
+  await loadOptionsResult;
+
   {
     const start = performance && performance.now();
     replaceComments(rootDiv, comments,
@@ -145,7 +148,5 @@ class CommentApi {
     console.info(LOG_TAG, `DOM updated in ${duration} ms.`);
   }
 
-  // Wait for options to finish loading.
-  await loadOptionsResult;
   runOptionsOnLoad();
 })();
