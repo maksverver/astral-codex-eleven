@@ -43,6 +43,19 @@ const {
     default: true,
 
     /**
+     * (Required)
+     * A short description of the option to identify it on the option popup.
+     */
+    descriptionShort: 'A short description',
+
+    /**
+     * (Required)
+     * Text that describes what the option does in more detail. This will be
+     * shown in the option panel when the user hovers over the help icon.
+     */
+    descriptionLong: 'A longer description of the option with more detail than the name alone.',
+
+    /**
      * (Optional)
      * This will be called any time the option changes value.
      * @param {*} newValue - the new value of the option
@@ -80,6 +93,8 @@ const {
   const removeNagsOptions = {
     key: 'removeNags',
     default: false,
+    descriptionShort: 'Remove Substack nags',
+    descriptionLong: 'Remove Substack prompts to subscribe or share posts.',
     onStart(currentValue) {
       addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
@@ -92,6 +107,8 @@ const {
   const zenModeOption = {
     key: 'zenMode',
     default: false,
+    descriptionShort: 'Zen Mode',
+    descriptionLong: 'Remove all like, share, and subscribe buttons in the post.',
     onStart(currentValue) {
       addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
@@ -104,6 +121,8 @@ const {
   const defaultSortOption = {
     key: 'defaultSort',
     default: 'auto',
+    descriptionShort: 'Default comment sorting',
+    descriptionLong: 'Force the comment sorting to always be the same. Leave on Auto to use the default Substack sorting.',
     onLoad(currentValue) {
       if (currentValue === 'chrono') {
         commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
@@ -116,6 +135,8 @@ const {
   const hideUsersOption = {
     key: 'hideUsers',
     default: '',
+    descriptionShort: 'Hide user comments',
+    descriptionLong: 'Hide comments from the listed users, in a comma separated list.',
     createCachedSet(userString) {
       this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
     },
@@ -260,6 +281,14 @@ const {
 
     if (!Object.hasOwn(option, 'default')) {
       return [false, 'must contain a default value'];
+    }
+
+    if (typeof option.descriptionShort !== 'string' || option.descriptionShort.length === 0) {
+      return [false, 'short description is required'];
+    }
+
+    if (typeof option.descriptionLong !== 'string' || option.descriptionLong.length === 0) {
+      return [false, 'long description is required'];
     }
 
     if (Object.hasOwn(option, 'onValueChange') && !(option.onValueChange instanceof Function)) {
