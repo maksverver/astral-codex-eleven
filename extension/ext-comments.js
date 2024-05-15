@@ -183,8 +183,10 @@ class ExtCommentListComponent {
 
   reverseSelfOnly() {
     this.commentOrder = 1 - this.commentOrder;
-    this.commentsHolder.replaceChildren(
-        ...Array.from(this.commentsHolder.childNodes).reverse());
+    for (let i = 1; i < this.commentsHolder.childNodes.length; i++) {
+      this.commentsHolder.insertBefore(this.commentsHolder.childNodes[i],
+          this.commentsHolder.firstChild);
+    }
     ExtCommentListComponent.assignSiblings(this.children.reverse());
   }
 
