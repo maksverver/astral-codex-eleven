@@ -192,22 +192,56 @@ const STYLES = {
       font: 12px/20px Verdana, sans-serif !important;
     }
 
-    figcaption {
-      font: 12px/20px Verdana, sans-serif !important;
-    }
-
     article .available-content p a {
       color: #0066cc !important;
       text-decoration: underline !important;
     }
 
-    blockquote {
+    article .available-content figure a {
+      color: var(--print_secondary) !important;
+      text-decoration: underline !important;
+    }
+
+    article .available-content figure a:focus {
+      outline-color: var(--print_pop) !important;
+    }
+
+    article .available-content figcaption {
+      font: 12px/20px Verdana, sans-serif !important;
+    }
+
+    article .available-content h1 {
+      font-size: 24px;
+      color: #333 !important;
+    }
+
+    article .available-content h2 {
+      font-size: 22px;
+      color: #333 !important;
+    }
+
+    article .available-content h3 {
+      font-size: 20px;
+      color: #333 !important;
+    }
+
+    article .available-content h4 {
+      font-size: 18px;
+      color: #333 !important;
+    }
+
+    article .available-content h5 {
+      font-size: 16px;
+      color: #333 !important;
+    }
+
+    article .available-content blockquote {
       border-left: 4px solid #ddd !important;
       margin: 0 2em !important;
       padding: 0 1em !important;
     }
 
-    blockquote p {
+    article .available-content blockquote p {
       margin-left: 0 !important;
       font-family: Georgia, "Bitstream Charter", serif !important;
       font-style: italic !important;
