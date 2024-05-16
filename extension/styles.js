@@ -31,19 +31,30 @@ const STYLES = {
     }
 
     #entry {
+      display: flex;
+      flex-direction: column;
       max-width: 1242px;
       min-width: 572px;
+      min-height: calc(100vh - 80px);
       margin: 0 auto;
       margin-top: 40px;
-      margin-bottom: 20px;
+      margin-bottom: 40px;
       overflow: auto;
       border-radius: 6px;
       box-shadow: 0 0 10px black;
     }
 
     #entry #main {
+      display: flex;
+      flex-direction: column;
+      flex-grow: 1;
       -webkit-font-smoothing: auto !important;
       background-color: #f0f0f0 !important;
+      min-height: auto;
+    }
+
+    #entry #main .container {
+      flex-grow: 1;
     }
 
     .post-end-cta-full {
@@ -89,7 +100,7 @@ const STYLES = {
     }
 
     .topbar-content .navbar-logo-container {
-      flex: 1 1 auto;
+      flex: 1 0 auto;
       width: auto !important;
       padding-right: 32px;
     }
@@ -108,7 +119,7 @@ const STYLES = {
     .topbar-content .navbar-title {
       position: static !important;
       transform: none !important;
-      flex: 0 0 auto !important;
+      flex: 0 1 auto !important;
       font-size: 64px !important;
       font-family: 'Raleway', Open Sans, Arial, sans-serif !important;
       font-weight: normal !important;
@@ -138,7 +149,7 @@ const STYLES = {
     }
 
     .topbar-content .navbar-buttons {
-      flex: 1 1 0;
+      flex: 1 0 0;
       align-self: start;
       justify-content: end;
     }
@@ -151,16 +162,28 @@ const STYLES = {
       display: none;
     }
 
-    button.user-indicator.signed-in {
-      background-color: #00000000 !important;
+    .user-indicator-dropdown-menu .dropdown-menu.tooltip.active {
+      top: 100px;
     }
 
-    .user-indicator-icon {
-      stroke: white !important;
+    @media screen and (max-width: 1100px) {
+      .topbar-content .navbar-title {
+        font-size: 48px !important;
+      }
+
+      .topbar-content .navbar-logo-container .navbar-logo {
+        height: 48px !important;
+      }
     }
 
-    .notification-container {
-      transform: scale(.8) !important;
+    @media screen and (max-width: 950px) {
+      .topbar-content .navbar-title {
+        font-size: 34px !important;
+      }
+
+      .topbar-content .navbar-logo-container .navbar-logo {
+        height: 34px !important;
+      }
     }
 
 
@@ -434,7 +457,7 @@ const STYLES = {
     }
 
     .ext-comments .comment-thread > .border:hover > img.user-icon {
-      height: initial !important;
+      height: 41px !important;
       margin-bottom: 8px !important;
     }
 
