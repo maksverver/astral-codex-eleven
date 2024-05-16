@@ -55,23 +55,68 @@ const STYLES = {
     /* Topbar */
 
     .main-menu-content .topbar-content {
+      box-sizing: border-box;
+      height: 152px;
+      padding: 16px 20px !important;
+      column-gap: 0 !important;
+      border: none !important;
       background: linear-gradient(to bottom, rgba(139,171,232,1) 0%, rgba(79,115,193,1) 100%) !important;
       text-decoration: none !important;
     }
 
+    .topbar-content .navbar-logo-container {
+      flex: 1 1 auto;
+      width: auto !important;
+      padding-right: 32px;
+    }
+
+    .topbar-content .navbar-logo-container a {
+      display: inline !important;
+      pointer-events: none;
+      user-select: none;
+    }
+
+    .topbar-content .navbar-logo-container .navbar-logo {
+      height: 64px !important;
+      float: right;
+    }
+
     .topbar-content .navbar-title {
-      font-size: 43px !important;
-      max-height: 100px !important;
+      position: static !important;
+      transform: none !important;
+      flex: 0 0 auto !important;
+      font-size: 64px !important;
       font-family: 'Raleway', Open Sans, Arial, sans-serif !important;
       font-weight: normal !important;
       text-align: center !important;
+      line-height: normal !important;
       letter-spacing: 2px !important;
       text-decoration: none !important;
       -webkit-font-smoothing: auto !important;
     }
 
     .topbar-content .navbar-title .navbar-title-link {
+      display: inline-block;
       color: white !important;
+    }
+
+    .topbar-content .navbar-title .navbar-title-link:focus {
+      text-decoration: none !important;
+    }
+
+    .topbar-content .navbar-title .navbar-title-link:focus-visible {
+      text-decoration: solid underline currentcolor 2px !important;
+      text-underline-offset: 4px;
+    }
+
+    .topbar-content .navbar-title .navbar-title-link:active {
+      opacity: 1;
+    }
+
+    .topbar-content .navbar-buttons {
+      flex: 1 1 0;
+      align-self: start;
+      justify-content: end;
     }
 
     .topbar-content .navbar-buttons svg {
@@ -107,7 +152,7 @@ const STYLES = {
     }
 
     .footer-wrap {
-      height: 30px !important;
+      height: 33px !important;
       background: linear-gradient(to bottom, rgba(139,171,232,1) 0%, rgba(79,115,193,1) 100%);
     }
 
