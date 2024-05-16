@@ -6,7 +6,7 @@ const STYLES = {
     /* Global default font and look */
 
     :root {
-      --web_bg_color: #ffffff !important;
+      --web_bg_color: #f0f0f0 !important;
       --background_contrast_1: #f7f7f7 !important;
       --background_contrast_2: #ededed !important;
       --background_contrast_3: #d6d6d6 !important;
@@ -48,6 +48,30 @@ const STYLES = {
 
     .post-end-cta-full {
       display: none !important;
+    }
+
+    /* Home page */
+
+    .main-menu .topbar .section-bar {
+      border-top: none;
+      border-color: #ccc;
+      background-color: #fafafa;
+    }
+
+    .main-menu .topbar .section-bar .overflow-items .menu-item {
+      background-color: #fafafa;
+    }
+
+    .main-menu .topbar .section-bar .overflow-items .menu-item:hover {
+      background-color: #f4f4f4 !important;
+    }
+
+    .main-menu .topbar .section-bar .overflow-items .menu-item:has(a:focus) {
+      background-color: #f4f4f4;
+    }
+
+    .main-menu .topbar .section-bar .overflow-items .menu-item a:focus {
+      text-decoration: none !important;
     }
 
 
