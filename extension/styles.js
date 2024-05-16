@@ -10,6 +10,15 @@ const STYLES = {
       --background_contrast_1: #f7f7f7 !important;
       --background_contrast_2: #ededed !important;
       --background_contrast_3: #d6d6d6 !important;
+
+      /* link color */
+      --print_pop: #0066cc !important;
+
+      /* active comment link color */
+      --background_pop_darken: #0066cc !important;
+
+      /* active comment border color, active element underline color, main button color */
+      --background_pop: #0066cc !important;
     }
 
     html {
@@ -154,6 +163,11 @@ const STYLES = {
       padding: 10px 0px !important;
     }
 
+    .single-post-container :focus {
+      outline: auto !important;
+      outline-offset: 1px;
+    }
+
     @media screen and (min-width: 800px) {
       .single-post-container > .container {
         margin: 0 auto;
@@ -227,7 +241,28 @@ const STYLES = {
       font-size: 16px !important;
       font-weight: normal !important;
       letter-spacing: 1px !important;
+    }
+
+    .ext-comments .comments-heading-holder {
       text-transform: uppercase;
+    }
+
+    .ext-comments .comments-heading-holder .add-top-level-comment:focus {
+      text-decoration: none !important;
+      outline-color: #555 !important;
+    }
+
+    .ext-comments .comments-heading-holder .comment-order {
+      font-family: Georgia, "Bitstream Charter", serif;
+      text-transform: none;
+    }
+
+    .ext-comments .radio-buttons button:focus {
+      outline: none !important;
+    }
+
+    .ext-comments .radio-buttons button {
+      font: 14px Georgia, "Bitstream Charter", serif;
     }
 
     .ext-comments .top-level-reply-holder {
@@ -240,9 +275,10 @@ const STYLES = {
     }
 
     .ext-comments .comment-editor textarea {
-      font-family: var(--font_family_ui, var(--font-family-text));
+      font: 12px Verdana, sans-serif;
       padding-top: 6.66px;
       border: 0;
+      border-radius: 10px;
       outline: 1px solid #cbd5e3;
       resize: vertical !important;
     }
@@ -261,7 +297,7 @@ const STYLES = {
       border: 1px solid #ddd;
       padding: 10px;
       border-radius: 10px;
-      margin-left: 0;
+      margin: 0;
       flex-grow: 1;
       background-color: #fafafa;
       box-sizing: border-box;
@@ -317,8 +353,16 @@ const STYLES = {
       column-gap: 8px;
     }
 
+    .ext-comments .comment .comment-meta a:focus {
+      text-decoration: none !important;
+    }
+
     .ext-comments .comment .comment-meta .commenter-name {
       width: 100%;
+    }
+
+    .ext-comments .comment .comment-meta .commenter-name a:focus {
+      outline-color: #555 !important;
     }
 
     .ext-comments .comment .comment-meta .reply-sep,
@@ -356,13 +400,18 @@ const STYLES = {
 
     /* Comment content */
 
-    .ext-comments .comment .comment-body {
-      padding-top: 8px;
+    .ext-comments .comment:focus {
+      outline-color: #888 !important;
     }
 
-    .ext-comments .comment-body {
+    .ext-comments .comment .comment-body {
+      padding-top: 8px;
       font: 12px/20px Verdana, sans-serif;
       color: #333;
+    }
+
+    .ext-comments .comment .comment-body a {
+      text-decoration: underline !important;
     }
 
 
@@ -375,6 +424,10 @@ const STYLES = {
       margin-top: 6px;
     }
 
+    .ext-comments .comment .comment-footer a:focus {
+      text-decoration: underline !important;
+    }
+
     .ext-comments .comment .comment-footer > * {
       font: 12px Georgia, "Bitstream Charter", serif;
       color: #888;
@@ -382,6 +435,26 @@ const STYLES = {
 
     .ext-comments .comment-thread.collapsed .comment .comment-footer {
       display: none;
+    }
+
+    .ext-comments .comment-editor .buttons {
+      justify-content: left;
+    }
+
+    .ext-comments .comment-editor button {
+      height: 30px;
+      padding: 0px 20px;
+      font-family: verdana;
+      font-weight: normal;
+    }
+
+    .ext-comments .comment-editor button:focus {
+      padding: 0px 18px;
+      outline: none !important;
+    }
+
+    .ext-comments .comment-editor button.primary:focus {
+      border-color: #000 !important;
     }
 
 

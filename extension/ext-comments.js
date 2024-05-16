@@ -769,7 +769,7 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
         `${countCommentsInArray(comments)} Comments`);
 
     if (options.userId) {
-      addCommentLink = createElement(holderDiv, 'a', undefined, 'add a top-level comment');
+      addCommentLink = createElement(holderDiv, 'a', 'add-top-level-comment', 'add a top-level comment');
       addCommentLink.href = '#';
     }
 
