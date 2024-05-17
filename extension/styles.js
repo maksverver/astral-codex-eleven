@@ -21,7 +21,7 @@ const STYLES = {
 
     html {
       /* !important necessary to override inline style */
-      background: url(${chrome.runtime.getURL('images/mochaGrunge.png')}) !important;
+      background: url(https://slatestarcodex.com/wp-content/themes/responsive-pujugama-v3/images/mochaGrunge.png) !important;
       overscroll-behavior-y: none;
     }
 
