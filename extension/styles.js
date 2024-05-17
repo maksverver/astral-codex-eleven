@@ -22,6 +22,7 @@ const STYLES = {
     html {
       /* !important necessary to override inline style */
       background: url(${chrome.runtime.getURL('images/mochaGrunge.png')}) !important;
+      overscroll-behavior-y: none;
     }
 
     body {
@@ -52,7 +53,7 @@ const STYLES = {
       min-height: auto;
     }
 
-    #entry #main .container {
+    #entry #main [data-testid="navbar"] + div {
       flex-grow: 1;
     }
 
@@ -83,6 +84,7 @@ const STYLES = {
 
     .about-page .about-content-wrap .content-about > .body {
       font: 12px/20px Verdana, sans-serif;
+      -webkit-font-smoothing: auto;
     }
 
 
@@ -233,7 +235,8 @@ const STYLES = {
       margin-top: 0;
     }
 
-    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft {
+    /* this is destined to break one day */
+    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:first-child {
       padding: 5px 7px;
       font-size: 10px;
       font-family: Verdana, sans-serif;
@@ -244,12 +247,16 @@ const STYLES = {
       line-height: normal;
     }
 
-    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:before {
+    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:first-child:before {
       content: "Posted on ";
     }
 
-    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:after {
+    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:first-child:after {
       content: " by Scott Alexander";
+    }
+
+    .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft:not(:first-child) {
+      display: none;
     }
 
 
@@ -423,7 +430,6 @@ const STYLES = {
       padding: 10px;
       border-radius: 10px;
       margin: 0;
-      flex-grow: 1;
       background-color: #fafafa;
       box-sizing: border-box;
     }
