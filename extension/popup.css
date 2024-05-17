@@ -49,3 +49,37 @@ input[type="text"] {
 input[type="number"] {
     width: 30px;
 }
+
+.help-icon {
+    width: 14px;
+    vertical-align: middle;
+    margin-right: 4px;
+    margin-left: 4px;
+}
+
+.tooltip {
+    position: fixed;
+    background-color: #555;
+    color: white;
+    font-size: 14px;
+    left: 8px;
+    right: 8px;
+    border-radius: 10px;
+    padding: 10px;
+    hyphens: auto;
+    pointer-events: none;
+    z-index: 1;
+}
+
+.tooltip.top {
+    top: 8px;
+}
+
+.tooltip.center {
+    top: 50%;
+    transform: translateY(-50%);
+}
+
+.tooltip.bottom {
+    bottom: 8px;
+}
