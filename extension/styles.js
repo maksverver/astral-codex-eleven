@@ -6,28 +6,29 @@ const STYLES = {
     /* Global default font and look */
 
     :root {
-      --web_bg_color: #f0f0f0 !important;
-      --background_contrast_1: #f7f7f7 !important;
-      --background_contrast_2: #ededed !important;
-      --background_contrast_3: #d6d6d6 !important;
+      --web_bg_color: #f0f0f0;
+      --print_on_web_bg_color: #333;
 
       /* link color */
-      --print_pop: #0066cc !important;
+      --print_pop: #0066cc;
 
       /* active comment link color */
-      --background_pop_darken: #0066cc !important;
+      --background_pop_darken: #0066cc;
 
       /* active comment border color, active element underline color, main button color */
-      --background_pop: #0066cc !important;
+      --background_pop: #0066cc;
     }
 
     html {
+      /* !important necessary to override inline style */
       background: url(${chrome.runtime.getURL('images/mochaGrunge.png')}) !important;
     }
 
     body {
       padding-left: 20px;
       padding-right: 20px;
+      font: 12px/20px Verdana, sans-serif;
+      -webkit-font-smoothing: auto;
     }
 
     #entry {
@@ -48,17 +49,11 @@ const STYLES = {
       display: flex;
       flex-direction: column;
       flex-grow: 1;
-      -webkit-font-smoothing: auto !important;
-      background-color: #f0f0f0 !important;
       min-height: auto;
     }
 
     #entry #main .container {
       flex-grow: 1;
-    }
-
-    .post-end-cta-full {
-      display: none !important;
     }
 
     /* Home page */
@@ -73,8 +68,8 @@ const STYLES = {
       background-color: #fafafa;
     }
 
-    .main-menu .topbar .section-bar .overflow-items .menu-item:hover {
-      background-color: #f4f4f4 !important;
+    .main-menu .topbar .section-bar .overflow-items .menu-item.menu-item:hover {
+      background-color: #f4f4f4;
     }
 
     .main-menu .topbar .section-bar .overflow-items .menu-item:has(a:focus) {
@@ -82,79 +77,90 @@ const STYLES = {
     }
 
     .main-menu .topbar .section-bar .overflow-items .menu-item a:focus {
+      /* !important necessary to override existing important style */
       text-decoration: none !important;
+    }
+
+    .about-page .about-content-wrap .content-about > .body {
+      font: 12px/20px Verdana, sans-serif;
     }
 
 
 
     /* Topbar */
 
-    .main-menu-content .topbar-content {
+    .main-menu .main-menu-content .topbar .topbar-content {
       box-sizing: border-box;
       height: 152px;
-      padding: 16px 20px !important;
-      column-gap: 0 !important;
-      border: none !important;
-      background: linear-gradient(to bottom, rgba(139,171,232,1) 0%, rgba(79,115,193,1) 100%) !important;
-      text-decoration: none !important;
+      padding: 16px 20px;
+      column-gap: 0;
+      border: none;
+      background: linear-gradient(to bottom, rgba(139,171,232,1) 0%, rgba(79,115,193,1) 100%);
+      text-decoration: none;
     }
 
-    .topbar-content .navbar-logo-container {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-logo-container {
       flex: 1 0 auto;
+      /* !important necessary to override inline style */
       width: auto !important;
       padding-right: 32px;
     }
 
-    .topbar-content .navbar-logo-container a {
-      display: inline !important;
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-logo-container a {
+      display: inline;
       pointer-events: none;
       user-select: none;
     }
 
-    .topbar-content .navbar-logo-container .navbar-logo {
-      height: 64px !important;
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-logo-container a .navbar-logo {
+      height: 64px;
       float: right;
     }
 
-    .topbar-content .navbar-title {
-      position: static !important;
-      transform: none !important;
-      flex: 0 1 auto !important;
-      font-size: 64px !important;
-      font-family: 'Raleway', Open Sans, Arial, sans-serif !important;
-      font-weight: normal !important;
-      text-align: center !important;
-      line-height: normal !important;
-      letter-spacing: 2px !important;
-      text-decoration: none !important;
-      -webkit-font-smoothing: auto !important;
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title {
+      flex: 0 1 auto;
+      font-size: 64px;
+      font-family: Arial, sans-serif;
+      font-weight: normal;
+      text-align: center;
+      line-height: normal;
+      letter-spacing: 2px;
+      text-decoration: none;
+      -webkit-font-smoothing: auto;
     }
 
-    .topbar-content .navbar-title .navbar-title-link {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title.loading {
+      position: static;
+      transform: none;
+    }
+
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title .navbar-title-link {
       display: inline-block;
-      color: white !important;
+      color: white;
     }
 
-    .topbar-content .navbar-title .navbar-title-link:focus {
-      text-decoration: none !important;
-    }
-
-    .topbar-content .navbar-title .navbar-title-link:focus-visible {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title .navbar-title-link:focus {
+      /* !important necessary to override existing important style */
       text-decoration: solid underline currentcolor 2px !important;
       text-underline-offset: 4px;
     }
 
-    .topbar-content .navbar-title .navbar-title-link:active {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title .navbar-title-link:focus-visible {
+      text-decoration: solid underline currentcolor 2px;
+      text-underline-offset: 4px;
+    }
+
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-title .navbar-title-link:active {
       opacity: 1;
     }
 
-    .topbar-content .navbar-buttons {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-buttons {
       flex: 1 0 0;
       align-self: start;
       justify-content: end;
     }
 
-    .topbar-content .navbar-buttons svg {
+    .main-menu .main-menu-content .topbar .topbar-content .navbar-buttons svg {
       filter: invert(100%) sepia(91%) saturate(38%) hue-rotate(321deg) brightness(110%) contrast(110%);
     }
 
@@ -167,22 +173,22 @@ const STYLES = {
     }
 
     @media screen and (max-width: 1100px) {
-      .topbar-content .navbar-title {
-        font-size: 48px !important;
+      .main-menu .main-menu-content .topbar .topbar-content .navbar-title {
+        font-size: 48px;
       }
 
-      .topbar-content .navbar-logo-container .navbar-logo {
-        height: 48px !important;
+      .main-menu .main-menu-content .topbar .topbar-content .navbar-logo-container a .navbar-logo {
+        height: 48px;
       }
     }
 
     @media screen and (max-width: 950px) {
-      .topbar-content .navbar-title {
-        font-size: 34px !important;
+      .main-menu .main-menu-content .topbar .topbar-content .navbar-title {
+        font-size: 34px;
       }
 
-      .topbar-content .navbar-logo-container .navbar-logo {
-        height: 34px !important;
+      .main-menu .main-menu-content .topbar .topbar-content .navbar-logo-container a .navbar-logo {
+        height: 34px;
       }
     }
 
@@ -198,8 +204,8 @@ const STYLES = {
       display: none;
     }
 
-    .footer-wrap {
-      height: 33px !important;
+    .footer-wrap.publication-footer {
+      height: 33px;
       background: linear-gradient(to bottom, rgba(139,171,232,1) 0%, rgba(79,115,193,1) 100%);
     }
 
@@ -211,20 +217,20 @@ const STYLES = {
 
     /* Title and post info */
 
-    .post-title {
-      font-size: 16px !important;
-      line-height: 1.3em !important;
-      margin-bottom: 6px !important;
-      text-transform: uppercase !important;
-      letter-spacing: 1px !important;
-      font-family: Georgia, "Bitstream Charter", serif !important;
-      font-weight: normal !important;
-      -webkit-font-smoothing: auto !important;
+    .post .post-header .post-title {
+      font-size: 16px;
+      line-height: 1.3em;
+      margin-bottom: 6px;
+      text-transform: uppercase;
+      letter-spacing: 1px;
+      font-family: Georgia, "Bitstream Charter", serif;
+      font-weight: normal;
+      -webkit-font-smoothing: auto;
     }
 
-    .subtitle {
-      font: 12px/20px Verdana, sans-serif !important;
-      margin-top: 0 !important;
+    .post .post-header .subtitle {
+      font: 12px/20px Verdana, sans-serif;
+      margin-top: 0;
     }
 
     .post-header > .pencraft > .pencraft:first-child > .pencraft > .pencraft > .pencraft > .pencraft {
@@ -251,12 +257,11 @@ const STYLES = {
     /* Post content */
 
     .single-post-container {
-      background: #f0f0f0 !important;
-      padding: 10px 0px !important;
+      padding: 10px 0px;
     }
 
     .single-post-container :focus {
-      outline: auto !important;
+      outline: auto;
       outline-offset: 1px;
     }
 
@@ -268,78 +273,79 @@ const STYLES = {
     }
 
     .single-post {
-      border: 1px solid #d5d5d5 !important;
-      border-radius: 10px !important;
-      background: #fff !important;
-      padding: 20px 28px !important;
-      margin-bottom: 10px !important;
+      border: 1px solid #d5d5d5;
+      border-radius: 10px;
+      background: #fff;
+      padding: 20px 28px;
+      margin-bottom: 10px;
     }
 
-    article {
-      padding: 0 !important;
+    .post {
+      padding: 0;
     }
 
-    article .available-content p, article .available-content li {
-      color: #333 !important;
-      font: 12px/20px Verdana, sans-serif !important;
-    }
-
-    article .available-content p a {
-      color: #0066cc !important;
+    .post .available-content p a {
+      /* !important used as the text-decoration rules are a mess */
       text-decoration: underline !important;
     }
 
-    article .available-content figure a {
-      color: var(--print_secondary) !important;
-      text-decoration: underline !important;
+    .post .available-content .captioned-image-container figure {
+      color: #7b8086;
     }
 
-    article .available-content figure a:focus {
-      outline-color: var(--print_pop) !important;
+    .post .available-content .captioned-image-container figure a {
+      color: #7b8086;
+      text-decoration: underline;
     }
 
-    article .available-content figcaption {
-      font: 12px/20px Verdana, sans-serif !important;
+    .post .available-content .captioned-image-container figure a:focus {
+      outline-color: #7b8086;
+      /* !important necessary to override existing important style */
+      text-decoration: solid underline #7b8086 1px !important;
     }
 
-    article .available-content h1 {
+    .post .available-content .captioned-image-container figcaption {
+      font: 12px/20px Verdana, sans-serif;
+    }
+
+    .post .available-content h1 {
       font-size: 24px;
-      color: #333 !important;
+      color: #333;
     }
 
-    article .available-content h2 {
+    .post .available-content h2 {
       font-size: 22px;
-      color: #333 !important;
+      color: #333;
     }
 
-    article .available-content h3 {
+    .post .available-content h3 {
       font-size: 20px;
-      color: #333 !important;
+      color: #333;
     }
 
-    article .available-content h4 {
+    .post .available-content h4 {
       font-size: 18px;
-      color: #333 !important;
+      color: #333;
     }
 
-    article .available-content h5 {
+    .post .available-content h5 {
       font-size: 16px;
-      color: #333 !important;
+      color: #333;
     }
 
-    article .available-content blockquote {
-      border-left: 4px solid #ddd !important;
-      margin: 0 2em !important;
-      padding: 0 1em !important;
+    .post .available-content blockquote {
+      border-left: 4px solid #ddd;
+      margin: 0 2em;
+      padding: 0 1em;
     }
 
-    article .available-content blockquote p {
-      margin-left: 0 !important;
-      font-family: Georgia, "Bitstream Charter", serif !important;
-      font-style: italic !important;
-      font-size: 13px !important;
-      line-height: 24px !important;
-      color: #333 !important;
+    .post .available-content blockquote p {
+      margin-left: 0;
+      font-family: Georgia, "Bitstream Charter", serif;
+      font-style: italic;
+      font-size: 13px;
+      line-height: 24px;
+      color: #333;
     }
 
 
@@ -356,26 +362,19 @@ const STYLES = {
       padding-bottom: 25px;
     }
 
-    /* TODO don't hard code */
-    .ext-comments .content {
-      /*max-width: 695px;*/
-    }
-
     .ext-comments .comments-heading-holder {
-      margin-top: 0 !important;
-      font-family: Georgia, "Bitstream Charter", serif !important;
-      font-size: 16px !important;
-      font-weight: normal !important;
-      letter-spacing: 1px !important;
-    }
-
-    .ext-comments .comments-heading-holder {
+      margin-top: 0;
+      font-family: Georgia, "Bitstream Charter", serif;
+      font-size: 16px;
+      font-weight: normal;
+      letter-spacing: 1px;
       text-transform: uppercase;
     }
 
     .ext-comments .comments-heading-holder .add-top-level-comment:focus {
+      /* !important necessary to override existing important style */
       text-decoration: none !important;
-      outline-color: #555 !important;
+      outline-color: #555;
     }
 
     .ext-comments .comments-heading-holder .comment-order {
@@ -384,7 +383,7 @@ const STYLES = {
     }
 
     .ext-comments .radio-buttons button:focus {
-      outline: none !important;
+      outline: none;
     }
 
     .ext-comments .radio-buttons button {
@@ -406,12 +405,12 @@ const STYLES = {
       border: 0;
       border-radius: 10px;
       outline: 1px solid #cbd5e3;
-      resize: vertical !important;
+      resize: vertical;
     }
 
     @media screen and (min-width: 800px) {
       .ext-comments.container {
-        width: 780px !important;
+        width: 780px;
       }
     }
 
@@ -429,11 +428,6 @@ const STYLES = {
       box-sizing: border-box;
     }
 
-    .ext-comments .comment:focus {
-      background-color: #f2f2f2;
-      border: 1px solid var(--background_pop) !important;
-    }
-
     .ext-comments .border img.user-icon {
       display: block;
       border-radius: 0px;
@@ -446,9 +440,13 @@ const STYLES = {
     }
 
     .ext-comments .comment-thread > .border {
-      margin-right: 8px !important;
+      margin-right: 8px;
       margin-top: 4px;
       width: 41px;
+    }
+
+    .ext-comments .comment-thread > .border > .line {
+      background: #ccc;
     }
 
     .ext-comments .comment-thread > .border:hover > .line {
@@ -457,16 +455,16 @@ const STYLES = {
     }
 
     .ext-comments .comment-thread > .border:hover > img.user-icon {
-      height: 41px !important;
-      margin-bottom: 8px !important;
+      height: 41px;
+      margin-bottom: 8px;
     }
 
     .ext-comments .comment-thread.collapsed > .border .line {
       display: none;
     }
 
-    .ext-comments .comment-thread.collapsed > .border .user-icon {
-      display: initial !important;
+    .ext-comments .comment-thread.collapsed > .border img.user-icon {
+      display: initial;
     }
 
 
@@ -480,6 +478,7 @@ const STYLES = {
     }
 
     .ext-comments .comment .comment-meta a:focus {
+      /* !important necessary to override existing important style */
       text-decoration: none !important;
     }
 
@@ -488,7 +487,7 @@ const STYLES = {
     }
 
     .ext-comments .comment .comment-meta .commenter-name a:focus {
-      outline-color: #555 !important;
+      outline-color: #555;
     }
 
     .ext-comments .comment .comment-meta .reply-sep,
@@ -497,11 +496,11 @@ const STYLES = {
     .ext-comments .comment .comment-meta .edit,
     .ext-comments .comment .comment-meta .delete-sep,
     .ext-comments .comment .comment-meta .delete {
-      display: none !important;
+      display: none;
     }
 
     .ext-comments .comment .comment-meta > * {
-      padding-top: 0 !important;
+      padding-top: 0;
     }
 
     .ext-comments .comment .comment-meta .commenter-name {
@@ -527,7 +526,7 @@ const STYLES = {
     /* Comment content */
 
     .ext-comments .comment:focus {
-      outline-color: #888 !important;
+      outline-color: #888;
     }
 
     .ext-comments .comment .comment-body {
@@ -537,6 +536,12 @@ const STYLES = {
     }
 
     .ext-comments .comment .comment-body a {
+      text-decoration: underline;
+    }
+
+
+    .ext-comments .comment .comment-body a:focus {
+      /* !important necessary to override existing important style */
       text-decoration: underline !important;
     }
 
@@ -551,6 +556,7 @@ const STYLES = {
     }
 
     .ext-comments .comment .comment-footer a:focus {
+      /* !important necessary to override existing important style */
       text-decoration: underline !important;
     }
 
@@ -576,19 +582,11 @@ const STYLES = {
 
     .ext-comments .comment-editor button:focus {
       padding: 0px 18px;
-      outline: none !important;
+      outline: none;
     }
 
     .ext-comments .comment-editor button.primary:focus {
-      border-color: #000 !important;
-    }
-
-
-
-    /* Expand comment button */
-
-    .comment-collapse-toggle {
-      font-weight: normal !important;
+      border-color: #000;
     }
   `,
   removeNags: `
