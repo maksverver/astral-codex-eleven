@@ -3,7 +3,6 @@
 // Keep this list in sync with the object at the bottom of the file.
 const {
   OPTIONS,
-  processComments,
   processSingleComment,
   processAllComments,
   getOption,
@@ -142,7 +141,7 @@ const {
     },
     onValueChange(newValue) {
       this.createCachedSet(newValue);
-      processComments(this.key);
+      processComments(this);
     },
     onStart(currentValue) {
       this.createCachedSet(currentValue);
@@ -172,20 +171,14 @@ const {
   }).map((e) => [e.key, e]));
 
   // Apply `processComment` from the given key to all ExtCommentComponents
-  function processComments(key) {
-    const option = OPTIONS[key]
-    if (!option) {
-      console.warn(`No option key '${key}' found`);
-      return;
-    };
-
+  function processComments(option) {
     if (!(option.processComment instanceof Function)) {
-      console.warn(`No processComment function for key '${key}'`);
+      console.warn(`No processComment function for key '${option.key}'`);
       return;
     }
 
-    const value = getOption(key);
-    for (let child of commentListRoot.allChildren()) {
+    const value = getOption(option.key);
+    for (let child of commentListRoot.descendants()) {
       option.processComment(value, child);
     }
   }
@@ -204,7 +197,7 @@ const {
   function processAllComments() {
     for (const option of Object.values(OPTIONS)) {
       if (Object.hasOwn(option, 'processComment')) {
-        processComments(option.key);
+        processComments(option);
       }
     }
   }
@@ -313,7 +306,6 @@ const {
   // Keep this list in sync with the object at the top of the file.
   return {
     OPTIONS,
-    processComments,
     processSingleComment,
     processAllComments,
     getOption,

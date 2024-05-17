@@ -212,10 +212,10 @@ class ExtCommentListComponent {
     for (const child of this.children) child.reverse();
   }
 
-  *allChildren() {
+  *descendants() {
     for (let child of this.children) {
       yield child;
-      yield* child.childList.allChildren();
+      yield* child.childList.descendants();
     }
   }
 }
@@ -375,17 +375,9 @@ class ExtCommentComponent {
       ev.preventDefault();
       new CommentEditorComponent(replyHolder, toHide, '', async (body) => {
         if (body) {
-          try {
-            const comment = await this.options.commentApi.createComment(this.commentData.id, body);
-            this.childList.addComment(comment, this, this.options).focus();
-          } catch (e) {
-            console.warn(e);
-            alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return CommentEditorComponent.ERROR;
-          }
+          const comment = await this.options.commentApi.createComment(this.commentData.id, body);
+          this.childList.addComment(comment, this, this.options).focus();
         }
-
-        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -396,18 +388,10 @@ class ExtCommentComponent {
       ev.preventDefault();
       new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
         if (body && body !== this.commentData.body) {
-          try {
-            const comment = await this.options.commentApi.editComment(this.commentData.id, body);
-            commentBodyDiv.replaceChildren();
-            this.appendCommentText(commentBodyDiv, comment.body);
-          } catch (e) {
-            console.warn(e);
-            alert('Failed to edit comment!\n\nSee the JavaScript console for details.');
-            return CommentEditorComponent.ERROR;
-          }
+          const comment = await this.options.commentApi.editComment(this.commentData.id, body);
+          commentBodyDiv.replaceChildren();
+          this.appendCommentText(commentBodyDiv, comment.body);
         }
-
-        return CommentEditorComponent.SUCCESS;
       });
     };
   }
@@ -645,9 +629,6 @@ class CommentOrderComponent {
 }
 
 class CommentEditorComponent {
-  static SUCCESS = 0;
-  static ERROR = 1;
-
   constructor(parentElem, elemsToHide, initialText, exitCallback) {
     for (const elem of elemsToHide) elem.style.setProperty('display', 'none');
 
@@ -684,10 +665,13 @@ Push OK to discard, or Cancel to keep editing.')) {
     window.addEventListener('beforeunload', this.beforeUnloadHandler);
   }
 
-  handleButtonClick(textValue) {
-    const status = this.exitCallback(textValue);
-    if (status !== CommentEditorComponent.ERROR) {
+  async handleButtonClick(textValue) {
+    try {
+      await this.exitCallback(textValue);
       this.close();
+    } catch (e) {
+      console.warn(e);
+      alert(`Failed to post comment!\n\nSee the JavaScript console for details.`);
     }
   }
 
@@ -788,17 +772,9 @@ function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OP
       ev.preventDefault();
       new CommentEditorComponent(replyHolder, [addCommentLink], '', async (body) => {
         if (body) {
-          try {
-            const comment = await options.commentApi.createComment(undefined, body);
-            commentListRoot.addComment(comment, undefined, options);
-          } catch (e) {
-            console.warn(e);
-            alert('Failed to add comment!\n\nSee the JavaScript console for details.');
-            return CommentEditorComponent.ERROR;
-          }
+          const comment = await options.commentApi.createComment(undefined, body);
+          commentListRoot.addComment(comment, undefined, options);
         }
-
-        return CommentEditorComponent.SUCCESS;
       });
     };
   }
