@@ -129,7 +129,7 @@ const {
     onValueChange(newValue) {
       setStyleEnabled(this.key, newValue);
       if (newValue) {
-        processComments(this.key);
+        processComments(this);
       } else {
         // This is slow compared to just hiding with styling, but is only done
         // when the option value changes
