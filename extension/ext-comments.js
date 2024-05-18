@@ -407,7 +407,7 @@ class ExtCommentComponent {
           commentBodyDiv.classList.add('missing');
           for (const elem of toDelete) elem.remove();
         } catch (e) {
-          console.warn(e);
+          Logging.warn(e);
           alert('Failed to delete comment!\n\nSee the JavaScript console for details.');
         }
       }
@@ -670,7 +670,7 @@ Push OK to discard, or Cancel to keep editing.')) {
       await this.exitCallback(textValue);
       this.close();
     } catch (e) {
-      console.warn(e);
+      Logging.warn(e);
       alert(`Failed to post comment!\n\nSee the JavaScript console for details.`);
     }
   }

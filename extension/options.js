@@ -162,25 +162,26 @@ const {
     hideUsersOption,
   ];
 
-  const LOG_TAG = '[Astral Codex Eleven] [Option]';
   const STORAGE_KEY = 'acxi-options';
   const OPTIONS = Object.fromEntries(optionArray.filter((e) => {
     const [valid, reason] = isValidOption(e);
-    if (!valid) console.error(LOG_TAG, 'Invalid option:', reason, e);
+    if (!valid) Logging.error('Invalid option:', reason, e);
     return valid;
   }).map((e) => [e.key, e]));
 
   // Apply `processComment` from the given key to all ExtCommentComponents
   function processComments(option) {
     if (!(option.processComment instanceof Function)) {
-      console.warn(`No processComment function for key '${option.key}'`);
+      Logging.warn(`No processComment function for key '${option.key}'`);
       return;
     }
 
+    const perfTimer = new Timer();
     const value = getOption(option.key);
     for (let child of commentListRoot.descendants()) {
       option.processComment(value, child);
     }
+    Logging.info(`Processed comments for option '${option.key}' in ${perfTimer.totalTime()}ms`);
   }
 
   // Apply `processComment` from all keys to the given ExtCommentComponent
@@ -217,11 +218,11 @@ const {
 
   async function loadSavedOptions() {
     const v = await chrome.storage.local.get(STORAGE_KEY).catch((e) => {
-      console.error(LOG_TAG, e);
+      Logging.error('Error loading options:', e);
       return undefined;
     });
     optionShadow = v?.[STORAGE_KEY] ?? {};
-    console.info(LOG_TAG, 'Loaded option values', optionShadow);
+    Logging.info('Loaded option values', optionShadow);
   }
 
   async function loadOptions() {
@@ -244,7 +245,7 @@ const {
 
   async function saveOptions() {
     await chrome.storage.local.set({[STORAGE_KEY]: optionShadow}).catch((e) => {
-      console.error(LOG_TAG, e);
+      Logging.error('Error saving options:', e);
     });
   }
 

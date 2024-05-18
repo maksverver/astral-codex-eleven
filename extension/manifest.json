@@ -47,6 +47,7 @@
         "ext-comments.css"
       ],
       "js": [
+        "logging.js",
         "styles.js",
         "options.js",
         "ext-comments.js",
