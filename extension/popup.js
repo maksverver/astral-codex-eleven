@@ -51,7 +51,7 @@ function setInitialState(optionElement) {
 
   if (input.classList.contains('check')) {
     input.checked = setValue;
-  } else if (input.classList.contains('text')) {
+  } else if (input.classList.contains('text') || input.classList.contains('number')) {
     input.value = setValue;
   }
 }
@@ -67,6 +67,13 @@ function createChangeHandler(optionElement) {
   } else if (input.classList.contains('text')) {
     input.addEventListener('change', () => {
       setOption(id, input.value);
+    });
+  } else if (input.classList.contains('number')) {
+    input.addEventListener('change', () => {
+      const value = parseInt(input.value);
+      if (!isNaN(value)) {
+        setOption(id, value);
+      }
     });
   }
 }

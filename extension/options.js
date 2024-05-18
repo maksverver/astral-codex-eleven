@@ -3,12 +3,13 @@
 // Keep this list in sync with the object at the bottom of the file.
 const {
   OPTIONS,
+  processSingleComment,
+  processAllComments,
   getOption,
-  getOptionsToProcessInitially,
-  loadOptions,
-  loadSavedOptions,
-  runOptionsOnLoad,
   setOption,
+  loadSavedOptions,
+  loadOptions,
+  runOptionsOnLoad,
 } = (() => {
   /**
    * This file holds all options that are implemented with the options API. This
@@ -20,10 +21,10 @@ const {
    * as long as arrow function expressions are not used. For this reason, arrow
    * expressions are discouraged when defining options.
    *
-   * The value of the option must be truthy in order for processComment to be run.
-   * onStart and onLoad are called for every option when the page is first loaded,
-   * and are passed the current value, so checking the current value of the option
-   * is required.
+   * The value of the option must be truthy in order for processComment to be
+   * run. onStart and onLoad are called for every option when the page is first
+   * loaded, and are passed the current value, so checking the current value of
+   * the option is required.
    */
   const templateOption = {
     /**
@@ -35,8 +36,8 @@ const {
 
     /**
      * (Required)
-     * The default value for the option. This will be the value of the option the
-     * first time the user loads the extension.
+     * The default value for the option. This will be the value of the option
+     * the first time the user loads the extension.
      */
     default: true,
 
@@ -62,29 +63,30 @@ const {
 
     /**
      * (Optional)
-     * Runs immediately when a page is first opened, even if the value of the
-     * option is falsy. Useful for applying custom CSS styling.
+     * Runs immediately when a page is first opened, Useful for applying custom
+     * CSS styling.
      * @param {*} currentValue - the current value of the option
      */
     onStart(currentValue) {},
 
     /**
      * (Optional)
-     * Runs when a page is fully loaded, after the DOM is created and the rest of
-     * the extension changes are made, even if the value of the option is falsy.
+     * Runs when a page is fully loaded, after the DOM is created and the rest
+     * of the extension changes are made.
      * @param {*} currentValue - the current value of the option
      */
     onLoad(currentValue) {},
 
     /**
      * (Optional)
-     * Applied to each ExtCommentComponent. From that, the comment element itself
-     * can be accessed and modified, as well as other state. Any return value is
-     * discarded. This only runs if the current value of the option is truthy.
-     * @param commentComponent - the ExtCommentComponent that represents the given
-     * comment
+     * Applied to each ExtCommentComponent. From that, the comment element
+     * itself can be accessed and modified, as well as other state. Any return
+     * value is discarded.
+     * @param currentValue - the current value of the option
+     * @param commentComponent - the ExtCommentComponent that represents the
+     * given comment
      */
-    processComment(commentComponent) {}
+    processComment(currentValue, commentComponent) {}
   };
 
   const removeNagsOptions = {
@@ -139,12 +141,12 @@ const {
     },
     onValueChange(newValue) {
       this.createCachedSet(newValue);
-      reprocessComments(this);
+      processComments(this);
     },
     onStart(currentValue) {
       this.createCachedSet(currentValue);
     },
-    processComment(commentComponent) {
+    processComment(currentValue, commentComponent) {
       const commentData = commentComponent.commentData;
       const commentElem = commentComponent.threadDiv;
       commentElem.classList.toggle('hidden', this.cachedSet.has(commentData.name));
@@ -168,29 +170,49 @@ const {
     return valid;
   }).map((e) => [e.key, e]));
 
-  // Stores a local copy of the current option values. It should not be modified
-  // directly, instead setOption below should be used.
-  let optionShadow = {};
+  // Apply `processComment` from the given key to all ExtCommentComponents
+  function processComments(option) {
+    if (!(option.processComment instanceof Function)) {
+      console.warn(`No processComment function for key '${option.key}'`);
+      return;
+    }
 
-  // Returns the list of options that are applied to the initial comment list.
-  //
-  // This includes all valid options that:
-  //
-  //  - have a processComment() implementation
-  //  - are enabled (i.e., the current value is truthy)
-  //
-  function getOptionsToProcessInitially() {
-    return Object.entries(OPTIONS)
-        .filter(
-            ([key, option]) =>
-              option.hasOwnProperty('processComment') &&
-              Boolean(optionShadow[key]))
-        .map(([key, option]) => option);
+    const value = getOption(option.key);
+    for (let child of commentListRoot.descendants()) {
+      option.processComment(value, child);
+    }
   }
 
-  // Reprocess all comments with the given option key.
-  function reprocessComments(option) {
-    if (commentListRoot) commentListRoot.applyOptions([option]);
+  // Apply `processComment` from all keys to the given ExtCommentComponent
+  function processSingleComment(comment) {
+    for (const option of Object.values(OPTIONS)) {
+      if (Object.hasOwn(option, 'processComment')) {
+        const value = getOption(option.key);
+        option.processComment(value, comment);
+      }
+    }
+  }
+
+  // Apply `processComment` from all keys to all ExtCommentComponents
+  function processAllComments() {
+    for (const option of Object.values(OPTIONS)) {
+      if (Object.hasOwn(option, 'processComment')) {
+        processComments(option);
+      }
+    }
+  }
+
+  // Stores a local copy of the current option values. It should not be used
+  // directly, instead getOption and setOption below should be used.
+  let optionShadow = {};
+
+  function getOption(key) {
+    return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
+  }
+
+  async function setOption(key, value) {
+    optionShadow[key] = value;
+    await saveOptions();
   }
 
   async function loadSavedOptions() {
@@ -200,21 +222,6 @@ const {
     });
     optionShadow = v?.[STORAGE_KEY] ?? {};
     console.info(LOG_TAG, 'Loaded option values', optionShadow);
-  }
-
-  async function saveOptions() {
-    await chrome.storage.local.set({[STORAGE_KEY]: optionShadow}).catch((e) => {
-      console.error(LOG_TAG, e);
-    });
-  }
-
-  function getOption(key) {
-    return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
-  }
-
-  async function setOption(key, value) {
-    optionShadow[key] = value;
-    await saveOptions();
   }
 
   async function loadOptions() {
@@ -235,6 +242,12 @@ const {
     }
   }
 
+  async function saveOptions() {
+    await chrome.storage.local.set({[STORAGE_KEY]: optionShadow}).catch((e) => {
+      console.error(LOG_TAG, e);
+    });
+  }
+
   function storageChangeHandler(changes, namespace) {
     if (namespace !== 'local' || !changes[STORAGE_KEY]
         || typeof changes[STORAGE_KEY].newValue !== 'object') {
@@ -245,7 +258,7 @@ const {
       // stringify is a simple way to compare values that may be dicts, and
       // performance isn't a concern here since the function doesn't run often.
       const newValueString = JSON.stringify(newValue);
-      const oldValueString = JSON.stringify(getOption('key'));
+      const oldValueString = JSON.stringify(getOption(key));
 
       if (newValueString !== oldValueString) {
         optionShadow[key] = newValue;
@@ -293,11 +306,12 @@ const {
   // Keep this list in sync with the object at the top of the file.
   return {
     OPTIONS,
+    processSingleComment,
+    processAllComments,
     getOption,
-    getOptionsToProcessInitially,
-    loadOptions,
-    loadSavedOptions,
-    runOptionsOnLoad,
     setOption,
+    loadSavedOptions,
+    loadOptions,
+    runOptionsOnLoad,
   };
 })();
