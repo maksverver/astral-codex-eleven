@@ -594,6 +594,12 @@ const STYLES = {
     .ext-comments .comment-editor button.primary:focus {
       border-color: #000;
     }
+
+    .ext-comments .comment .continue-thread-button {
+      color: #888;
+      border-color: #888;
+      outline: none;
+    }
   `,
   removeNags: `
     button[data-testid='noncontributor-cta-button'],
