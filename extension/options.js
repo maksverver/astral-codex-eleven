@@ -226,6 +226,30 @@ const {
     }
   };
 
+  const forceLimitDepthOption = {
+    key: 'forceLimitDepth',
+    default: 8,
+    descriptionShort: 'asdf',
+    descriptionLong: 'asdf',
+    onStart(currentValue) {
+      const basePostUrlMatch = window.location.pathname.match(/\/p\/[\w-]+/);
+      this.basePostUrl = basePostUrlMatch?.[0] ?? window.location.pathname;
+    },
+    processComment(currentValue, commentComponent) {
+      if (currentValue > 0) {
+        if (commentComponent.depth === currentValue) {
+          const commentElem = commentComponent.threadDiv;
+          commentElem.classList.add('hidden');
+        } else if (commentComponent.depth === currentValue - 1) {
+          const button = createElement(undefined, 'a', 'button outline continue-thread-button', 'Continue Thread →');
+          const id = commentComponent.commentData.id;
+          button.href = `${this.basePostUrl}/comment/${id}`;
+          commentComponent.commentDiv.append(button);
+        }
+      }
+    }
+  }
+
   // All options should be added here.
   const optionArray = [
     // templateOption,
@@ -235,6 +259,7 @@ const {
     collapseDepthOption,
     hideUsersOption,
     timeFormatOption,
+    forceLimitDepthOption,
   ];
 
   const LOG_TAG = '[Astral Codex Eleven] [Option]';

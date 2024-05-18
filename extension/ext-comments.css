@@ -165,6 +165,15 @@ a:focus {
   font-style: italic;
 }
 
+.ext-comments .comment .continue-thread-button {
+  display: inline-flex;
+  align-items: center;
+  height: 25px;
+  margin: 10px 0 0 0;
+  padding: 0 10px;
+  font-size: 12px;
+}
+
 /* Dates */
 
 .comment-timestamps {
@@ -292,4 +301,9 @@ a:focus {
 
 .ext-comments .comment-editor button.primary:focus {
   border-color: #0008 !important;
+}
+
+.ext-comments .comment .continue-thread-button:focus {
+  border-width: 2px;
+  padding: 0 9px;
 }
