@@ -45,7 +45,8 @@ class CommentApi {
 }
 
 (async function() {
-  Logging.info('Starting extension.');
+  const logger = new Logger('[Astral Codex Eleven]');
+  logger.info('Starting extension.');
 
   // Start loading options asynchronously (this doesn't depend on the DOM).
   const loadOptionsResult = loadOptions();
@@ -84,16 +85,16 @@ class CommentApi {
   });
 
   if (!postId) {
-    Logging.warn("postId not defined! Can't continue.");
+    logger.warn("postId not defined! Can't continue.");
     return;
   }
 
   if (!userId) {
-    Logging.info('userId not defined! Commenting will be disabled.');
+    logger.info('userId not defined! Commenting will be disabled.');
   }
 
   if (commentSort !== 'oldest_first' && commentSort !== 'most_recent_first') {
-    Logging.info('Invalid value for commentSort! Will default to oldest_first.');
+    logger.info('Invalid value for commentSort! Will default to oldest_first.');
     commentSort = 'oldest_first';
   }
   const commentOrder = commentSort === 'most_recent_first' ?
@@ -101,10 +102,10 @@ class CommentApi {
 
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
-    Logging.warn("Element comments-page not found! Can't continue.");
+    logger.warn("Element comments-page not found! Can't continue.");
     return;
   } else {
-    Logging.info('Hiding comments-page element.');
+    logger.info('Hiding comments-page element.');
     commentsPage.style.display = 'none';
   }
 
@@ -117,22 +118,22 @@ class CommentApi {
   const perfTimer = new Timer();
   let comments = undefined;
   try {
-    Logging.info('Fetching comments...');
+    logger.info('Fetching comments...');
     perfTimer.restart();
     // Note that I use ?no-filter& to bypass the filter rule that redirects
     // requests from the real page!
     comments = await fetchComments(
         `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=${commentSort}`);
-    Logging.info(`fetch() completed in ${perfTimer.totalTime()} ms.`)
+    logger.info(`fetch() completed in ${perfTimer.totalTime()} ms.`);
   } catch (e) {
-    Logging.warn('Failed to fetch comments!', e);
+    logger.warn('Failed to fetch comments!', e);
     return;
   }
   if (!Array.isArray(comments)) {
-    Logging.warn("comments is not an Array! Can't continue.");
+    logger.warn("comments is not an Array! Can't continue.");
     return;
   }
-  Logging.info(`${comments.length} top-level comments found.`);
+  logger.info(`${comments.length} top-level comments found.`);
 
   const commentApi = new CommentApi(postId);
 
@@ -143,7 +144,7 @@ class CommentApi {
     perfTimer.restart();
     replaceComments(rootDiv, comments,
         {...REPLACE_COMMENTS_DEFAULT_OPTIONS, userId, commentApi, commentOrder});
-    Logging.info(`DOM updated in ${perfTimer.totalTime()} ms.`);
+    logger.info(`DOM updated in ${perfTimer.totalTime()} ms.`);
   }
 
   runOptionsOnLoad();

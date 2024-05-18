@@ -5,23 +5,27 @@ class LoggingLevel {
     static INFO = 3;
 }
 
-class Logging {
-    static LOG_TAG = '[Astral Codex Eleven]';
-    static level = LoggingLevel.INFO;
+class Logger {
+    static disabled = false;
 
-    static info(...objs) {
-        if (this.level < LoggingLevel.INFO) return;
-        console.log(Logging.LOG_TAG, ...objs);
+    constructor(tag, level=LoggingLevel.INFO) {
+        this.tag = tag;
+        this.level = level;
     }
 
-    static warn(...objs) {
-        if (this.level < LoggingLevel.WARN) return;
-        console.warn(Logging.LOG_TAG, ...objs);
+    info(...objs) {
+        if (!Logger.disabled && this.level < LoggingLevel.INFO) return;
+        console.log(this.tag, ...objs);
     }
 
-    static error(...objs) {
-        if (this.level < LoggingLevel.ERROR) return;
-        console.error(Logging.LOG_TAG, ...objs);
+    warn(...objs) {
+        if (!Logger.disabled && this.level < LoggingLevel.WARN) return;
+        console.warn(this.tag, ...objs);
+    }
+
+    error(...objs) {
+        if (!Logger.disabled && this.level < LoggingLevel.ERROR) return;
+        console.error(this.tag, ...objs);
     }
 }
 
