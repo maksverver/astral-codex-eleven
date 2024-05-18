@@ -1,7 +1,11 @@
 'use strict';
 
-async function fetchComments(jsonPath) {
-  const fetchResponse = await fetch(jsonPath);
+async function fetchComments(postId, rootCommentId, commentSort) {
+  let url = `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=${commentSort}`;
+  if (rootCommentId) {
+    url += `&comment_id=${rootCommentId}`
+  }
+  const fetchResponse = await fetch(url);
   const responseJson = await fetchResponse.json();
   return responseJson?.comments;
 }

@@ -178,6 +178,8 @@ const {
       this.dateFormatLong = new Intl.DateTimeFormat('en-US', {
         month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
         minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
+      const basePostUrlMatch = window.location.pathname.match(/\/p\/[\w-]+/);
+      this.basePostUrl = basePostUrlMatch?.[0] ?? window.location.pathname;
     },
     // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is
     // between `now` and `now` minus 24 hours, or returns undefined otherwise.
@@ -212,7 +214,7 @@ const {
 
       const timeDiv = commentComponent.commentDiv.querySelector(':scope > .comment-meta > .comment-timestamps');
       const postDateDiv = createElement(timeDiv, 'a', 'posted-date');
-      postDateDiv.href = `${document.location.pathname}/comment/${id}`;
+      postDateDiv.href = `${this.basePostUrl}/comment/${id}`;
       postDateDiv.rel = 'nofollow';
       this.createDate(postDateDiv, postDate);
 
