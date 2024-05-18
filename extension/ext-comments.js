@@ -408,7 +408,7 @@ class ExtCommentComponent {
     }
   }
 
-  setExpanded(expanded) {
+  setExpanded(expanded, isUserAction=true) {
     expanded = Boolean(expanded);
     if (expanded === this.expanded) return;
     this.expanded = expanded;
@@ -418,13 +418,17 @@ class ExtCommentComponent {
     // Ensure the comment is in view, to avoid scrolling past comments below a
     // collapsed thread. (This also applies to expanding, for consistency.)
     // See: https://github.com/maksverver/astral-codex-eleven/issues/3
-    if (this.commentDiv.getBoundingClientRect().top < 0) {
-      this.commentDiv.scrollIntoView();
+    if (isUserAction) {
+      // Only do this if it's initiated by a user action, as opposed to
+      // something done by the script
+      if (this.commentDiv.getBoundingClientRect().top < 0) {
+        this.commentDiv.scrollIntoView();
+      }
     }
   }
 
-  toggleExpanded() {
-    this.setExpanded(!this.expanded);
+  toggleExpanded(isUserAction=true) {
+    this.setExpanded(!this.expanded, isUserAction);
   }
 
   focus() {
