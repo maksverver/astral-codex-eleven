@@ -87,6 +87,14 @@ const STYLES = {
       -webkit-font-smoothing: auto;
     }
 
+    ._container_1tbj4_1 ._actions_1tbj4_24 {
+      opacity: 1;
+    }
+
+    .post-ufi .post-ufi-button.style-compressed {
+      padding: 0;
+    }
+
 
 
     /* Topbar */
@@ -313,6 +321,14 @@ const STYLES = {
 
     .post .available-content .captioned-image-container figcaption {
       font: 12px/20px Verdana, sans-serif;
+    }
+
+    .post .available-content .footnote-anchor {
+      font-size: 11px;
+    }
+
+    .footnote-hovercard {
+      font-size: 11px;
     }
 
     .post .available-content h1 {
