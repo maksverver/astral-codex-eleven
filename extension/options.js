@@ -271,10 +271,9 @@ const {
 
       if (newValueString !== oldValueString) {
         optionShadow[key] = newValue;
-        const onValueChange = OPTIONS[key]?.onValueChange;
-        if (onValueChange) {
+        if (OPTIONS[key]?.onValueChange) {
           const perfTimer = new Timer();
-          onValueChange(newValue);
+          OPTIONS[key].onValueChange(newValue);
           logger.info(`onValueChange() for '${key}' ran in ${perfTimer.totalTime()}ms`);
         }
       }
