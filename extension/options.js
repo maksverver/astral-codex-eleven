@@ -167,8 +167,8 @@ const {
 
   // This will handle formatting the comment time, but will use the value of
   // other options and not be directly settable itself.
-  const timeFormatOption = {
-    key: 'timeFormat',
+  const dateFormatOption = {
+    key: 'dateFormat',
     default: null,
     descriptionShort: 'Time formatting',
     descriptionLong: 'Time formatting but long.',
@@ -232,7 +232,7 @@ const {
     defaultSortOption,
     collapseDepthOption,
     hideUsersOption,
-    timeFormatOption,
+    dateFormatOption,
   ];
 
   const LOG_TAG = '[Astral Codex Eleven] [Option]';
