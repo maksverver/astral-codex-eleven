@@ -73,7 +73,9 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (!comments) replaceComments(rootDiv, comments, replaceCommentOptions);
+  if (!comments) return;
+  replaceComments(rootDiv, comments, replaceCommentOptions);
+  runOptionsOnLoad();
 }
 
 function handleFileChange() {
@@ -113,4 +115,9 @@ function setUserId(value) {
 }
 
 // Initialization.
-setUpCommentOptions();
+async function initializeDemo() {
+  await loadOptions();
+  setUpCommentOptions();
+}
+
+initializeDemo();
