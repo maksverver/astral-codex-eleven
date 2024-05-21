@@ -142,6 +142,44 @@ function createTextNode(parent, text) {
   return node;
 }
 
+// Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is
+// between `now` and `now` minus 24 hours, or returns undefined otherwise.
+function formatRecentDate(now, date) {
+  const minuteMillis = 60 * 1000;
+  const hourMillis = 60 * minuteMillis;
+  const dayMillis = 24 * hourMillis;
+  const timeAgoMillis = now - date;
+  if (timeAgoMillis < 0) return undefined; // date is in the future?!
+  if (timeAgoMillis < hourMillis) {
+    const mins = Math.floor(timeAgoMillis / minuteMillis);
+    return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
+  }
+  if (timeAgoMillis < dayMillis) {
+    const hrs = Math.floor(timeAgoMillis / hourMillis);
+    return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
+  }
+  return undefined; // date is more than a day ago.
+}
+
+class ExtDateComponent {
+  constructor(parentElem, dateString) {
+    parentElem.classList.add('date');
+    parentElem.tabIndex = 0;
+    this.dateString = dateString;
+    this.shortDateSpan = createElement(parentElem, 'span', 'short', dateString);
+    this.longDateSpan = createElement(parentElem, 'span', 'long', dateString);
+  }
+
+  setDateFormat(shortFormat, longFormat) {
+    // We could also convert to Date in the constructor instead of here, but I
+    // think the current solution is more memory-efficient, and typically
+    // setting the date format only happens once.
+    const date = new Date(this.dateString);
+    this.shortDateSpan.textContent = formatRecentDate(Date.now(), date) || shortFormat.format(date);
+    this.longDateSpan.textContent = longFormat.format(date);
+  }
+}
+
 class ExtCommentListComponent {
   static assignSiblings(children) {
     const n = children.length;
@@ -275,7 +313,17 @@ class ExtCommentComponent {
       authorSpan.classList.add('missing');
     }
 
-    createElement(commentHeader, 'span', 'comment-timestamps');
+    const postDateLink = createElement(commentHeader, 'a', 'comment-timestamp');
+    postDateLink.href = `${document.location.pathname}/comment/${comment.id}`;
+    postDateLink.rel = 'nofollow';
+    const postDate = new ExtDateComponent(postDateLink, comment.date);
+
+    let editDate = null;
+    if (typeof comment.edited_at === 'string') {
+      createTextNode(commentHeader, '·');
+      const editedIndicator = createElement(commentHeader, 'span', 'edited-indicator', 'edited ');
+      editDate = new ExtDateComponent(editedIndicator, comment.edited_at);
+    }
 
     // Substack assigns special rendering to class="comment-body"
     const commentBody = createElement(commentDiv, 'div', 'comment-body');
@@ -290,6 +338,8 @@ class ExtCommentComponent {
     const editHolder = createElement(contentDiv, 'div', 'edit-holder');
 
     this.options     = options;
+    this.postDate    = postDate;
+    this.editDate    = editDate;
     this.commentData = comment;
     this.threadDiv   = threadDiv;
     this.headerDiv   = commentHeader;
@@ -301,7 +351,6 @@ class ExtCommentComponent {
     this.nextSibling = undefined;
     this.childList =
         new ExtCommentListComponent(contentDiv, comment.children ?? [], this, options);
-
 
     if (!comment.deleted && options.userId) {
       const replySeparator = createElement(commentHeader, 'span', 'reply-sep', '·');
@@ -325,6 +374,11 @@ class ExtCommentComponent {
         this.connectDeleteButton(deleteLink, commentBody, headerButtons);
       }
     }
+  }
+
+  setDateFormat(shortFormat, longFormat) {
+    this.postDate.setDateFormat(shortFormat, longFormat);
+    this.editDate?.setDateFormat(shortFormat, longFormat);
   }
 
   connectReplyButton(replyHolder, replyLink, toHide) {
@@ -361,7 +415,7 @@ class ExtCommentComponent {
       if (confirm('Are you sure you want to delete this comment?')) {
         try {
           await this.options.commentApi.deleteComment(this.commentData.id);
-          commentBodyDiv.innerText = 'deleted';
+          commentBodyDiv.textContent = 'deleted';
           commentBodyDiv.classList.add('missing');
           for (const elem of toDelete) elem.remove();
         } catch (e) {

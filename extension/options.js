@@ -173,54 +173,15 @@ const {
     descriptionShort: 'Time formatting',
     descriptionLong: 'Time formatting but long.',
     onStart(currentValue) {
-      this.dateFormatShort = new Intl.DateTimeFormat('en-US', {
+      this.shortFormat = new Intl.DateTimeFormat('en-US', {
         month: 'short', day: 'numeric'});
-      this.dateFormatLong = new Intl.DateTimeFormat('en-US', {
+      this.longFormat = new Intl.DateTimeFormat('en-US', {
         month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
         minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
     },
-    // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is
-    // between `now` and `now` minus 24 hours, or returns undefined otherwise.
-    formatRecentDate(now, date) {
-      const minuteMillis = 60 * 1000;
-      const hourMillis = 60 * minuteMillis;
-      const dayMillis = 24 * hourMillis;
-      const timeAgoMillis = now - date;
-      if (timeAgoMillis < 0) return undefined; // date is in the future?!
-      if (timeAgoMillis < hourMillis) {
-        const mins = Math.floor(timeAgoMillis / minuteMillis);
-        return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
-      }
-      if (timeAgoMillis < dayMillis) {
-        const hrs = Math.floor(timeAgoMillis / hourMillis);
-        return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
-      }
-      return undefined; // date is more than a day ago.
-    },
-    createDate(parentElem, dateString) {
-      parentElem.classList.add('date');
-      parentElem.tabIndex = 0;
-      const date = new Date(dateString);
-      const shortDate = this.formatRecentDate(Date.now(), date) || this.dateFormatShort.format(date);
-      createElement(parentElem, 'span', 'short', shortDate);
-      createElement(parentElem, 'span', 'long', this.dateFormatLong.format(date));
-    },
+
     processComment(currentValue, commentComponent) {
-      const id = commentComponent.commentData.id;
-      const postDate = commentComponent.commentData.date;
-      const editDate = commentComponent.commentData.edited_at;
-
-      const timeDiv = commentComponent.commentDiv.querySelector(':scope > .comment-meta > .comment-timestamps');
-      const postDateDiv = createElement(timeDiv, 'a', 'posted-date');
-      postDateDiv.href = `${document.location.pathname}/comment/${id}`;
-      postDateDiv.rel = 'nofollow';
-      this.createDate(postDateDiv, postDate);
-
-      if (typeof editDate === 'string') {
-        createElement(timeDiv, 'span', 'edited-sep', '·');
-        const editedDateDiv = createElement(timeDiv, 'span', 'edited-date', 'edited ');
-        this.createDate(editedDateDiv, editDate);
-      }
+      commentComponent.setDateFormat(this.shortFormat, this.longFormat);
     }
   };
 
