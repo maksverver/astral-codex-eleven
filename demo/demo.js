@@ -73,7 +73,7 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (comments) replaceComments(rootDiv, comments);
+  if (!comments) replaceComments(rootDiv, comments, replaceCommentOptions);
 }
 
 function handleFileChange() {
