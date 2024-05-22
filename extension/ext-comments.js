@@ -221,8 +221,10 @@ class ExtCommentListComponent {
 
   reverseSelfOnly() {
     this.commentOrder = 1 - this.commentOrder;
-    this.commentsHolder.replaceChildren(
-        ...Array.from(this.commentsHolder.childNodes).reverse());
+    for (let i = 1; i < this.commentsHolder.childNodes.length; i++) {
+      this.commentsHolder.insertBefore(this.commentsHolder.childNodes[i],
+          this.commentsHolder.firstChild);
+    }
     ExtCommentListComponent.assignSiblings(this.children.reverse());
   }
 
@@ -342,7 +344,6 @@ class ExtCommentComponent {
     this.editDate    = editDate;
     this.commentData = comment;
     this.threadDiv   = threadDiv;
-    this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
@@ -701,49 +702,7 @@ Push OK to discard, or Cancel to keep editing.')) {
   }
 }
 
-// Skeleton for the implementation of the comments API. Will be replaced in the
-// extension with a real instance, and in the demo page with a fake instance for
-// local testing. This object exists to show the expected interface.
-const COMMENT_API_UNIMPLEMENTED = Object.freeze({
-  // Create a new comment with the given body text.
-  //
-  // parentId is the numeric id of the comment to reply to, or undefined to
-  // create a top-level comment.
-  //
-  // Returns a new comment object, or throws an error on failure.
-  async createComment(parentId, body) {
-    throw new Error('createComment() not implemented');
-  },
-
-  // Edits an existing comment with the given body text.
-  //
-  // Returns an updated comment object, or throws an error on failure.
-  async editComment(id, body) {
-    throw new Error('editComment() not implemented');
-  },
-
-  // Deletes an existing comment.
-  //
-  // Returns an empty object, or throws an error on failure.
-  async deleteComment(id) {
-    throw new Error('deleteComment() not implemented');
-  },
-});
-
-// Default options for replaceComments(). Callers should override the fields
-// they want to customize.
-const REPLACE_COMMENTS_DEFAULT_OPTIONS = Object.freeze({
-  // Set to NEW_FIRST when comments are provided in reverse chronological order.
-  commentOrder: CommentOrder.CHRONOLOGICAL,
-
-  // Set to the numeric id of the currently logged-in user, to enable commenting.
-  userId: undefined,
-
-  // Interface used to created/update/delete comments.
-  commentApi: COMMENT_API_UNIMPLEMENTED
-});
-
-function replaceComments(rootElem, comments, options=REPLACE_COMMENTS_DEFAULT_OPTIONS) {
+function replaceComments(rootElem, comments, options) {
   // Clear out the original root.
   rootElem.replaceChildren();
 

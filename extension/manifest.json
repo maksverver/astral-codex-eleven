@@ -49,6 +49,7 @@
       "js": [
         "styles.js",
         "options.js",
+        "commentApi.js",
         "ext-comments.js",
         "astral-codex-eleven.js"
       ],
