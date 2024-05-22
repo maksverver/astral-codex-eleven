@@ -344,7 +344,6 @@ class ExtCommentComponent {
     this.editDate    = editDate;
     this.commentData = comment;
     this.threadDiv   = threadDiv;
-    this.headerDiv   = commentHeader;
     this.commentDiv  = commentDiv;
     this.depth       = depth;
     this.parent      = parentCommentComponent;
