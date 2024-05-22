@@ -30,7 +30,7 @@
       ],
       "resources": [
         "filtered-comments.json",
-        "main-script.js"
+        "js/main-script.js"
       ]
     }
   ],
@@ -44,13 +44,13 @@
         "*://www.astralcodexten.com/p/*/comments"
       ],
       "css": [
-        "ext-comments.css"
+        "css/ext-comments.css"
       ],
       "js": [
-        "styles.js",
-        "options.js",
-        "ext-comments.js",
-        "astral-codex-eleven.js"
+        "js/styles.js",
+        "js/options.js",
+        "js/ext-comments.js",
+        "js/astral-codex-eleven.js"
       ],
       "run_at": "document_start"
     }
