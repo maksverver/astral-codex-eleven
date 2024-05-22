@@ -138,7 +138,7 @@ const {
     descriptionLong: "Collapse comments greater than the given depth. If 0, then don't collapse any comments.",
     processComment(currentValue, commentComponent) {
       if (currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0) {
-        commentComponent.setExpanded(false, false);
+        commentComponent.setExpanded(false);
       }
     }
   };

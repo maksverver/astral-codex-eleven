@@ -289,7 +289,7 @@ class ExtCommentComponent {
 
     // Create div for the border. This can be clicked to collapse/expand comments.
     const borderDiv = createElement(threadDiv, 'div', 'border');
-    borderDiv.onclick = this.toggleExpanded.bind(this);
+    borderDiv.onclick = this.toggleExpandedInteractive.bind(this);
     // Add profile picture to the top of the border.
     createElement(borderDiv, 'img', 'user-icon')
         .src = getUserIconUrl(comment);
@@ -462,31 +462,29 @@ class ExtCommentComponent {
     }
   }
 
-  setExpanded(expanded, isUserAction=true) {
+  setExpanded(expanded) {
     expanded = Boolean(expanded);
     if (expanded === this.expanded) return;
     this.expanded = expanded;
     this.threadDiv.classList.toggle('collapsed', !expanded);
     this.threadDiv.classList.toggle('expanded', expanded);
-
-    // Ensure the comment is in view, to avoid scrolling past comments below a
-    // collapsed thread. (This also applies to expanding, for consistency.)
-    // See: https://github.com/maksverver/astral-codex-eleven/issues/3
-    if (isUserAction) {
-      // Only do this if it's initiated by a user action, as opposed to
-      // something done by the script
-      if (this.commentDiv.getBoundingClientRect().top < 0) {
-        this.commentDiv.scrollIntoView();
-      }
-    }
   }
 
-  toggleExpanded(isUserAction=true) {
-    this.setExpanded(!this.expanded, isUserAction);
+  // Toggle expanded state trigged by a user action. Besides flipping the
+  // expanded state, this scrolls the top of the comment into view, to avoid
+  // scrolling past comments below the collapsed thread:
+  // https://github.com/maksverver/astral-codex-eleven/issues/3
+  toggleExpandedInteractive() {
+    this.setExpanded(!this.expanded);
+    this.scrollIntoView();
   }
 
   focus() {
     this.commentDiv.focus();
+    this.scrollIntoView();
+  }
+
+  scrollIntoView() {
     // Make sure the top of the comment is visible after it is focused:
     if (this.commentDiv.getBoundingClientRect().top < 0) {
       this.commentDiv.scrollIntoView();
@@ -530,7 +528,7 @@ class ExtCommentComponent {
     switch (ev.code) {
       case 'Enter':
       case 'NumpadEnter':
-        this.toggleExpanded();
+        this.toggleExpandedInteractive();
         break;
 
       case 'KeyH':
