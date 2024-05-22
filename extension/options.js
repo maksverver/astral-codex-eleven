@@ -190,8 +190,8 @@ const {
   const forceLimitDepthOption = {
     key: 'forceLimitDepth',
     default: 8,
-    descriptionShort: 'asdf',
-    descriptionLong: 'asdf',
+    descriptionShort: 'Comment nesting limit',
+    descriptionLong: 'Limit to how deeply comments are nested before a "Continue Thread" button is shown. If 0, allow unlimited nesting.',
     onStart(currentValue) {
       const basePostUrlMatch = window.location.pathname.match(/\/p\/[\w-]+/);
       this.basePostUrl = basePostUrlMatch?.[0] ?? window.location.pathname;
@@ -202,10 +202,12 @@ const {
           const commentElem = commentComponent.threadDiv;
           commentElem.classList.add('hidden');
         } else if (commentComponent.depth === currentValue - 1) {
-          const button = createElement(undefined, 'a', 'button outline continue-thread-button', 'Continue Thread →');
-          const id = commentComponent.commentData.id;
-          button.href = `${this.basePostUrl}/comment/${id}`;
-          commentComponent.commentDiv.append(button);
+          if (commentComponent.commentData.children.length > 0) {
+            const button = createElement(undefined, 'a', 'button outline continue-thread-button', 'Continue Thread →');
+            const id = commentComponent.commentData.id;
+            button.href = `${this.basePostUrl}/comment/${id}`;
+            commentComponent.commentDiv.append(button);
+          }
         }
       }
     }
