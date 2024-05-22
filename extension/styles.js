@@ -425,11 +425,13 @@ const STYLES = {
 
     .ext-comments .comment-editor textarea {
       font: 12px Verdana, sans-serif;
-      padding-top: 6.66px;
-      border: 0;
       border-radius: 10px;
-      outline: 1px solid #cbd5e3;
+      border: 1px solid #cbd5e3;
       resize: vertical;
+    }
+
+    .ext-comments .comment-editor textarea:focus {
+      outline: none;
     }
 
     @media screen and (min-width: 800px) {

@@ -260,6 +260,7 @@ a:focus {
 .ext-comments .comment-editor textarea {
   height: 96px;
   max-height: 400px;
+  box-sizing: border-box;
   padding: 0.5em 1em;
   border-radius: var(--border-radius-md);
   background: var(--web_bg_color);
@@ -277,7 +278,8 @@ a:focus {
 
 /* Why does substack remove focus indicators from everything?! */
 .ext-comments .comment-editor textarea:focus {
-  outline: 2px solid var(--background_pop) !important;
+  border: 2px solid var(--background_pop) !important;
+  padding: calc(0.5em - 1px) calc(1em - 1px);
 }
 
 .ext-comments .comment-editor button {
