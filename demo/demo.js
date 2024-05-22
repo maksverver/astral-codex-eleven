@@ -38,7 +38,6 @@ const longerDateFormat = new Intl.DateTimeFormat('en-US', {
 
 let replaceCommentOptions = {
   ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
-  collapseDepth: 3,
   dateFormatShort: longerDateFormat,
   commentOrder: CommentOrder.CHRONOLOGICAL,
   commentApi: {
@@ -101,11 +100,6 @@ function setDateFormat(value) {
 function setCommentOrder(value) {
   replaceCommentOptions.commentOrder =
       value === 'most_recent_first' ? CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
-  repopulate();
-}
-
-function setCollapseDepth(value) {
-  replaceCommentOptions.collapseDepth = Number(value);
   repopulate();
 }
 
