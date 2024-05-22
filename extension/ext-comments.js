@@ -400,9 +400,10 @@ class ExtCommentComponent {
       ev.preventDefault();
       new CommentEditorComponent(editHolder, toHide, this.commentData.body, async (body) => {
         if (body && body !== this.commentData.body) {
-          const comment = await this.options.commentApi.editComment(this.commentData.id, body);
+          const newCommentData = await this.options.commentApi.editComment(this.commentData.id, body);
           commentBodyDiv.replaceChildren();
-          this.appendCommentText(commentBodyDiv, comment.body);
+          this.appendCommentText(commentBodyDiv, newCommentData.body);
+          this.commentData = newCommentData;
         }
       });
     };
