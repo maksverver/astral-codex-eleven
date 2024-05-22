@@ -205,10 +205,9 @@ const {
           if (commentComponent.commentData.children.length > 0) {
             const numChildren = commentComponent.getNumChildren();
             const buttonText = `Continue Thread (${numChildren} ${numChildren === 1 ? 'child' : 'children'}) →`;
-            const button = createElement(undefined, 'a', 'button outline continue-thread-button', buttonText);
+            const button = createElement(commentComponent.commentDiv, 'a', 'button outline continue-thread-button', buttonText);
             const id = commentComponent.commentData.id;
             button.href = `${this.basePostUrl}/comment/${id}`;
-            commentComponent.commentDiv.append(button);
           }
         }
       }
