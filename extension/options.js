@@ -196,25 +196,28 @@ const {
     dateFormatOption,
   ];
 
-  const LOG_TAG = '[Astral Codex Eleven] [Option]';
+  const logger = new Logger('[Astral Codex Eleven] [Options]');
+
   const STORAGE_KEY = 'acxi-options';
   const OPTIONS = Object.fromEntries(optionArray.filter((e) => {
     const [valid, reason] = isValidOption(e);
-    if (!valid) console.error(LOG_TAG, 'Invalid option:', reason, e);
+    if (!valid) logger.error('Invalid option:', reason, e);
     return valid;
   }).map((e) => [e.key, e]));
 
   // Apply `processComment` from the given key to all ExtCommentComponents
   function processComments(option) {
     if (!(option.processComment instanceof Function)) {
-      console.warn(`No processComment function for key '${option.key}'`);
+      logger.warn(`No processComment function for key '${option.key}'`);
       return;
     }
 
+    const perfTimer = new Timer();
     const value = getOption(option.key);
     for (let child of commentListRoot.descendants()) {
       option.processComment(value, child);
     }
+    logger.info(`processComments() for '${option.key}' ran in ${perfTimer.totalTime()}ms`);
   }
 
   // Apply `processComment` from all keys to the given ExtCommentComponent
@@ -251,34 +254,40 @@ const {
 
   async function loadSavedOptions() {
     const v = await chrome.storage.local.get(STORAGE_KEY).catch((e) => {
-      console.error(LOG_TAG, e);
+      logger.error('Error loading options:', e);
       return undefined;
     });
     optionShadow = v?.[STORAGE_KEY] ?? {};
-    console.info(LOG_TAG, 'Loaded option values', optionShadow);
+    logger.info('Loaded option values', optionShadow);
   }
 
   async function loadOptions() {
     await loadSavedOptions();
     chrome.storage.onChanged.addListener(storageChangeHandler);
+    const perfTimer = new Timer();
     for (const [key, option] of Object.entries(OPTIONS)) {
       if (option.onStart instanceof Function) {
+        perfTimer.restart();
         option.onStart(getOption(key));
+        logger.info(`onStart() for '${key}' ran in ${perfTimer.totalTime()}ms`);
       }
     }
   }
 
   function runOptionsOnLoad() {
+    const perfTimer = new Timer();
     for (const [key, option] of Object.entries(OPTIONS)) {
       if (option.onLoad instanceof Function) {
+        perfTimer.restart();
         option.onLoad(getOption(key));
+        logger.info(`onLoad() for '${key}' ran in ${perfTimer.totalTime()}ms`);
       }
     }
   }
 
   async function saveOptions() {
     await chrome.storage.local.set({[STORAGE_KEY]: optionShadow}).catch((e) => {
-      console.error(LOG_TAG, e);
+      logger.error('Error saving options:', e);
     });
   }
 
@@ -296,7 +305,11 @@ const {
 
       if (newValueString !== oldValueString) {
         optionShadow[key] = newValue;
-        OPTIONS[key]?.onValueChange?.(newValue);
+        if (OPTIONS[key]?.onValueChange) {
+          const perfTimer = new Timer();
+          OPTIONS[key].onValueChange(newValue);
+          logger.info(`onValueChange() for '${key}' ran in ${perfTimer.totalTime()}ms`);
+        }
       }
     }
   }
