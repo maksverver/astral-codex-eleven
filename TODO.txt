@@ -1,5 +1,7 @@
 Nice-to-haves:
 
+  - Cosmetic: editing a comment should update the edited-at timestamp.
+
   - Cosmetic: hide reply/delete/edit links after deleting a comment
 
   - Cosmetic: currently it's possible to collapse a comment and edit it or
