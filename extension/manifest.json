@@ -30,7 +30,9 @@
       ],
       "resources": [
         "filtered-comments.json",
-        "js/main-script.js"
+        "js/main-script.js",
+        "css/options/removeNags.css",
+        "css/options/zenMode.css"
       ]
     }
   ],
