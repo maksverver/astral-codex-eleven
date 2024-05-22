@@ -6,6 +6,7 @@
     <script src="../extension/styles.js" defer></script>
     <script src="../extension/options.js" defer></script>
     <script src="../extension/ext-comments.js" defer></script>
+    <script src="fake-storage.js" defer></script>
     <script src="demo.js" defer></script>
     <link rel="stylesheet" href="demo.css">
     <link rel="stylesheet" href="../extension/ext-comments.css">
@@ -46,16 +47,6 @@
       <tr style="font-size: small; color: #000a">
         <td colspan="2">
           * This only describes the order of comments in the JSON file. It does not actually reverse them!
-        </td>
-      </tr>
-      <tr>
-        <th>Collapse depth:</th>
-        <td style="display:inline-flex; flex-direction: row; justify-content: center;">
-          <input type="range" min="0" max="10" value="3" class="slider"
-              onchange="setCollapseDepth(this.value)"
-              oninput="document.getElementById('collapse-depth-value').innerText = this.value">
-          &nbsp;
-          <span id="collapse-depth-value">3</span>
         </td>
       </tr>
       <tr>

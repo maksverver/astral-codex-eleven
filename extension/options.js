@@ -3,7 +3,6 @@
 // Keep this list in sync with the object at the bottom of the file.
 const {
   OPTIONS,
-  processComments,
   processSingleComment,
   processAllComments,
   getOption,
@@ -43,6 +42,19 @@ const {
     default: true,
 
     /**
+     * (Required)
+     * A short description of the option to identify it on the option popup.
+     */
+    descriptionShort: 'A short description',
+
+    /**
+     * (Required)
+     * Text that describes what the option does in more detail. This will be
+     * shown in the option panel when the user hovers over the help icon.
+     */
+    descriptionLong: 'A longer description of the option with more detail than the name alone.',
+
+    /**
      * (Optional)
      * This will be called any time the option changes value.
      * @param {*} newValue - the new value of the option
@@ -80,6 +92,8 @@ const {
   const removeNagsOptions = {
     key: 'removeNags',
     default: false,
+    descriptionShort: 'Remove Substack nags',
+    descriptionLong: 'Remove Substack prompts to subscribe or share posts.',
     onStart(currentValue) {
       addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
@@ -92,6 +106,8 @@ const {
   const zenModeOption = {
     key: 'zenMode',
     default: false,
+    descriptionShort: 'Zen Mode',
+    descriptionLong: 'Remove all like, share, and subscribe buttons in the post.',
     onStart(currentValue) {
       addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
@@ -104,6 +120,8 @@ const {
   const defaultSortOption = {
     key: 'defaultSort',
     default: 'auto',
+    descriptionShort: 'Default comment sorting',
+    descriptionLong: 'Force the comment sorting to always be the same. Leave on Auto to use the default Substack sorting.',
     onLoad(currentValue) {
       if (currentValue === 'chrono') {
         commentOrderComponent.setOrder(CommentOrder.CHRONOLOGICAL);
@@ -116,6 +134,8 @@ const {
   const collapseDepthOption = {
     key: 'collapseDepth',
     default: 0,
+    descriptionShort: 'Automatic collapse depth',
+    descriptionLong: "Collapse comments greater than the given depth. If 0, then don't collapse any comments.",
     processComment(currentValue, commentComponent) {
       if (currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0) {
         commentComponent.setExpanded(false);
@@ -126,12 +146,14 @@ const {
   const hideUsersOption = {
     key: 'hideUsers',
     default: '',
+    descriptionShort: 'Hide user comments',
+    descriptionLong: 'Hide comments from the listed users, in a comma separated list.',
     createCachedSet(userString) {
       this.cachedSet = new Set(userString.split(',').map((e) => e.trim()).filter((x) => x));
     },
     onValueChange(newValue) {
       this.createCachedSet(newValue);
-      processComments(this.key);
+      processComments(this);
     },
     onStart(currentValue) {
       this.createCachedSet(currentValue);
@@ -143,58 +165,23 @@ const {
     }
   };
 
-  const timeFormatOption = {
-    key: 'timeFormat',
+  // This will handle formatting the comment time, but will use the value of
+  // other options and not be directly settable itself.
+  const dateFormatOption = {
+    key: 'dateFormat',
     default: null,
+    descriptionShort: 'Time formatting',
+    descriptionLong: 'Time formatting but long.',
     onStart(currentValue) {
-      this.dateFormatShort = new Intl.DateTimeFormat('en-US', {
+      this.shortFormat = new Intl.DateTimeFormat('en-US', {
         month: 'short', day: 'numeric'});
-      this.dateFormatLong = new Intl.DateTimeFormat('en-US', {
+      this.longFormat = new Intl.DateTimeFormat('en-US', {
         month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
         minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
     },
-    // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is between
-    // `now` and `now` minus 24 hours, or returns undefined otherwise.
-    formatRecentDate(now, date) {
-      const minuteMillis = 60 * 1000;
-      const hourMillis = 60 * minuteMillis;
-      const dayMillis = 24 * hourMillis;
-      const timeAgoMillis = now - date;
-      if (timeAgoMillis < 0) return undefined;  // date is in the future?!
-      if (timeAgoMillis < hourMillis) {
-        const mins = Math.floor(timeAgoMillis / minuteMillis);
-        return `${mins} ${mins === 1 ? 'min' : 'mins'} ago`;
-      }
-      if (timeAgoMillis < dayMillis) {
-        const hrs = Math.floor(timeAgoMillis / hourMillis);
-        return `${hrs} ${hrs === 1 ? 'hr' : 'hrs'} ago`;
-      }
-      return undefined;  // date is more than a day ago.
-    },
-    createDate(parentElem, dateString) {
-      parentElem.classList.add('date');
-      parentElem.tabIndex = 0;
-      const date = new Date(dateString);
-      const shortDate = this.formatRecentDate(Date.now(), date) || this.dateFormatShort.format(date);
-      createElement(parentElem, 'span', 'short', shortDate);
-      createElement(parentElem, 'span', 'long', this.dateFormatLong.format(date));
-    },
+
     processComment(currentValue, commentComponent) {
-      const id = commentComponent.commentData.id;
-      const postDate = commentComponent.commentData.date;
-      const editDate = commentComponent.commentData.edited_at;
-
-      const timeDiv = commentComponent.commentDiv.querySelector(':scope > .comment-meta > .comment-timestamps');
-      const postDateDiv = createElement(timeDiv, 'a', 'posted-date');
-      postDateDiv.href = `${document.location.pathname}/comment/${id}`;
-      postDateDiv.rel = 'nofollow';
-      this.createDate(postDateDiv, postDate);
-
-      if (typeof editDate === 'string') {
-        createElement(timeDiv, 'span', 'edited-sep', '·');
-        const editedDateDiv = createElement(timeDiv, 'span', 'edited-date', 'edited ');
-        this.createDate(editedDateDiv, editDate);
-      }
+      commentComponent.setDateFormat(this.shortFormat, this.longFormat);
     }
   };
 
@@ -206,7 +193,7 @@ const {
     defaultSortOption,
     collapseDepthOption,
     hideUsersOption,
-    timeFormatOption,
+    dateFormatOption,
   ];
 
   const LOG_TAG = '[Astral Codex Eleven] [Option]';
@@ -218,20 +205,14 @@ const {
   }).map((e) => [e.key, e]));
 
   // Apply `processComment` from the given key to all ExtCommentComponents
-  function processComments(key) {
-    const option = OPTIONS[key]
-    if (!option) {
-      console.warn(`No option key '${key}' found`);
-      return;
-    };
-
+  function processComments(option) {
     if (!(option.processComment instanceof Function)) {
-      console.warn(`No processComment function for key '${key}'`);
+      console.warn(`No processComment function for key '${option.key}'`);
       return;
     }
 
-    const value = getOption(key);
-    for (let child of commentListRoot.allChildren()) {
+    const value = getOption(option.key);
+    for (let child of commentListRoot.descendants()) {
       option.processComment(value, child);
     }
   }
@@ -250,7 +231,7 @@ const {
   function processAllComments() {
     for (const option of Object.values(OPTIONS)) {
       if (Object.hasOwn(option, 'processComment')) {
-        processComments(option.key);
+        processComments(option);
       }
     }
   }
@@ -329,6 +310,14 @@ const {
       return [false, 'must contain a default value'];
     }
 
+    if (typeof option.descriptionShort !== 'string' || option.descriptionShort.length === 0) {
+      return [false, 'short description is required'];
+    }
+
+    if (typeof option.descriptionLong !== 'string' || option.descriptionLong.length === 0) {
+      return [false, 'long description is required'];
+    }
+
     if (Object.hasOwn(option, 'onValueChange') && !(option.onValueChange instanceof Function)) {
       return [false, 'onValueChange must be a function if defined'];
     }
@@ -351,7 +340,6 @@ const {
   // Keep this list in sync with the object at the top of the file.
   return {
     OPTIONS,
-    processComments,
     processSingleComment,
     processAllComments,
     getOption,
