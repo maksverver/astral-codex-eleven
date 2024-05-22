@@ -325,6 +325,7 @@ const STYLES = {
 
     .post .available-content .footnote-anchor {
       font-size: 11px;
+      margin-left: 1px;
     }
 
     .footnote-hovercard {
