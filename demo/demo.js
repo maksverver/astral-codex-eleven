@@ -38,7 +38,6 @@ const longerDateFormat = new Intl.DateTimeFormat('en-US', {
 
 let replaceCommentOptions = {
   ...REPLACE_COMMENTS_DEFAULT_OPTIONS,
-  collapseDepth: 3,
   dateFormatShort: longerDateFormat,
   commentOrder: CommentOrder.CHRONOLOGICAL,
   commentApi: {
@@ -73,7 +72,9 @@ let replaceCommentOptions = {
 };
 
 function repopulate() {
-  if (comments) replaceComments(rootDiv, comments);
+  if (!comments) return;
+  replaceComments(rootDiv, comments, replaceCommentOptions);
+  runOptionsOnLoad();
 }
 
 function handleFileChange() {
@@ -102,15 +103,15 @@ function setCommentOrder(value) {
   repopulate();
 }
 
-function setCollapseDepth(value) {
-  replaceCommentOptions.collapseDepth = Number(value);
-  repopulate();
-}
-
 function setUserId(value) {
   replaceCommentOptions.userId = value;
   repopulate();
 }
 
 // Initialization.
-setUpCommentOptions();
+async function initializeDemo() {
+  await loadOptions();
+  setUpCommentOptions();
+}
+
+initializeDemo();

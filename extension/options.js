@@ -181,6 +181,18 @@ const {
     }
   };
 
+  const collapseDepthOption = {
+    key: 'collapseDepth',
+    default: 0,
+    descriptionShort: 'Automatic collapse depth',
+    descriptionLong: "Collapse comments greater than the given depth. If 0, then don't collapse any comments.",
+    processComment(currentValue, commentComponent) {
+      if (currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0) {
+        commentComponent.setExpanded(false);
+      }
+    }
+  };
+
   const hideUsersOption = {
     key: 'hideUsers',
     default: '',
@@ -203,6 +215,26 @@ const {
     }
   };
 
+  // This will handle formatting the comment time, but will use the value of
+  // other options and not be directly settable itself.
+  const dateFormatOption = {
+    key: 'dateFormat',
+    default: null,
+    descriptionShort: 'Time formatting',
+    descriptionLong: 'Time formatting but long.',
+    onStart(currentValue) {
+      this.shortFormat = new Intl.DateTimeFormat('en-US', {
+        month: 'short', day: 'numeric'});
+      this.longFormat = new Intl.DateTimeFormat('en-US', {
+        month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
+        minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
+    },
+
+    processComment(currentValue, commentComponent) {
+      commentComponent.setDateFormat(this.shortFormat, this.longFormat);
+    }
+  };
+
   // All options should be added here.
   const optionArray = [
     // templateOption,
@@ -210,7 +242,9 @@ const {
     zenModeOption,
     useOldStylingOption,
     defaultSortOption,
+    collapseDepthOption,
     hideUsersOption,
+    dateFormatOption,
   ];
 
   const LOG_TAG = '[Astral Codex Eleven] [Option]';

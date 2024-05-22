@@ -167,6 +167,11 @@ a:focus {
 
 /* Dates */
 
+.comment-timestamps {
+  display: flex;
+  column-gap: inherit;
+}
+
 .date > .long { display: none }
 .date:hover > .long { display: initial }
 .date:focus > .long { display: initial }
