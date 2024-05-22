@@ -19,7 +19,7 @@ body {
 
 /* Force textareas to be resizable. */
 textarea {
-  resize: both !important
+  resize: both;
 }
 
 /* Fix the main menu to the top of the page. By default, it will scroll back
@@ -196,7 +196,6 @@ a:focus {
 
 .ext-comments .radio-buttons {
   display: inline-block;
-  font-size: 16px;
   border-radius: 20px;
   padding: 2px;
   background: #0002;
@@ -261,6 +260,7 @@ a:focus {
 .ext-comments .comment-editor textarea {
   height: 96px;
   max-height: 400px;
+  box-sizing: border-box;
   padding: 0.5em 1em;
   border-radius: var(--border-radius-md);
   background: var(--web_bg_color);
@@ -279,6 +279,7 @@ a:focus {
 /* Why does substack remove focus indicators from everything?! */
 .ext-comments .comment-editor textarea:focus {
   border: 2px solid var(--background_pop) !important;
+  padding: calc(0.5em - 1px) calc(1em - 1px);
 }
 
 .ext-comments .comment-editor button {
@@ -286,10 +287,10 @@ a:focus {
 }
 
 .ext-comments .comment-editor button:focus {
-  border: 2px solid var(--background_pop) !important;
+  border: 2px solid var(--background_pop);
   padding: 8px 18px;
 }
 
 .ext-comments .comment-editor button.primary:focus {
-  border-color: #0008 !important;
+  border-color: #0008;
 }
