@@ -189,7 +189,7 @@ const {
 
   const forceLimitDepthOption = {
     key: 'forceLimitDepth',
-    default: 8,
+    default: 12,
     descriptionShort: 'Comment nesting limit',
     descriptionLong: 'Limit to how deeply comments are nested before a "Continue Thread" button is shown. If 0, allow unlimited nesting.',
     onStart(currentValue) {
