@@ -430,6 +430,10 @@ class ExtCommentComponent {
     };
   }
 
+  getNumChildren() {
+    return this.childList.children.map(e => 1 + e.getNumChildren()).reduce((a, b) => a + b, 0);
+  }
+
   // Creates DOM nodes for the given comment text, and appends them to the
   // given parent element. This tries to mirror how Substack seems to process
   // comments:
