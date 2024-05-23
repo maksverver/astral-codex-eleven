@@ -73,7 +73,7 @@ const STYLES = {
       background-color: #f4f4f4;
     }
 
-    .main-menu .topbar .section-bar .overflow-items .menu-item:has(a:focus) {
+    .main-menu .topbar .section-bar .overflow-items .menu-item a:focus {
       background-color: #f4f4f4;
     }
 
@@ -634,7 +634,7 @@ const STYLES = {
     .post-header .post-ufi,
     .post-footer,
     .single-post-section,
-    .post div:has(.available-content) > div:not(.available-content),
+    .post .available-content ~ div,
     .footer .footer-buttons,
     .footer .footer-slogan-blurb {
       display: none !important;
