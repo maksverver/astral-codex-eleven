@@ -5,6 +5,6 @@ dist:
 	./build-dist.sh
 
 test:
-	cat extension/styles.js extension/options.js extension/ext-comments.js tests/ext-comments-tests.js | node
+	cat extension/js/styles.js extension/js/options.js extension/js/ext-comments.js tests/js/ext-comments-tests.js | node
 
 .PHONY: all dist test

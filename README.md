@@ -95,7 +95,7 @@ comments, and making it more difficult to search through all comments.
     My current solution to this problem is to block the dynamic loading of
     pages. Whenever the document URL changes, I force a regular page reload, so
     that the extension script triggers properly. (See the `pushState()`
-    related logic in [main-script.js](extension/main-script.js)).
+    related logic in [main-script.js](extension/js/main-script.js)).
 
 
 ## Alternatives
@@ -157,7 +157,7 @@ json file.
 
 The demo page looks very ugly, but the functionality should be comparable to
 the live extension. Note that the demo only covers the comments widget
-([ext-comments.js](extension/ext-comments.js)), not the main extension code
-([astral-codex-eleven.js](extension/astral-codex-eleven.js),
-[main-script.js](extension/main-script.js)), so the demo is not a complete
+([ext-comments.js](extension/js/ext-comments.js)), not the main extension code
+([astral-codex-eleven.js](extension/js/astral-codex-eleven.js),
+[main-script.js](extension/js/main-script.js)), so the demo is not a complete
 substitute for live testing.

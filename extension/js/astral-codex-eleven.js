@@ -80,7 +80,7 @@ class CommentApi {
     document.addEventListener('ACXI-load-comments', (ev) => resolve(ev.detail));
 
     const scriptElem = document.createElement('script');
-    scriptElem.src = chrome.runtime.getURL('main-script.js');
+    scriptElem.src = chrome.runtime.getURL('js/main-script.js');
     document.body.appendChild(scriptElem);
   });
 
