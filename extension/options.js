@@ -199,8 +199,7 @@ const {
     processComment(currentValue, commentComponent) {
       if (currentValue > 0) {
         if (commentComponent.depth === currentValue) {
-          const commentElem = commentComponent.threadDiv;
-          commentElem.classList.add('hidden');
+          commentComponent.threadDiv.remove();
         } else if (commentComponent.depth === currentValue - 1) {
           if (commentComponent.commentData.children.length > 0) {
             const numChildren = commentComponent.getNumChildren();
