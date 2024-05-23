@@ -557,7 +557,6 @@ const STYLES = {
     .ext-comments .comment .comment-body {
       padding-top: 8px;
       font: 12px/20px Verdana, sans-serif;
-      color: #333;
     }
 
     .ext-comments .comment .comment-body a {

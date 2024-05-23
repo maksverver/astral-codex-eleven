@@ -161,7 +161,8 @@ a:focus {
   overflow-y: initial !important;
 }
 
-.ext-comments .comment .missing {
+.ext-comments .comment .commenter-name.missing,
+.ext-comments .comment .comment-body.missing {
   font-style: italic;
 }
 
