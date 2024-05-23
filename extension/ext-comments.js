@@ -1,7 +1,11 @@
 'use strict';
 
-async function fetchComments(jsonPath) {
-  const fetchResponse = await fetch(jsonPath);
+async function fetchComments(postId, rootCommentId, commentSort) {
+  let url = `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=${commentSort}`;
+  if (rootCommentId) {
+    url += `&comment_id=${rootCommentId}`
+  }
+  const fetchResponse = await fetch(url);
   const responseJson = await fetchResponse.json();
   return responseJson?.comments;
 }
@@ -425,6 +429,10 @@ class ExtCommentComponent {
         }
       }
     };
+  }
+
+  getNumChildren() {
+    return this.childList.children.map(e => 1 + e.getNumChildren()).reduce((a, b) => a + b, 0);
   }
 
   // Creates DOM nodes for the given comment text, and appends them to the

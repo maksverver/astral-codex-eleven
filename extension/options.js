@@ -178,12 +178,40 @@ const {
       this.longFormat = new Intl.DateTimeFormat('en-US', {
         month: 'long', day: 'numeric', year: 'numeric', hour: '2-digit',
         minute: '2-digit', second: '2-digit', timeZoneName: 'short'});
+      const basePostUrlMatch = window.location.pathname.match(/\/p\/[\w-]+/);
+      this.basePostUrl = basePostUrlMatch?.[0] ?? window.location.pathname;
     },
 
     processComment(currentValue, commentComponent) {
       commentComponent.setDateFormat(this.shortFormat, this.longFormat);
     }
   };
+
+  const forceLimitDepthOption = {
+    key: 'forceLimitDepth',
+    default: 12,
+    descriptionShort: 'Comment nesting limit',
+    descriptionLong: 'Limit to how deeply comments are nested before a "Continue Thread" button is shown. If 0, allow unlimited nesting.',
+    onStart(currentValue) {
+      const basePostUrlMatch = window.location.pathname.match(/\/p\/[\w-]+/);
+      this.basePostUrl = basePostUrlMatch?.[0] ?? window.location.pathname;
+    },
+    processComment(currentValue, commentComponent) {
+      if (currentValue > 0) {
+        if (commentComponent.depth === currentValue) {
+          commentComponent.threadDiv.remove();
+        } else if (commentComponent.depth === currentValue - 1) {
+          if (commentComponent.commentData.children.length > 0) {
+            const numChildren = commentComponent.getNumChildren();
+            const buttonText = `Continue Thread (${numChildren} ${numChildren === 1 ? 'child' : 'children'}) →`;
+            const button = createElement(commentComponent.commentDiv, 'a', 'button outline continue-thread-button', buttonText);
+            const id = commentComponent.commentData.id;
+            button.href = `${this.basePostUrl}/comment/${id}`;
+          }
+        }
+      }
+    }
+  }
 
   // All options should be added here.
   const optionArray = [
@@ -194,6 +222,7 @@ const {
     collapseDepthOption,
     hideUsersOption,
     dateFormatOption,
+    forceLimitDepthOption,
   ];
 
   const LOG_TAG = '[Astral Codex Eleven] [Option]';

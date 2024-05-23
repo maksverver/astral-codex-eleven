@@ -100,6 +100,9 @@ class CommentApi {
   const commentOrder = commentSort === 'most_recent_first' ?
     CommentOrder.NEW_FIRST : CommentOrder.CHRONOLOGICAL;
 
+  const commentPathMatch = window.location.pathname.match(/\/p\/[\w-]+\/comment\/(\d+)/);
+  const rootCommentId = commentPathMatch?.[1];
+
   const commentsPage = document.querySelector('.comments-page');
   if (!commentsPage) {
     console.warn(LOG_TAG, "Element comments-page not found! Can't continue.");
@@ -121,8 +124,7 @@ class CommentApi {
     const start = performance && performance.now();
     // Note that I use ?no-filter& to bypass the filter rule that redirects
     // requests from the real page!
-    comments = await fetchComments(
-        `/api/v1/post/${postId}/comments/?no-filter&all_comments=true&sort=${commentSort}`);
+    comments = await fetchComments(postId, rootCommentId, commentSort);
     const duration = performance && Math.round(performance.now() - start);
     console.info(LOG_TAG, `fetch() completed in ${duration} ms.`)
   } catch (e) {

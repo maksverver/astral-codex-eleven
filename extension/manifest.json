@@ -39,10 +39,6 @@
       "matches": [
         "*://www.astralcodexten.com/*"
       ],
-      "exclude_matches": [
-        "*://www.astralcodexten.com/p/*/comment/*",
-        "*://www.astralcodexten.com/p/*/comments"
-      ],
       "css": [
         "ext-comments.css"
       ],
