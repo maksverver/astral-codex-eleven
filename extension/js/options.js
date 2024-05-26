@@ -95,7 +95,6 @@ const {
     descriptionShort: 'Remove Substack nags',
     descriptionLong: 'Remove Substack prompts to subscribe or share posts.',
     onStart(currentValue) {
-      addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
     },
     onValueChange(newValue) {
@@ -109,7 +108,6 @@ const {
     descriptionShort: 'Zen Mode',
     descriptionLong: 'Remove all like, share, and subscribe buttons in the post.',
     onStart(currentValue) {
-      addStyle(this.key);
       setStyleEnabled(this.key, currentValue);
     },
     onValueChange(newValue) {
