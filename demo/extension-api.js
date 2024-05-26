@@ -1,6 +1,7 @@
-// This file contains a minimal implementation of the chrome.storage API
-// available in the extension. It's designed to allow including the popup on the
-// demo page for local testing, and not much more.
+// This file contains a minimal implementation of the chrome extension API.
+//
+// It's designed to allow including the popup on the demo page for local
+// testing, and not much more.
 
 'use strict';
 
@@ -56,5 +57,12 @@ class FakeStorageImpl {
   }
 }
 
+class FakeRuntimeImpl {
+  getURL(path) {
+    return '../extension/' + path;
+  }
+};
+
 window.chrome = window.chrome ?? {};
 window.chrome.storage = new FakeStorageImpl();
+window.chrome.runtime = new FakeRuntimeImpl();
