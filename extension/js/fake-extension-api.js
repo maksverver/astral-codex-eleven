@@ -10,6 +10,18 @@ class FakeStorageArea {
     this.namespace = namespace;
     this.listeners = listeners;
     this.items = items;
+
+    // The following logic propagates changes from an iframe to its parent, as
+    // in demo.html, which embeds popup.html in an iframe.
+    if (window.parent === window) {
+      window.addEventListener('message', (ev) => {
+        if (ev.data.acxiStorageChanged) this.set(ev.data.acxiStorageChanged);
+      });
+    } else {
+      listeners.push(() => {
+        window.parent.postMessage({acxiStorageChanged: this.items}, '*');
+      });
+    }
   }
 
   async get() {
@@ -63,6 +75,16 @@ class FakeRuntimeImpl {
   }
 };
 
-window.chrome = window.chrome ?? {};
-window.chrome.storage = new FakeStorageImpl();
-window.chrome.runtime = new FakeRuntimeImpl();
+if (window.chrome == null) {
+  window.chrome = {};
+}
+
+if (window.chrome.storage == null) {
+  console.info('Using fake chrome.storage implementation.');
+  window.chrome.storage = new FakeStorageImpl();
+}
+
+if (window.chrome.runtime == null) {
+  console.info('Using fake chrome.runtime implementation.');
+  window.chrome.runtime = new FakeRuntimeImpl();
+}

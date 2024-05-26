@@ -4,30 +4,6 @@ const fileInput = document.getElementById('file-input');;
 const rootDiv = document.getElementById('ext-comments');
 let comments = undefined;
 
-function setUpCommentOptions() {
-  const optionContainer = document.getElementById('comment-options');
-  for (const [key, option] of Object.entries(OPTIONS)) {
-    const optionDiv = document.createElement('div');
-    const input = document.createElement('input');
-    if (typeof option.default === 'boolean') {
-      input.type = 'checkbox';
-    } else {
-      input.type = 'text';
-    }
-    input.id = `${key}-input`;
-    input.addEventListener('change', (event) => {
-      setOption(key,  event.target.value);
-      // slight hack to not run handlers if no comments have been loaded
-      if (commentListRoot) option?.onValueChange?.(event.target.value);
-    });
-    const label = document.createElement('label');
-    label.textContent = key;
-    label.htmlFor = `${key}-input`;
-    optionDiv.append(input, label);
-    optionContainer.append(optionDiv);
-  }
-}
-
 function isCommentApiEnabled() {
   return document.getElementById('comment-api-enabled').checked;
 }
@@ -108,10 +84,8 @@ function setUserId(value) {
   repopulate();
 }
 
-// Initialization.
 async function initializeDemo() {
   await loadOptions();
-  setUpCommentOptions();
 }
 
 initializeDemo();

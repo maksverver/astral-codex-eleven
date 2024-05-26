@@ -57,8 +57,25 @@ a:hover {
   opacity: 50%;
 }
 
+.options-holder {
+  display: flex;
+  flex-direction: row;
+  flex-wrap: wrap;
+  align-items: flex-start;
+  column-gap: 2em;
+}
+
 .options th {
   text-align: left;
   padding-right: 16px;
   vertical-align: top;
+}
+
+.popup h4 {
+  margin: 0;
+}
+
+.popup iframe {
+  border: 1px solid black;
+  resize: both;
 }
