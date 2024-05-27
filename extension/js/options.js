@@ -211,6 +211,10 @@ const {
       return;
     }
 
+    // Don't do anything if the commentListRoot is not yet initialized.
+    // This happens in the demo page when comments have not been loaded.
+    if (commentListRoot == null) return;
+
     const value = getOption(option.key);
     for (let child of commentListRoot.descendants()) {
       option.processComment(value, child);
