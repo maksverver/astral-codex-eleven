@@ -135,9 +135,11 @@ const {
     descriptionShort: 'Automatic collapse depth',
     descriptionLong: "Collapse comments greater than the given depth. If 0, then don't collapse any comments.",
     processComment(currentValue, commentComponent) {
-      if (currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0) {
-        commentComponent.setExpanded(false);
-      }
+      const collapsed = currentValue > 0 && commentComponent.depth > 0 && commentComponent.depth % currentValue === 0;
+      commentComponent.setExpanded(!collapsed);
+    },
+    onValueChange(newValue) {
+      processComments(this);
     }
   };
 
