@@ -89,7 +89,7 @@ function createChangeHandler(optionElement) {
 // `trigger` plus one of `check` or `text` depending on if the value is a bool
 // or a string. The label is optionally used for checkbox inputs.
 (async function() {
-  await loadSavedOptions();
+  await loadOptionValues();
 
   // Wait for the DOM to load fully before continuing.
   if (document.readyState === 'loading') {

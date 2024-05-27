@@ -48,8 +48,8 @@ class CommentApi {
   const LOG_TAG = '[Astral Codex Eleven]';
   console.info(LOG_TAG, 'Starting extension.');
 
-  // Start loading options asynchronously (this doesn't depend on the DOM).
-  const loadOptionsResult = loadOptions();
+  // Load and start options asynchronously (this doesn't depend on the DOM).
+  const startOptionsResult = startOptions();
 
   // Wait for the DOM to load fully before continuing.
   if (document.readyState === 'loading') {
@@ -138,7 +138,7 @@ class CommentApi {
   const commentApi = new CommentApi(postId);
 
   // Wait for options to finish loading.
-  await loadOptionsResult;
+  await startOptionsResult;
 
   {
     const start = performance && performance.now();

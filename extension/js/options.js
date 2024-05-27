@@ -7,8 +7,8 @@ const {
   processAllComments,
   getOption,
   setOption,
-  loadSavedOptions,
-  loadOptions,
+  loadOptionValues,
+  startOptions,
   runOptionsOnLoad,
 } = (() => {
   /**
@@ -235,29 +235,33 @@ const {
   }
 
   // Stores a local copy of the current option values. It should not be used
-  // directly, instead getOption and setOption below should be used.
-  let optionShadow = {};
+  // directly, instead getOption and setOption below should be used. Initialized
+  // by loadOptionValues(), which is also called by startOptions().
+  let optionValues = undefined;
 
   function getOption(key) {
-    return optionShadow.hasOwnProperty(key) ? optionShadow[key] : OPTIONS[key]?.default;
+    return optionValues.hasOwnProperty(key) ? optionValues[key] : OPTIONS[key]?.default;
   }
 
   async function setOption(key, value) {
-    optionShadow[key] = value;
+    optionValues[key] = value;
     await saveOptions();
   }
 
-  async function loadSavedOptions() {
+  // Loads option values and nothing else. After this completes, getOption()
+  // and setOption() can be called.
+  async function loadOptionValues() {
     const v = await chrome.storage.local.get(STORAGE_KEY).catch((e) => {
       console.error(LOG_TAG, e);
       return undefined;
     });
-    optionShadow = v?.[STORAGE_KEY] ?? {};
-    console.info(LOG_TAG, 'Loaded option values', optionShadow);
+    optionValues = v?.[STORAGE_KEY] ?? {};
+    console.info(LOG_TAG, 'Loaded option values', optionValues);
   }
 
-  async function loadOptions() {
-    await loadSavedOptions();
+  // Loads option values and then calls onStart() on all options that have it.
+  async function startOptions() {
+    await loadOptionValues();
     chrome.storage.onChanged.addListener(storageChangeHandler);
     for (const [key, option] of Object.entries(OPTIONS)) {
       if (option.onStart instanceof Function) {
@@ -266,6 +270,7 @@ const {
     }
   }
 
+  // Calls onLoad() on all options that have it.
   function runOptionsOnLoad() {
     for (const [key, option] of Object.entries(OPTIONS)) {
       if (option.onLoad instanceof Function) {
@@ -275,7 +280,7 @@ const {
   }
 
   async function saveOptions() {
-    await chrome.storage.local.set({[STORAGE_KEY]: optionShadow}).catch((e) => {
+    await chrome.storage.local.set({[STORAGE_KEY]: optionValues}).catch((e) => {
       console.error(LOG_TAG, e);
     });
   }
@@ -293,7 +298,7 @@ const {
       const oldValueString = JSON.stringify(getOption(key));
 
       if (newValueString !== oldValueString) {
-        optionShadow[key] = newValue;
+        optionValues[key] = newValue;
         OPTIONS[key]?.onValueChange?.(newValue);
       }
     }
@@ -359,8 +364,8 @@ const {
     processAllComments,
     getOption,
     setOption,
-    loadSavedOptions,
-    loadOptions,
+    loadOptionValues,
+    startOptions,
     runOptionsOnLoad,
   };
 })();

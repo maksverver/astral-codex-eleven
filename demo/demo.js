@@ -85,7 +85,7 @@ function setUserId(value) {
 }
 
 async function initializeDemo() {
-  await loadOptions();
+  await startOptions();
 }
 
 initializeDemo();
