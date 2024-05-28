@@ -142,6 +142,16 @@ function createTextNode(parent, text) {
   return node;
 }
 
+// Reverses the children of the given DOM node.
+//
+// The implementation runs in linear time for browsers that store children as
+// a linked list, as Chrome and Firefox do.
+function reverseDomChildren(node) {
+  if (!node.hasChildNodes()) return;
+  const pivot = node.lastChild;
+  while (pivot.previousSibling) node.appendChild(pivot.previousSibling);
+}
+
 // Formats `date` as a string like "5 mins ago" or "1 hr ago" if it is
 // between `now` and `now` minus 24 hours, or returns undefined otherwise.
 function formatRecentDate(now, date) {
@@ -221,8 +231,7 @@ class ExtCommentListComponent {
 
   reverseSelfOnly() {
     this.commentOrder = 1 - this.commentOrder;
-    this.commentsHolder.replaceChildren(
-        ...Array.from(this.commentsHolder.childNodes).reverse());
+    reverseDomChildren(this.commentsHolder);
     ExtCommentListComponent.assignSiblings(this.children.reverse());
   }
 
