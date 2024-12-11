@@ -29,6 +29,9 @@ To release a new version:
     % git tag v0.1     # replace v0.1 with the current version
     % git push --follow-tags
 
+ 9. Create a release on Github with the submitted zip files.
+    https://github.com/maksverver/astral-codex-eleven/releases
+
 
 Things to test before release:
 
