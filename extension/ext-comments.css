@@ -133,6 +133,24 @@ a:focus {
 .ext-comments .comment p { transition: color 0.2s; }
 */
 
+.ext-comments .comment .comment-meta {
+  font-size: 15px;
+
+  display: flex;
+  flex-wrap: wrap;
+  column-gap: 12px;
+  row-gap: 4px;
+}
+
+.ext-comments .comment .comment-meta .commenter-name {
+  font-weight: bold;
+}
+
+.ext-comments .comment .comment-meta .comment-timestamp,
+.ext-comments .comment .comment-meta .edited-indicator {
+  opacity: 50%;
+}
+
 .ext-comments .comment .edited-indicator {
   font-style: italic;
 }
@@ -229,13 +247,12 @@ a:focus {
   margin-top: 12px;
 }
 
-.ext-comments .comments-heading-holder a {
+.ext-comments a {
   text-decoration: none;
   font-size: 15px;
-  /* color: var(--background_pop) !important; */
 }
 
-.ext-comments .comments-heading-holder a:hover {
+.ext-comments a:hover {
   text-decoration: underline;
 }
 

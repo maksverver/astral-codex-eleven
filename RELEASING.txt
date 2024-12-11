@@ -6,7 +6,7 @@ To release a new version:
 
  3. Run tests with `make test` (limited coverage)
 
- 4. Create a .zip file with ./build.sh (or equivalently, `make dist`).
+ 4. Create a .zip file with ./build-dist.sh (or equivalently, `make dist`).
 
  5. Smoke test on Chrome and Firefox (see below for details)
 

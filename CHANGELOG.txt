@@ -1,3 +1,9 @@
+Version 0.2.5
+-------------
+
+  - Fix comment styling after recent Substack update broke it
+
+
 Version 0.2.4
 -------------
 
