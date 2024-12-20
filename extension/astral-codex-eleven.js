@@ -100,6 +100,13 @@ class CommentApi {
     commentsPage.style.display = 'none';
   }
 
+  // In a recent update, the "XXX comments" label was moved out of .comments-page div,
+  // so hide it separately:
+  const substackCommentCount = document.querySelector('#discussion > .container:first-child:has(>h4)');
+  if (substackCommentCount != null) {
+    substackCommentCount.style.display = 'none';
+  }
+
   const rootDiv = document.createElement('div');
   rootDiv.innerHTML = `<p>Astral Codex Eleven extension loading comments...</p>`;
   // The 'container' causes Substack to limit the width of the div.

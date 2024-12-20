@@ -1,3 +1,9 @@
+Version 0.2.6
+-------------
+
+  - Hide superfluous "1 Comment" heading
+
+
 Version 0.2.5
 -------------
 
